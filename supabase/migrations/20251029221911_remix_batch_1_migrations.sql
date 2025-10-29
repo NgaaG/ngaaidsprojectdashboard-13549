@@ -1,4 +1,6 @@
 
+-- Migration: 20251029123357
+
 -- Migration: 20251029104656
 -- Create profiles table
 CREATE TABLE public.profiles (
@@ -287,3 +289,4 @@ ALTER TABLE public.projects ALTER COLUMN user_id DROP NOT NULL;
 ALTER TABLE public.reflections ALTER COLUMN user_id DROP NOT NULL;
 ALTER TABLE public.mentor_logs ALTER COLUMN user_id DROP NOT NULL;
 ALTER TABLE public.competency_progress ALTER COLUMN user_id DROP NOT NULL;
+
