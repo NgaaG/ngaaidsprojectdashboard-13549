@@ -4,28 +4,35 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, Upload, X } from "lucide-react";
-import { Competency } from "@/types";
+import { Competency, Mode } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 import { db } from "@/lib/supabaseHelpers";
 import { toast } from "sonner";
 
-const COMPETENCIES: Competency[] = ["Research", "Create", "Organize", "Communicate", "Learn"];
+const COMPETENCIES: Competency[] = ["Research", "Create", "Organize", "Communicate", "Learn", "Unsure/TBD"];
 
 interface ProjectDialogProps {
   onProjectCreated: () => void;
+  currentMode: Mode;
 }
 
-export const ProjectDialog = ({ onProjectCreated }: ProjectDialogProps) => {
+export const ProjectDialog = ({ onProjectCreated, currentMode }: ProjectDialogProps) => {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [competency, setCompetency] = useState<Competency>("Create");
+  const [competencies, setCompetencies] = useState<Competency[]>(["Create"]);
   const [figmaLink, setFigmaLink] = useState("");
   const [githubLink, setGithubLink] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
+
+  const toggleCompetency = (comp: Competency) => {
+    setCompetencies(prev =>
+      prev.includes(comp) ? prev.filter(c => c !== comp) : [...prev, comp]
+    );
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -66,11 +73,12 @@ export const ProjectDialog = ({ onProjectCreated }: ProjectDialogProps) => {
       const { error } = await db.from("projects").insert({
         name,
         description,
-        competency,
+        competencies,
         figma_link: figmaLink || null,
         github_link: githubLink || null,
         visual_url: visualUrl || null,
         completion: 0,
+        mode: currentMode,
       });
 
       if (error) throw error;
@@ -89,7 +97,7 @@ export const ProjectDialog = ({ onProjectCreated }: ProjectDialogProps) => {
   const resetForm = () => {
     setName("");
     setDescription("");
-    setCompetency("Create");
+    setCompetencies(["Create"]);
     setFigmaLink("");
     setGithubLink("");
     setFiles([]);
@@ -131,19 +139,27 @@ export const ProjectDialog = ({ onProjectCreated }: ProjectDialogProps) => {
           </div>
 
           <div>
-            <Label htmlFor="competency">CMD Competency</Label>
-            <Select value={competency} onValueChange={(value) => setCompetency(value as Competency)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {COMPETENCIES.map((comp) => (
-                  <SelectItem key={comp} value={comp}>
+            <Label>CMD Competencies (select all that apply)</Label>
+            <div className="grid grid-cols-2 gap-3 mt-3 p-4 bg-muted/50 rounded-lg">
+              {COMPETENCIES.map((comp) => (
+                <div key={comp} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={comp}
+                    checked={competencies.includes(comp)}
+                    onCheckedChange={() => toggleCompetency(comp)}
+                  />
+                  <label
+                    htmlFor={comp}
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                  >
                     {comp}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                  </label>
+                </div>
+              ))}
+            </div>
+            {competencies.length === 0 && (
+              <p className="text-xs text-destructive mt-2">Select at least one competency</p>
+            )}
           </div>
 
           <div>
@@ -215,7 +231,7 @@ export const ProjectDialog = ({ onProjectCreated }: ProjectDialogProps) => {
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading || competencies.length === 0}>
               {loading ? "Creating..." : "Create Project"}
             </Button>
           </div>

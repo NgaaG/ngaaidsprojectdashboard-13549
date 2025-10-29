@@ -21,6 +21,7 @@ const COMPETENCY_COLORS: Record<Competency, string> = {
   Organize: "hsl(195 60% 76%)",
   Communicate: "hsl(280 50% 75%)",
   Learn: "hsl(150 60% 75%)",
+  "Unsure/TBD": "hsl(0 0% 70%)",
 };
 
 const Growth = () => {

@@ -23,6 +23,7 @@ const Home = () => {
     Organize: 0,
     Communicate: 0,
     Learn: 0,
+    "Unsure/TBD": 0,
   });
 
   const loadData = async () => {
@@ -37,15 +38,18 @@ const Home = () => {
         id: p.id,
         name: p.name,
         completion: p.completion,
-        competency: p.competency,
+        competencies: p.competencies || ["Create"],
         visualUrl: p.visual_url,
         lastReflectionMood: p.last_reflection_mood,
         description: p.description,
         figmaLink: p.figma_link,
         githubLink: p.github_link,
+        mode: p.mode || "personal",
       }));
       setProjects(mappedProjects);
     }
+
+    const filteredProjects = projects.filter(p => p.mode === mode);
 
     // Load competency progress
     const { data: progressData } = await db
@@ -177,7 +181,7 @@ const Home = () => {
             <h2 className="text-2xl font-semibold">
               {mode === "personal" ? "My Projects" : "Project Portfolio"}
             </h2>
-            <ProjectDialog onProjectCreated={loadData} />
+            <ProjectDialog onProjectCreated={loadData} currentMode={mode} />
           </div>
 
           {projects.length === 0 ? (
@@ -185,7 +189,7 @@ const Home = () => {
               <p className="text-muted-foreground text-lg mb-4">
                 No projects yet. Create your first one!
               </p>
-              <ProjectDialog onProjectCreated={loadData} />
+              <ProjectDialog onProjectCreated={loadData} currentMode={mode} />
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

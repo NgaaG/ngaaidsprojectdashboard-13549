@@ -72,7 +72,7 @@ export const ProjectDetailView = ({
               <div className="flex-1">
                 <DialogTitle className="text-2xl">{project.name}</DialogTitle>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {project.competency} • {project.completion}% Complete
+                  {project.competencies.join(", ")} • {project.completion}% Complete
                 </p>
               </div>
               <Button

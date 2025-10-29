@@ -1,6 +1,6 @@
 export type Mode = "personal" | "lecturer";
 
-export type Competency = "Research" | "Create" | "Organize" | "Communicate" | "Learn";
+export type Competency = "Research" | "Create" | "Organize" | "Communicate" | "Learn" | "Unsure/TBD";
 
 export type MoodType = "calm" | "anxious" | "focused" | "overwhelmed" | "energized";
 
@@ -32,12 +32,13 @@ export interface Project {
   id: string;
   name: string;
   completion: number;
-  competency: Competency;
+  competencies: Competency[];
   visualUrl?: string;
   lastReflectionMood?: MoodType;
   description?: string;
   figmaLink?: string;
   githubLink?: string;
+  mode: Mode;
 }
 
 export interface CompetencyProgress {

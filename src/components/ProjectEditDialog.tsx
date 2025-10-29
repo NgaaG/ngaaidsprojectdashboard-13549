@@ -9,13 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Upload, X } from "lucide-react";
 import { Competency, Project } from "@/types";
@@ -29,6 +23,7 @@ const COMPETENCIES: Competency[] = [
   "Organize",
   "Communicate",
   "Learn",
+  "Unsure/TBD",
 ];
 
 interface ProjectEditDialogProps {
@@ -46,7 +41,7 @@ export const ProjectEditDialog = ({
 }: ProjectEditDialogProps) => {
   const [name, setName] = useState(project.name);
   const [description, setDescription] = useState(project.description || "");
-  const [competency, setCompetency] = useState<Competency>(project.competency);
+  const [competencies, setCompetencies] = useState<Competency[]>(project.competencies);
   const [completion, setCompletion] = useState(project.completion);
   const [figmaLink, setFigmaLink] = useState(project.figmaLink || "");
   const [githubLink, setGithubLink] = useState(project.githubLink || "");
@@ -57,13 +52,19 @@ export const ProjectEditDialog = ({
     if (open) {
       setName(project.name);
       setDescription(project.description || "");
-      setCompetency(project.competency);
+      setCompetencies(project.competencies);
       setCompletion(project.completion);
       setFigmaLink(project.figmaLink || "");
       setGithubLink(project.githubLink || "");
       setFiles([]);
     }
   }, [open, project]);
+
+  const toggleCompetency = (comp: Competency) => {
+    setCompetencies(prev =>
+      prev.includes(comp) ? prev.filter(c => c !== comp) : [...prev, comp]
+    );
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -107,7 +108,7 @@ export const ProjectEditDialog = ({
         .update({
           name,
           description,
-          competency,
+          competencies,
           completion,
           figma_link: figmaLink || null,
           github_link: githubLink || null,
@@ -156,22 +157,27 @@ export const ProjectEditDialog = ({
           </div>
 
           <div>
-            <Label htmlFor="competency">CMD Competency</Label>
-            <Select
-              value={competency}
-              onValueChange={(value) => setCompetency(value as Competency)}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {COMPETENCIES.map((comp) => (
-                  <SelectItem key={comp} value={comp}>
+            <Label>CMD Competencies (select all that apply)</Label>
+            <div className="grid grid-cols-2 gap-3 mt-3 p-4 bg-muted/50 rounded-lg">
+              {COMPETENCIES.map((comp) => (
+                <div key={comp} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`edit-${comp}`}
+                    checked={competencies.includes(comp)}
+                    onCheckedChange={() => toggleCompetency(comp)}
+                  />
+                  <label
+                    htmlFor={`edit-${comp}`}
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                  >
                     {comp}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                  </label>
+                </div>
+              ))}
+            </div>
+            {competencies.length === 0 && (
+              <p className="text-xs text-destructive mt-2">Select at least one competency</p>
+            )}
           </div>
 
           <div>
@@ -260,7 +266,7 @@ export const ProjectEditDialog = ({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading || competencies.length === 0}>
               {loading ? "Updating..." : "Update Project"}
             </Button>
           </div>

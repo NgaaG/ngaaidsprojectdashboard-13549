@@ -8,6 +8,7 @@ const COMPETENCY_COLORS: Record<string, string> = {
   Organize: "hsl(195 60% 76%)",
   Communicate: "hsl(280 50% 75%)",
   Learn: "hsl(150 60% 75%)",
+  "Unsure/TBD": "hsl(0 0% 70%)",
 };
 
 const MOOD_EMOJIS: Record<string, string> = {
@@ -24,7 +25,7 @@ interface ProjectCardProps {
 }
 
 export const ProjectCard = ({ project, onClick }: ProjectCardProps) => {
-  const borderColor = COMPETENCY_COLORS[project.competency];
+  const borderColor = COMPETENCY_COLORS[project.competencies[0]];
   const moodEmoji = project.lastReflectionMood ? MOOD_EMOJIS[project.lastReflectionMood] : null;
 
   return (
@@ -37,12 +38,17 @@ export const ProjectCard = ({ project, onClick }: ProjectCardProps) => {
         <div className="flex items-start justify-between mb-3">
           <div>
             <h3 className="font-semibold text-lg">{project.name}</h3>
-            <span
-              className="text-xs font-medium px-2 py-1 rounded-full inline-block mt-1"
-              style={{ backgroundColor: `${borderColor}40`, color: borderColor }}
-            >
-              {project.competency}
-            </span>
+            <div className="flex flex-wrap gap-1 mt-1">
+              {project.competencies.map(comp => (
+                <span
+                  key={comp}
+                  className="text-xs font-medium px-2 py-1 rounded-full inline-block"
+                  style={{ backgroundColor: `${COMPETENCY_COLORS[comp]}40`, color: COMPETENCY_COLORS[comp] }}
+                >
+                  {comp}
+                </span>
+              ))}
+            </div>
           </div>
           {moodEmoji && (
             <span className="text-2xl" title={`Last mood: ${project.lastReflectionMood}`}>
