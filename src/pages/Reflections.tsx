@@ -16,6 +16,7 @@ import { Plus, Save, Trash2 } from "lucide-react";
 import { MoodType } from "@/types";
 import { db } from "@/lib/supabaseHelpers";
 import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const MOODS: { value: MoodType; emoji: string; label: string; color: string }[] = [
   { value: "calm", emoji: "😌", label: "Calm", color: "hsl(195 60% 76%)" },
@@ -26,6 +27,7 @@ const MOODS: { value: MoodType; emoji: string; label: string; color: string }[] 
 ];
 
 const Reflections = () => {
+  const [currentMode, setCurrentMode] = useState<"personal" | "lecturer">("personal");
   const [reflections, setReflections] = useState<any[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
@@ -38,22 +40,25 @@ const Reflections = () => {
     todoList: [] as string[],
     progress: 0,
     sentiment: 50,
+    category: "time-out",
   });
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [currentMode]);
 
   const loadData = async () => {
     const { data: projectsData } = await db
       .from("projects")
       .select("*")
+      .eq("mode", currentMode)
       .order("name");
     if (projectsData) setProjects(projectsData);
 
     const { data: reflectionsData } = await db
       .from("reflections")
       .select("*")
+      .eq("mode", currentMode)
       .order("created_at", { ascending: false });
     if (reflectionsData) setReflections(reflectionsData);
   };
@@ -96,6 +101,8 @@ const Reflections = () => {
         todo_list: currentReflection.todoList,
         progress: currentReflection.progress,
         sentiment: currentReflection.sentiment,
+        category: currentReflection.category,
+        mode: currentMode,
       });
 
       if (error) throw error;
@@ -113,6 +120,7 @@ const Reflections = () => {
         todoList: [],
         progress: 0,
         sentiment: 50,
+        category: currentMode === "personal" ? "time-out" : "sprint",
       });
       setSelectedProjectId(null);
     } catch (error: any) {
@@ -137,9 +145,21 @@ const Reflections = () => {
     <div className="min-h-screen py-8 px-4">
       <div className="max-w-4xl mx-auto">
         <header className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">💭 Time-Out Reflection Studio</h1>
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-3xl font-bold">
+              {currentMode === "personal" ? "💭 Time-Out Reflection Studio" : "🎓 Sprint Reflection"}
+            </h1>
+            <Tabs value={currentMode} onValueChange={(v) => setCurrentMode(v as "personal" | "lecturer")}>
+              <TabsList>
+                <TabsTrigger value="personal">🌱 Personal</TabsTrigger>
+                <TabsTrigger value="lecturer">🎓 Lecture</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
           <p className="text-muted-foreground">
-            Process emotions and thoughts in a structured, calming space
+            {currentMode === "personal" 
+              ? "Process emotions and thoughts in a structured, calming space"
+              : "Reflect on learning outcomes and sprint progress"}
           </p>
         </header>
 
@@ -181,13 +201,15 @@ const Reflections = () => {
 
         {/* Reflection Sections */}
         <div className="space-y-6">
-          {/* 1. Emotional Brain Dump */}
-          <Card className="overflow-hidden" style={{ borderLeft: `4px solid ${moodColor}` }}>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                1️⃣ Emotional Brain Dump
-              </CardTitle>
-            </CardHeader>
+          {currentMode === "personal" ? (
+            <>
+              {/* Personal Mode: Time-Out Reflection */}
+              <Card className="overflow-hidden" style={{ borderLeft: `4px solid ${moodColor}` }}>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    1️⃣ Emotional Brain Dump
+                  </CardTitle>
+                </CardHeader>
             <CardContent className="space-y-4">
               <div>
                 <label className="text-sm font-medium mb-2 block">How are you feeling?</label>
@@ -328,6 +350,87 @@ const Reflections = () => {
               </div>
             </CardContent>
           </Card>
+            </>
+          ) : (
+            <>
+              {/* Lecture Mode: Sprint Reflection */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>1️⃣ Sprint Summary</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">What did you learn?</label>
+                    <Textarea
+                      placeholder="Key learnings and insights from this sprint..."
+                      value={currentReflection.emotionalDump}
+                      onChange={(e) =>
+                        setCurrentReflection((prev) => ({ ...prev, emotionalDump: e.target.value }))
+                      }
+                      className="min-h-32"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>2️⃣ Challenges & Solutions</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Challenges Faced</label>
+                      <Textarea
+                        placeholder="What obstacles did you encounter?"
+                        value={currentReflection.thoughtsWhatIThink}
+                        onChange={(e) =>
+                          setCurrentReflection((prev) => ({
+                            ...prev,
+                            thoughtsWhatIThink: e.target.value,
+                          }))
+                        }
+                        className="min-h-32"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">How You Overcame Them</label>
+                      <Textarea
+                        placeholder="Solutions and strategies used..."
+                        value={currentReflection.thoughtsWhatIsTrue}
+                        onChange={(e) =>
+                          setCurrentReflection((prev) => ({
+                            ...prev,
+                            thoughtsWhatIsTrue: e.target.value,
+                          }))
+                        }
+                        className="min-h-32"
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>3️⃣ Next Steps</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Textarea
+                    placeholder="What will you do differently or work on next?"
+                    value={currentReflection.contingencyPlan}
+                    onChange={(e) =>
+                      setCurrentReflection((prev) => ({
+                        ...prev,
+                        contingencyPlan: e.target.value,
+                      }))
+                    }
+                    className="min-h-24"
+                  />
+                </CardContent>
+              </Card>
+            </>
+          )}
         </div>
 
         {/* Past Reflections */}

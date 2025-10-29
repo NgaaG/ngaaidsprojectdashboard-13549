@@ -52,12 +52,13 @@ const MentorLogs = () => {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [currentMode]);
 
   const loadData = async () => {
     const { data: projectsData } = await db
       .from("projects")
       .select("*")
+      .eq("mode", currentMode)
       .order("name");
     if (projectsData) setProjects(projectsData);
 

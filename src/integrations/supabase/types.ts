@@ -59,6 +59,7 @@ export type Database = {
           mentor_comments: string | null
           mode: string | null
           outcomes: string | null
+          project_id: string | null
           share_token: string | null
           title: string
           updated_at: string | null
@@ -75,6 +76,7 @@ export type Database = {
           mentor_comments?: string | null
           mode?: string | null
           outcomes?: string | null
+          project_id?: string | null
           share_token?: string | null
           title: string
           updated_at?: string | null
@@ -91,12 +93,21 @@ export type Database = {
           mentor_comments?: string | null
           mode?: string | null
           outcomes?: string | null
+          project_id?: string | null
           share_token?: string | null
           title?: string
           updated_at?: string | null
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "mentor_logs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
