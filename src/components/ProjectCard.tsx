@@ -20,9 +20,10 @@ const MOOD_EMOJIS: Record<string, string> = {
 
 interface ProjectCardProps {
   project: Project;
+  onClick?: () => void;
 }
 
-export const ProjectCard = ({ project }: ProjectCardProps) => {
+export const ProjectCard = ({ project, onClick }: ProjectCardProps) => {
   const borderColor = COMPETENCY_COLORS[project.competency];
   const moodEmoji = project.lastReflectionMood ? MOOD_EMOJIS[project.lastReflectionMood] : null;
 
@@ -30,6 +31,7 @@ export const ProjectCard = ({ project }: ProjectCardProps) => {
     <Card 
       className="overflow-hidden hover:shadow-lg transition-all hover:scale-105 cursor-pointer"
       style={{ borderLeft: `4px solid ${borderColor}` }}
+      onClick={onClick}
     >
       <CardContent className="p-4">
         <div className="flex items-start justify-between mb-3">

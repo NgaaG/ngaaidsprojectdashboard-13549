@@ -2,18 +2,21 @@ import { useEffect, useState } from "react";
 import { CompetencyWheel } from "@/components/CompetencyWheel";
 import { ProjectCard } from "@/components/ProjectCard";
 import { ProjectDialog } from "@/components/ProjectDialog";
+import { ProjectDetailView } from "@/components/ProjectDetailView";
 import { ModeToggle } from "@/components/ModeToggle";
 import { getMode, setMode } from "@/lib/storage";
 import { Mode, Project, CompetencyProgress } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/lib/supabaseHelpers";
 import { exportToJSON, exportToCSV } from "@/lib/exportUtils";
 import { toast } from "sonner";
 
 const Home = () => {
   const [mode, setModeState] = useState<Mode>(getMode());
   const [projects, setProjects] = useState<Project[]>([]);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [detailViewOpen, setDetailViewOpen] = useState(false);
   const [competencyProgress, setCompetencyProgress] = useState<CompetencyProgress>({
     Research: 0,
     Create: 0,
@@ -24,7 +27,7 @@ const Home = () => {
 
   const loadData = async () => {
     // Load projects
-    const { data: projectsData } = await supabase
+    const { data: projectsData } = await db
       .from("projects")
       .select("*")
       .order("created_at", { ascending: false });
@@ -37,12 +40,15 @@ const Home = () => {
         competency: p.competency,
         visualUrl: p.visual_url,
         lastReflectionMood: p.last_reflection_mood,
+        description: p.description,
+        figmaLink: p.figma_link,
+        githubLink: p.github_link,
       }));
       setProjects(mappedProjects);
     }
 
     // Load competency progress
-    const { data: progressData } = await supabase
+    const { data: progressData } = await db
       .from("competency_progress")
       .select("*")
       .maybeSingle();
@@ -68,11 +74,11 @@ const Home = () => {
   };
 
   const handleExportJSON = async () => {
-    const { data: reflections } = await supabase
+    const { data: reflections } = await db
       .from("reflections")
       .select("*");
 
-    const { data: mentorLogs } = await supabase
+    const { data: mentorLogs } = await db
       .from("mentor_logs")
       .select("*");
 
@@ -89,11 +95,11 @@ const Home = () => {
   };
 
   const handleExportCSV = async () => {
-    const { data: reflections } = await supabase
+    const { data: reflections } = await db
       .from("reflections")
       .select("*");
 
-    const { data: mentorLogs } = await supabase
+    const { data: mentorLogs } = await db
       .from("mentor_logs")
       .select("*");
 
@@ -184,7 +190,14 @@ const Home = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {projects.map((project) => (
-                <ProjectCard key={project.id} project={project} />
+                <ProjectCard
+                  key={project.id}
+                  project={project}
+                  onClick={() => {
+                    setSelectedProject(project);
+                    setDetailViewOpen(true);
+                  }}
+                />
               ))}
             </div>
           )}
@@ -204,6 +217,16 @@ const Home = () => {
           </section>
         )}
       </main>
+
+      {selectedProject && (
+        <ProjectDetailView
+          project={selectedProject}
+          mode={mode}
+          open={detailViewOpen}
+          onOpenChange={setDetailViewOpen}
+          onUpdate={loadData}
+        />
+      )}
     </div>
   );
 };

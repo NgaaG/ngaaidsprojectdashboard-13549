@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -18,8 +19,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Plus, Trash2, Calendar } from "lucide-react";
-import { MentorLog, Competency } from "@/types";
-import { getMentorLogs, saveMentorLog, deleteMentorLog } from "@/lib/storage";
+import { Competency } from "@/types";
+import { db } from "@/lib/supabaseHelpers";
 import { toast } from "sonner";
 
 const COMPETENCIES: Competency[] = ["Research", "Create", "Organize", "Communicate", "Learn"];
@@ -33,53 +34,81 @@ const COMPETENCY_COLORS: Record<Competency, string> = {
 };
 
 const MentorLogs = () => {
-  const [logs, setLogs] = useState<MentorLog[]>([]);
+  const [logs, setLogs] = useState<any[]>([]);
+  const [projects, setProjects] = useState<any[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [newLog, setNewLog] = useState<Omit<MentorLog, "id" | "timestamp">>({
+  const [newLog, setNewLog] = useState({
     date: new Date().toISOString().split("T")[0],
     title: "",
     keyGoals: "",
     outcomes: "",
-    competency: "Create",
-    evidenceImages: [],
+    competency: "Create" as Competency,
+    projectId: null as string | null,
   });
 
   useEffect(() => {
-    setLogs(getMentorLogs());
+    loadData();
   }, []);
 
-  const handleSave = () => {
+  const loadData = async () => {
+    const { data: projectsData } = await db
+      .from("projects")
+      .select("*")
+      .order("name");
+    if (projectsData) setProjects(projectsData);
+
+    const { data: logsData } = await db
+      .from("mentor_logs")
+      .select("*, projects(name)")
+      .order("created_at", { ascending: false });
+    if (logsData) setLogs(logsData);
+  };
+
+  const handleSave = async () => {
     if (!newLog.title.trim()) {
       toast.error("Please add a title");
       return;
     }
 
-    const log: MentorLog = {
-      ...newLog,
-      id: crypto.randomUUID(),
-      timestamp: new Date().toISOString(),
-    };
+    try {
+      const { error } = await db.from("mentor_logs").insert({
+        date: newLog.date,
+        title: newLog.title,
+        key_goals: newLog.keyGoals,
+        outcomes: newLog.outcomes,
+        competency: newLog.competency,
+        project_id: newLog.projectId,
+      });
 
-    saveMentorLog(log);
-    setLogs(getMentorLogs());
-    toast.success("Mentor log saved!");
-    setIsDialogOpen(false);
-    
-    // Reset form
-    setNewLog({
-      date: new Date().toISOString().split("T")[0],
-      title: "",
-      keyGoals: "",
-      outcomes: "",
-      competency: "Create",
-      evidenceImages: [],
-    });
+      if (error) throw error;
+
+      toast.success("Mentor log saved!");
+      setIsDialogOpen(false);
+      loadData();
+
+      // Reset form
+      setNewLog({
+        date: new Date().toISOString().split("T")[0],
+        title: "",
+        keyGoals: "",
+        outcomes: "",
+        competency: "Create",
+        projectId: null,
+      });
+    } catch (error: any) {
+      toast.error(error.message || "Failed to save mentor log");
+    }
   };
 
-  const handleDelete = (id: string) => {
-    deleteMentorLog(id);
-    setLogs(getMentorLogs());
-    toast.success("Mentor log deleted");
+  const handleDelete = async (id: string) => {
+    try {
+      const { error } = await db.from("mentor_logs").delete().eq("id", id);
+      if (error) throw error;
+      toast.success("Mentor log deleted");
+      loadData();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to delete mentor log");
+    }
   };
 
   return (
@@ -106,9 +135,28 @@ const MentorLogs = () => {
               </DialogHeader>
               
               <div className="space-y-4 py-4">
+                <div>
+                  <Label htmlFor="project">Project (optional)</Label>
+                  <Select
+                    value={newLog.projectId || ""}
+                    onValueChange={(value) => setNewLog({ ...newLog, projectId: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a project..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {projects.map((project) => (
+                        <SelectItem key={project.id} value={project.id}>
+                          {project.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium mb-2 block">Date</label>
+                    <Label htmlFor="date">Date</Label>
                     <Input
                       type="date"
                       value={newLog.date}
@@ -116,7 +164,7 @@ const MentorLogs = () => {
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-medium mb-2 block">Competency</label>
+                    <Label htmlFor="competency">Competency</Label>
                     <Select
                       value={newLog.competency}
                       onValueChange={(value) =>
@@ -138,7 +186,7 @@ const MentorLogs = () => {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Session Title</label>
+                  <Label htmlFor="title">Session Title</Label>
                   <Input
                     placeholder="e.g., Portfolio Review Session"
                     value={newLog.title}
@@ -147,7 +195,7 @@ const MentorLogs = () => {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Key Goals</label>
+                  <Label htmlFor="goals">Key Goals</Label>
                   <Textarea
                     placeholder="What were the main goals for this session?"
                     value={newLog.keyGoals}
@@ -157,7 +205,7 @@ const MentorLogs = () => {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Outcomes</label>
+                  <Label htmlFor="outcomes">Outcomes</Label>
                   <Textarea
                     placeholder="What did you learn or achieve?"
                     value={newLog.outcomes}
@@ -230,9 +278,14 @@ const MentorLogs = () => {
                     
                     <div className="space-y-3">
                       <div>
+                        {log.projects && (
+                          <p className="text-xs text-muted-foreground mb-2">
+                            Project: {log.projects.name}
+                          </p>
+                        )}
                         <p className="text-sm font-medium mb-1">Key Goals:</p>
                         <p className="text-sm text-muted-foreground line-clamp-2">
-                          {log.keyGoals}
+                          {log.key_goals}
                         </p>
                       </div>
                       <div>

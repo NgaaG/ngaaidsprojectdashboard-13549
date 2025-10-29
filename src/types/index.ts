@@ -35,6 +35,9 @@ export interface Project {
   competency: Competency;
   visualUrl?: string;
   lastReflectionMood?: MoodType;
+  description?: string;
+  figmaLink?: string;
+  githubLink?: string;
 }
 
 export interface CompetencyProgress {

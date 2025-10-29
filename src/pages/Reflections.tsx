@@ -4,9 +4,17 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { Plus, Save, Trash2 } from "lucide-react";
-import { Reflection, MoodType } from "@/types";
-import { getReflections, saveReflection, deleteReflection } from "@/lib/storage";
+import { MoodType } from "@/types";
+import { db } from "@/lib/supabaseHelpers";
 import { toast } from "sonner";
 
 const MOODS: { value: MoodType; emoji: string; label: string; color: string }[] = [
@@ -18,23 +26,37 @@ const MOODS: { value: MoodType; emoji: string; label: string; color: string }[] 
 ];
 
 const Reflections = () => {
-  const [reflections, setReflections] = useState<Reflection[]>([]);
-  const [currentReflection, setCurrentReflection] = useState<Reflection>({
-    id: crypto.randomUUID(),
-    timestamp: new Date().toISOString(),
+  const [reflections, setReflections] = useState<any[]>([]);
+  const [projects, setProjects] = useState<any[]>([]);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [currentReflection, setCurrentReflection] = useState({
     mood: "calm",
     emotionalDump: "",
     thoughtsWhatIThink: "",
     thoughtsWhatIsTrue: "",
     contingencyPlan: "",
-    todoList: [],
+    todoList: [] as string[],
     progress: 0,
     sentiment: 50,
   });
 
   useEffect(() => {
-    setReflections(getReflections());
+    loadData();
   }, []);
+
+  const loadData = async () => {
+    const { data: projectsData } = await db
+      .from("projects")
+      .select("*")
+      .order("name");
+    if (projectsData) setProjects(projectsData);
+
+    const { data: reflectionsData } = await db
+      .from("reflections")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (reflectionsData) setReflections(reflectionsData);
+  };
 
   useEffect(() => {
     // Calculate progress based on filled fields
@@ -57,30 +79,56 @@ const Reflections = () => {
     currentReflection.contingencyPlan,
   ]);
 
-  const handleSave = () => {
-    saveReflection(currentReflection);
-    setReflections(getReflections());
-    toast.success("Reflection saved!");
-    
-    // Create new reflection
-    setCurrentReflection({
-      id: crypto.randomUUID(),
-      timestamp: new Date().toISOString(),
-      mood: "calm",
-      emotionalDump: "",
-      thoughtsWhatIThink: "",
-      thoughtsWhatIsTrue: "",
-      contingencyPlan: "",
-      todoList: [],
-      progress: 0,
-      sentiment: 50,
-    });
+  const handleSave = async () => {
+    if (!selectedProjectId) {
+      toast.error("Please select a project");
+      return;
+    }
+
+    try {
+      const { error } = await db.from("reflections").insert({
+        project_id: selectedProjectId,
+        mood: currentReflection.mood,
+        emotional_dump: currentReflection.emotionalDump,
+        thoughts_what_i_think: currentReflection.thoughtsWhatIThink,
+        thoughts_what_is_true: currentReflection.thoughtsWhatIsTrue,
+        contingency_plan: currentReflection.contingencyPlan,
+        todo_list: currentReflection.todoList,
+        progress: currentReflection.progress,
+        sentiment: currentReflection.sentiment,
+      });
+
+      if (error) throw error;
+
+      toast.success("Reflection saved!");
+      loadData();
+
+      // Reset form
+      setCurrentReflection({
+        mood: "calm",
+        emotionalDump: "",
+        thoughtsWhatIThink: "",
+        thoughtsWhatIsTrue: "",
+        contingencyPlan: "",
+        todoList: [],
+        progress: 0,
+        sentiment: 50,
+      });
+      setSelectedProjectId(null);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to save reflection");
+    }
   };
 
-  const handleDelete = (id: string) => {
-    deleteReflection(id);
-    setReflections(getReflections());
-    toast.success("Reflection deleted");
+  const handleDelete = async (id: string) => {
+    try {
+      const { error } = await db.from("reflections").delete().eq("id", id);
+      if (error) throw error;
+      toast.success("Reflection deleted");
+      loadData();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to delete reflection");
+    }
   };
 
   const moodColor = MOODS.find((m) => m.value === currentReflection.mood)?.color || "hsl(195 60% 76%)";
@@ -111,6 +159,25 @@ const Reflections = () => {
             {Math.round(currentReflection.progress)}% Complete
           </p>
         </div>
+
+        {/* Project Selection */}
+        <Card>
+          <CardContent className="pt-6">
+            <Label htmlFor="project">Select Project</Label>
+            <Select value={selectedProjectId || ""} onValueChange={setSelectedProjectId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Choose a project..." />
+              </SelectTrigger>
+              <SelectContent>
+                {projects.map((project) => (
+                  <SelectItem key={project.id} value={project.id}>
+                    {project.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </CardContent>
+        </Card>
 
         {/* Reflection Sections */}
         <div className="space-y-6">
@@ -284,7 +351,7 @@ const Reflections = () => {
                           </div>
                         </div>
                         <p className="text-sm text-muted-foreground line-clamp-2">
-                          {reflection.emotionalDump}
+                          {reflection.emotional_dump}
                         </p>
                       </div>
                       <Button

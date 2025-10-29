@@ -1,31 +1,69 @@
-import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Upload, X } from "lucide-react";
-import { Competency } from "@/types";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+import { Upload, X } from "lucide-react";
+import { Competency, Project } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 import { db } from "@/lib/supabaseHelpers";
 import { toast } from "sonner";
 
-const COMPETENCIES: Competency[] = ["Research", "Create", "Organize", "Communicate", "Learn"];
+const COMPETENCIES: Competency[] = [
+  "Research",
+  "Create",
+  "Organize",
+  "Communicate",
+  "Learn",
+];
 
-interface ProjectDialogProps {
-  onProjectCreated: () => void;
+interface ProjectEditDialogProps {
+  project: Project;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSuccess: () => void;
 }
 
-export const ProjectDialog = ({ onProjectCreated }: ProjectDialogProps) => {
-  const [open, setOpen] = useState(false);
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [competency, setCompetency] = useState<Competency>("Create");
-  const [figmaLink, setFigmaLink] = useState("");
-  const [githubLink, setGithubLink] = useState("");
+export const ProjectEditDialog = ({
+  project,
+  open,
+  onOpenChange,
+  onSuccess,
+}: ProjectEditDialogProps) => {
+  const [name, setName] = useState(project.name);
+  const [description, setDescription] = useState(project.description || "");
+  const [competency, setCompetency] = useState<Competency>(project.competency);
+  const [completion, setCompletion] = useState(project.completion);
+  const [figmaLink, setFigmaLink] = useState(project.figmaLink || "");
+  const [githubLink, setGithubLink] = useState(project.githubLink || "");
   const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setName(project.name);
+      setDescription(project.description || "");
+      setCompetency(project.competency);
+      setCompletion(project.completion);
+      setFigmaLink(project.figmaLink || "");
+      setGithubLink(project.githubLink || "");
+      setFiles([]);
+    }
+  }, [open, project]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -42,70 +80,57 @@ export const ProjectDialog = ({ onProjectCreated }: ProjectDialogProps) => {
     setLoading(true);
 
     try {
-      // Upload files to storage
-      let visualUrl = "";
+      let visualUrl = project.visualUrl;
+
+      // Upload new files if provided
       if (files.length > 0) {
-        const file = files[0]; // Use first file as visual
+        const file = files[0];
         const fileExt = file.name.split(".").pop();
         const fileName = `${Date.now()}.${fileExt}`;
-        
-        const { error: uploadError, data } = await supabase.storage
+
+        const { error: uploadError } = await supabase.storage
           .from("project-files")
           .upload(fileName, file);
 
         if (uploadError) throw uploadError;
 
-        const { data: { publicUrl } } = supabase.storage
-          .from("project-files")
-          .getPublicUrl(fileName);
-        
+        const {
+          data: { publicUrl },
+        } = supabase.storage.from("project-files").getPublicUrl(fileName);
+
         visualUrl = publicUrl;
       }
 
-      // Create project
-      const { error } = await db.from("projects").insert({
-        name,
-        description,
-        competency,
-        figma_link: figmaLink || null,
-        github_link: githubLink || null,
-        visual_url: visualUrl || null,
-        completion: 0,
-      });
+      // Update project
+      const { error } = await db
+        .from("projects")
+        .update({
+          name,
+          description,
+          competency,
+          completion,
+          figma_link: figmaLink || null,
+          github_link: githubLink || null,
+          visual_url: visualUrl || null,
+        })
+        .eq("id", project.id);
 
       if (error) throw error;
 
-      toast.success("Project created successfully!");
-      setOpen(false);
-      resetForm();
-      onProjectCreated();
+      toast.success("Project updated successfully!");
+      onSuccess();
     } catch (error: any) {
-      toast.error(error.message || "Failed to create project");
+      toast.error(error.message || "Failed to update project");
     } finally {
       setLoading(false);
     }
   };
 
-  const resetForm = () => {
-    setName("");
-    setDescription("");
-    setCompetency("Create");
-    setFigmaLink("");
-    setGithubLink("");
-    setFiles([]);
-  };
-
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="gap-2 rounded-full">
-          <Plus className="h-4 w-4" />
-          New Project
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create New Project</DialogTitle>
+          <DialogTitle>Edit Project</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -132,7 +157,10 @@ export const ProjectDialog = ({ onProjectCreated }: ProjectDialogProps) => {
 
           <div>
             <Label htmlFor="competency">CMD Competency</Label>
-            <Select value={competency} onValueChange={(value) => setCompetency(value as Competency)}>
+            <Select
+              value={competency}
+              onValueChange={(value) => setCompetency(value as Competency)}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -144,6 +172,19 @@ export const ProjectDialog = ({ onProjectCreated }: ProjectDialogProps) => {
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="completion">Completion: {completion}%</Label>
+            <Slider
+              id="completion"
+              value={[completion]}
+              onValueChange={(value) => setCompletion(value[0])}
+              min={0}
+              max={100}
+              step={5}
+              className="mt-2"
+            />
           </div>
 
           <div>
@@ -169,16 +210,13 @@ export const ProjectDialog = ({ onProjectCreated }: ProjectDialogProps) => {
           </div>
 
           <div>
-            <Label htmlFor="files">Upload Files (Images, Videos, PDFs)</Label>
+            <Label htmlFor="files">Update Visual (Images, Videos, PDFs)</Label>
             <div className="mt-2">
               <label htmlFor="files" className="cursor-pointer">
                 <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary transition-colors">
                   <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                   <p className="text-sm text-muted-foreground">
-                    Click to upload or drag and drop
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Images, videos, documents
+                    Click to upload new files
                   </p>
                 </div>
                 <Input
@@ -191,11 +229,14 @@ export const ProjectDialog = ({ onProjectCreated }: ProjectDialogProps) => {
                 />
               </label>
             </div>
-            
+
             {files.length > 0 && (
               <div className="mt-4 space-y-2">
                 {files.map((file, index) => (
-                  <div key={index} className="flex items-center justify-between p-2 bg-muted rounded">
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-2 bg-muted rounded"
+                  >
                     <span className="text-sm truncate flex-1">{file.name}</span>
                     <Button
                       type="button"
@@ -212,11 +253,15 @@ export const ProjectDialog = ({ onProjectCreated }: ProjectDialogProps) => {
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? "Creating..." : "Create Project"}
+              {loading ? "Updating..." : "Update Project"}
             </Button>
           </div>
         </form>
