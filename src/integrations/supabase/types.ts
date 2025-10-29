@@ -14,7 +14,195 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      competency_progress: {
+        Row: {
+          communicate: number | null
+          create_score: number | null
+          id: string
+          learn: number | null
+          organize: number | null
+          research: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          communicate?: number | null
+          create_score?: number | null
+          id?: string
+          learn?: number | null
+          organize?: number | null
+          research?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          communicate?: number | null
+          create_score?: number | null
+          id?: string
+          learn?: number | null
+          organize?: number | null
+          research?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      mentor_logs: {
+        Row: {
+          competency: string
+          created_at: string | null
+          date: string
+          evidence_images: Json | null
+          id: string
+          is_public: boolean | null
+          key_goals: string | null
+          outcomes: string | null
+          share_token: string | null
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          competency: string
+          created_at?: string | null
+          date: string
+          evidence_images?: Json | null
+          id?: string
+          is_public?: boolean | null
+          key_goals?: string | null
+          outcomes?: string | null
+          share_token?: string | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          competency?: string
+          created_at?: string | null
+          date?: string
+          evidence_images?: Json | null
+          id?: string
+          is_public?: boolean | null
+          key_goals?: string | null
+          outcomes?: string | null
+          share_token?: string | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          display_name: string | null
+          id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          display_name?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          display_name?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      projects: {
+        Row: {
+          competency: string
+          completion: number | null
+          created_at: string | null
+          description: string | null
+          figma_link: string | null
+          github_link: string | null
+          id: string
+          last_reflection_mood: string | null
+          name: string
+          updated_at: string | null
+          user_id: string
+          visual_url: string | null
+        }
+        Insert: {
+          competency: string
+          completion?: number | null
+          created_at?: string | null
+          description?: string | null
+          figma_link?: string | null
+          github_link?: string | null
+          id?: string
+          last_reflection_mood?: string | null
+          name: string
+          updated_at?: string | null
+          user_id: string
+          visual_url?: string | null
+        }
+        Update: {
+          competency?: string
+          completion?: number | null
+          created_at?: string | null
+          description?: string | null
+          figma_link?: string | null
+          github_link?: string | null
+          id?: string
+          last_reflection_mood?: string | null
+          name?: string
+          updated_at?: string | null
+          user_id?: string
+          visual_url?: string | null
+        }
+        Relationships: []
+      }
+      reflections: {
+        Row: {
+          contingency_plan: string | null
+          created_at: string | null
+          emotional_dump: string | null
+          id: string
+          mood: string
+          progress: number | null
+          sentiment: number | null
+          thoughts_what_i_think: string | null
+          thoughts_what_is_true: string | null
+          todo_list: Json | null
+          user_id: string
+        }
+        Insert: {
+          contingency_plan?: string | null
+          created_at?: string | null
+          emotional_dump?: string | null
+          id?: string
+          mood: string
+          progress?: number | null
+          sentiment?: number | null
+          thoughts_what_i_think?: string | null
+          thoughts_what_is_true?: string | null
+          todo_list?: Json | null
+          user_id: string
+        }
+        Update: {
+          contingency_plan?: string | null
+          created_at?: string | null
+          emotional_dump?: string | null
+          id?: string
+          mood?: string
+          progress?: number | null
+          sentiment?: number | null
+          thoughts_what_i_think?: string | null
+          thoughts_what_is_true?: string | null
+          todo_list?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
