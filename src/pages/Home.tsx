@@ -1,27 +1,144 @@
 import { useEffect, useState } from "react";
 import { CompetencyWheel } from "@/components/CompetencyWheel";
 import { ProjectCard } from "@/components/ProjectCard";
+import { ProjectDialog } from "@/components/ProjectDialog";
 import { ModeToggle } from "@/components/ModeToggle";
-import { getProjects, getCompetencyProgress, getMode, setMode } from "@/lib/storage";
+import { getMode, setMode } from "@/lib/storage";
 import { Mode, Project, CompetencyProgress } from "@/types";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Download, LogOut } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { exportToJSON, exportToCSV } from "@/lib/exportUtils";
+import { toast } from "sonner";
 
 const Home = () => {
+  const { user, signOut } = useAuth();
   const [mode, setModeState] = useState<Mode>(getMode());
   const [projects, setProjects] = useState<Project[]>([]);
-  const [competencyProgress, setCompetencyProgress] = useState<CompetencyProgress>(
-    getCompetencyProgress()
-  );
+  const [competencyProgress, setCompetencyProgress] = useState<CompetencyProgress>({
+    Research: 0,
+    Create: 0,
+    Organize: 0,
+    Communicate: 0,
+    Learn: 0,
+  });
+
+  const loadData = async () => {
+    if (!user) return;
+
+    // Load projects
+    const { data: projectsData } = await supabase
+      .from("projects")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+
+    if (projectsData) {
+      const mappedProjects: Project[] = projectsData.map((p: any) => ({
+        id: p.id,
+        name: p.name,
+        completion: p.completion,
+        competency: p.competency,
+        visualUrl: p.visual_url,
+        lastReflectionMood: p.last_reflection_mood,
+      }));
+      setProjects(mappedProjects);
+    }
+
+    // Load competency progress
+    const { data: progressData } = await supabase
+      .from("competency_progress")
+      .select("*")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (progressData) {
+      setCompetencyProgress({
+        Research: progressData.research,
+        Create: progressData.create_score,
+        Organize: progressData.organize,
+        Communicate: progressData.communicate,
+        Learn: progressData.learn,
+      });
+    }
+  };
 
   useEffect(() => {
-    setProjects(getProjects());
-    setCompetencyProgress(getCompetencyProgress());
-  }, []);
+    loadData();
+  }, [user]);
 
   const handleModeChange = (newMode: Mode) => {
     setModeState(newMode);
     setMode(newMode);
+  };
+
+  const handleExportJSON = async () => {
+    if (!user) return;
+
+    const { data: reflections } = await supabase
+      .from("reflections")
+      .select("*")
+      .eq("user_id", user.id);
+
+    const { data: mentorLogs } = await supabase
+      .from("mentor_logs")
+      .select("*")
+      .eq("user_id", user.id);
+
+    const exportData = {
+      reflections,
+      mentorLogs,
+      projects,
+      competencyProgress,
+      exportedAt: new Date().toISOString(),
+    };
+
+    exportToJSON(exportData, "adhd-studio-export.json");
+    toast.success("Data exported successfully!");
+  };
+
+  const handleExportCSV = async () => {
+    if (!user) return;
+
+    const { data: reflections } = await supabase
+      .from("reflections")
+      .select("*")
+      .eq("user_id", user.id);
+
+    const { data: mentorLogs } = await supabase
+      .from("mentor_logs")
+      .select("*")
+      .eq("user_id", user.id);
+
+    if (reflections && mentorLogs) {
+      exportToCSV(
+        reflections.map((r: any) => ({
+          id: r.id,
+          timestamp: r.created_at,
+          mood: r.mood,
+          emotionalDump: r.emotional_dump,
+          thoughtsWhatIThink: r.thoughts_what_i_think,
+          thoughtsWhatIsTrue: r.thoughts_what_is_true,
+          contingencyPlan: r.contingency_plan,
+          todoList: r.todo_list,
+          progress: r.progress,
+          sentiment: r.sentiment,
+        })),
+        mentorLogs.map((m: any) => ({
+          id: m.id,
+          timestamp: m.created_at,
+          date: m.date,
+          title: m.title,
+          keyGoals: m.key_goals,
+          outcomes: m.outcomes,
+          competency: m.competency,
+          evidenceImages: m.evidence_images,
+        })),
+        "adhd-studio-data.csv"
+      );
+      toast.success("CSV exported successfully!");
+    }
   };
 
   return (
@@ -38,7 +155,21 @@ const Home = () => {
                 Track your progress with clarity and calm
               </p>
             </div>
-            <ModeToggle mode={mode} onModeChange={handleModeChange} />
+            <div className="flex items-center gap-4">
+              <Button variant="outline" onClick={handleExportJSON} className="gap-2">
+                <Download className="h-4 w-4" />
+                Export JSON
+              </Button>
+              <Button variant="outline" onClick={handleExportCSV} className="gap-2">
+                <Download className="h-4 w-4" />
+                Export CSV
+              </Button>
+              <ModeToggle mode={mode} onModeChange={handleModeChange} />
+              <Button variant="outline" onClick={signOut} className="gap-2">
+                <LogOut className="h-4 w-4" />
+                Sign Out
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -58,10 +189,7 @@ const Home = () => {
             <h2 className="text-2xl font-semibold">
               {mode === "personal" ? "My Projects" : "Project Portfolio"}
             </h2>
-            <Button className="gap-2 rounded-full">
-              <Plus className="h-4 w-4" />
-              New Project
-            </Button>
+            <ProjectDialog onProjectCreated={loadData} />
           </div>
 
           {projects.length === 0 ? (
@@ -69,10 +197,7 @@ const Home = () => {
               <p className="text-muted-foreground text-lg mb-4">
                 No projects yet. Create your first one!
               </p>
-              <Button variant="outline" className="gap-2">
-                <Plus className="h-4 w-4" />
-                Add Project
-              </Button>
+              <ProjectDialog onProjectCreated={loadData} />
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
