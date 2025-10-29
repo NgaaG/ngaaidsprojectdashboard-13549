@@ -1,0 +1,51 @@
+import { Home, MessageCircle, Compass, TrendingUp, Moon } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import { cn } from "@/lib/utils";
+
+const navItems = [
+  { icon: Home, label: "Home", path: "/" },
+  { icon: MessageCircle, label: "Reflections", path: "/reflections" },
+  { icon: Compass, label: "Mentor Logs", path: "/mentor-logs" },
+  { icon: TrendingUp, label: "Growth", path: "/growth" },
+  { icon: Moon, label: "Focus", path: "/focus" },
+];
+
+export const Sidebar = () => {
+  const location = useLocation();
+
+  return (
+    <aside className="fixed left-0 top-0 h-screen w-20 bg-sidebar border-r border-sidebar-border flex flex-col items-center py-8 gap-6 z-50">
+      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-2xl font-bold text-primary-foreground shadow-lg">
+        💜
+      </div>
+
+      <nav className="flex flex-col gap-4 mt-8">
+        {navItems.map(({ icon: Icon, label, path }) => {
+          const isActive = location.pathname === path;
+          return (
+            <Link
+              key={path}
+              to={path}
+              className={cn(
+                "flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all",
+                "hover:bg-sidebar-accent hover:scale-105",
+                isActive && "bg-sidebar-accent shadow-md"
+              )}
+              title={label}
+            >
+              <Icon
+                className={cn(
+                  "h-6 w-6 transition-colors",
+                  isActive ? "text-sidebar-primary" : "text-sidebar-foreground"
+                )}
+              />
+              <span className="text-[10px] font-medium text-sidebar-foreground">
+                {label}
+              </span>
+            </Link>
+          );
+        })}
+      </nav>
+    </aside>
+  );
+};
