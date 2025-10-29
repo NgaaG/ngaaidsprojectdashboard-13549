@@ -41,18 +41,12 @@ export const ProjectDialog = ({ onProjectCreated }: ProjectDialogProps) => {
     setLoading(true);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast.error("You must be logged in to create a project");
-        return;
-      }
-
       // Upload files to storage
       let visualUrl = "";
       if (files.length > 0) {
         const file = files[0]; // Use first file as visual
         const fileExt = file.name.split(".").pop();
-        const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+        const fileName = `${Date.now()}.${fileExt}`;
         
         const { error: uploadError, data } = await supabase.storage
           .from("project-files")
@@ -69,7 +63,6 @@ export const ProjectDialog = ({ onProjectCreated }: ProjectDialogProps) => {
 
       // Create project
       const { error } = await supabase.from("projects").insert({
-        user_id: user.id,
         name,
         description,
         competency,

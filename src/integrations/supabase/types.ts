@@ -23,7 +23,7 @@ export type Database = {
           organize: number | null
           research: number | null
           updated_at: string | null
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           communicate?: number | null
@@ -33,7 +33,7 @@ export type Database = {
           organize?: number | null
           research?: number | null
           updated_at?: string | null
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           communicate?: number | null
@@ -43,7 +43,7 @@ export type Database = {
           organize?: number | null
           research?: number | null
           updated_at?: string | null
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -60,7 +60,7 @@ export type Database = {
           share_token: string | null
           title: string
           updated_at: string | null
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           competency: string
@@ -74,7 +74,7 @@ export type Database = {
           share_token?: string | null
           title: string
           updated_at?: string | null
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           competency?: string
@@ -88,7 +88,7 @@ export type Database = {
           share_token?: string | null
           title?: string
           updated_at?: string | null
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -98,21 +98,21 @@ export type Database = {
           display_name: string | null
           id: string
           updated_at: string | null
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string | null
           display_name?: string | null
           id?: string
           updated_at?: string | null
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string | null
           display_name?: string | null
           id?: string
           updated_at?: string | null
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -128,7 +128,7 @@ export type Database = {
           last_reflection_mood: string | null
           name: string
           updated_at: string | null
-          user_id: string
+          user_id: string | null
           visual_url: string | null
         }
         Insert: {
@@ -142,7 +142,7 @@ export type Database = {
           last_reflection_mood?: string | null
           name: string
           updated_at?: string | null
-          user_id: string
+          user_id?: string | null
           visual_url?: string | null
         }
         Update: {
@@ -156,7 +156,7 @@ export type Database = {
           last_reflection_mood?: string | null
           name?: string
           updated_at?: string | null
-          user_id?: string
+          user_id?: string | null
           visual_url?: string | null
         }
         Relationships: []
@@ -173,7 +173,7 @@ export type Database = {
           thoughts_what_i_think: string | null
           thoughts_what_is_true: string | null
           todo_list: Json | null
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           contingency_plan?: string | null
@@ -186,7 +186,7 @@ export type Database = {
           thoughts_what_i_think?: string | null
           thoughts_what_is_true?: string | null
           todo_list?: Json | null
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           contingency_plan?: string | null
@@ -199,7 +199,7 @@ export type Database = {
           thoughts_what_i_think?: string | null
           thoughts_what_is_true?: string | null
           todo_list?: Json | null
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: []
       }

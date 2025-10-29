@@ -6,14 +6,12 @@ import { ModeToggle } from "@/components/ModeToggle";
 import { getMode, setMode } from "@/lib/storage";
 import { Mode, Project, CompetencyProgress } from "@/types";
 import { Button } from "@/components/ui/button";
-import { Download, LogOut } from "lucide-react";
+import { Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
 import { exportToJSON, exportToCSV } from "@/lib/exportUtils";
 import { toast } from "sonner";
 
 const Home = () => {
-  const { user, signOut } = useAuth();
   const [mode, setModeState] = useState<Mode>(getMode());
   const [projects, setProjects] = useState<Project[]>([]);
   const [competencyProgress, setCompetencyProgress] = useState<CompetencyProgress>({
@@ -25,13 +23,10 @@ const Home = () => {
   });
 
   const loadData = async () => {
-    if (!user) return;
-
     // Load projects
     const { data: projectsData } = await supabase
       .from("projects")
       .select("*")
-      .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 
     if (projectsData) {
@@ -50,7 +45,6 @@ const Home = () => {
     const { data: progressData } = await supabase
       .from("competency_progress")
       .select("*")
-      .eq("user_id", user.id)
       .maybeSingle();
 
     if (progressData) {
@@ -66,7 +60,7 @@ const Home = () => {
 
   useEffect(() => {
     loadData();
-  }, [user]);
+  }, []);
 
   const handleModeChange = (newMode: Mode) => {
     setModeState(newMode);
@@ -74,17 +68,13 @@ const Home = () => {
   };
 
   const handleExportJSON = async () => {
-    if (!user) return;
-
     const { data: reflections } = await supabase
       .from("reflections")
-      .select("*")
-      .eq("user_id", user.id);
+      .select("*");
 
     const { data: mentorLogs } = await supabase
       .from("mentor_logs")
-      .select("*")
-      .eq("user_id", user.id);
+      .select("*");
 
     const exportData = {
       reflections,
@@ -99,17 +89,13 @@ const Home = () => {
   };
 
   const handleExportCSV = async () => {
-    if (!user) return;
-
     const { data: reflections } = await supabase
       .from("reflections")
-      .select("*")
-      .eq("user_id", user.id);
+      .select("*");
 
     const { data: mentorLogs } = await supabase
       .from("mentor_logs")
-      .select("*")
-      .eq("user_id", user.id);
+      .select("*");
 
     if (reflections && mentorLogs) {
       exportToCSV(
@@ -165,10 +151,6 @@ const Home = () => {
                 Export CSV
               </Button>
               <ModeToggle mode={mode} onModeChange={handleModeChange} />
-              <Button variant="outline" onClick={signOut} className="gap-2">
-                <LogOut className="h-4 w-4" />
-                Sign Out
-              </Button>
             </div>
           </div>
         </div>
