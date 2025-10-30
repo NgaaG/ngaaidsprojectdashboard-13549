@@ -1,4 +1,6 @@
 
+-- Migration: 20251029221912
+
 -- Migration: 20251029123357
 
 -- Migration: 20251029104656
@@ -290,3 +292,49 @@ ALTER TABLE public.reflections ALTER COLUMN user_id DROP NOT NULL;
 ALTER TABLE public.mentor_logs ALTER COLUMN user_id DROP NOT NULL;
 ALTER TABLE public.competency_progress ALTER COLUMN user_id DROP NOT NULL;
 
+
+
+-- Migration: 20251029222122
+-- Add mode tracking columns to tables
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS mode text DEFAULT 'personal' CHECK (mode IN ('personal', 'lecturer'));
+ALTER TABLE reflections ADD COLUMN IF NOT EXISTS mode text DEFAULT 'personal' CHECK (mode IN ('personal', 'lecturer'));
+ALTER TABLE mentor_logs ADD COLUMN IF NOT EXISTS mode text DEFAULT 'lecturer' CHECK (mode IN ('personal', 'lecturer'));
+
+-- Change competency from single to multiple (array) and add Unsure/TBD option
+ALTER TABLE projects DROP COLUMN IF EXISTS competency;
+ALTER TABLE projects ADD COLUMN competencies text[] DEFAULT ARRAY['Create'];
+
+ALTER TABLE mentor_logs DROP COLUMN IF EXISTS competency;
+ALTER TABLE mentor_logs ADD COLUMN competencies text[] DEFAULT ARRAY['Create'];
+
+-- Add mentor comments field to mentor_logs
+ALTER TABLE mentor_logs ADD COLUMN IF NOT EXISTS mentor_comments text;
+
+-- Add reflection category for lecture mode
+ALTER TABLE reflections ADD COLUMN IF NOT EXISTS category text DEFAULT 'time-out';
+
+-- Update RLS policies to allow mode-based filtering (keep existing public access)
+-- No changes needed to RLS since we're filtering in the application layer;
+
+-- Migration: 20251029223407
+-- Add project_id column to mentor_logs table
+ALTER TABLE public.mentor_logs 
+ADD COLUMN project_id uuid REFERENCES public.projects(id);
+
+-- Add index for better query performance
+CREATE INDEX idx_mentor_logs_project_id ON public.mentor_logs(project_id);
+
+-- Add index for mode filtering
+CREATE INDEX idx_mentor_logs_mode ON public.mentor_logs(mode);
+CREATE INDEX idx_reflections_mode ON public.reflections(mode);
+CREATE INDEX idx_projects_mode ON public.projects(mode);
+
+-- Migration: 20251030011942
+-- Add learning goals and key tasks to projects table
+ALTER TABLE public.projects 
+ADD COLUMN IF NOT EXISTS learning_goals JSONB DEFAULT '{"Research": "", "Create": "", "Organize": "", "Communicate": "", "Learn": ""}'::jsonb,
+ADD COLUMN IF NOT EXISTS key_tasks JSONB DEFAULT '[]'::jsonb;
+
+-- Add comment for documentation
+COMMENT ON COLUMN public.projects.learning_goals IS 'Learning goals organized by CMD competency';
+COMMENT ON COLUMN public.projects.key_tasks IS 'Array of task objects with name, status (completed/not-completed/to-be-completed), and description';
