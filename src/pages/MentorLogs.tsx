@@ -24,6 +24,7 @@ import { Competency, Mode } from "@/types";
 import { db } from "@/lib/supabaseHelpers";
 import { toast } from "sonner";
 import { ModeToggle } from "@/components/ModeToggle";
+import { MentorLogDetailView } from "@/components/MentorLogDetailView";
 
 const COMPETENCIES: Competency[] = ["Research", "Create", "Organize", "Communicate", "Learn", "Unsure/TBD"];
 
@@ -42,6 +43,7 @@ const MentorLogs = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentMode, setCurrentMode] = useState<Mode>("lecturer");
   const [editingLog, setEditingLog] = useState<any | null>(null);
+  const [detailViewLog, setDetailViewLog] = useState<any | null>(null);
   const [newLog, setNewLog] = useState({
     date: new Date().toISOString().split("T")[0],
     title: "",
@@ -50,6 +52,7 @@ const MentorLogs = () => {
     mentorComments: "",
     competencies: ["Create"] as Competency[],
     projectId: null as string | null,
+    selectedTaskIds: [] as string[],
   });
 
   useEffect(() => {
@@ -66,7 +69,7 @@ const MentorLogs = () => {
 
     const { data: logsData } = await db
       .from("mentor_logs")
-      .select("*, projects(name)")
+      .select("*, projects(name, key_tasks)")
       .order("created_at", { ascending: false });
     if (logsData) setLogs(logsData);
   };
@@ -92,8 +95,13 @@ const MentorLogs = () => {
       mentorComments: log.mentor_comments || "",
       competencies: log.competencies || ["Create"],
       projectId: log.project_id,
+      selectedTaskIds: log.selected_task_ids || [],
     });
     setIsDialogOpen(true);
+  };
+
+  const handleCardClick = (log: any) => {
+    setDetailViewLog(log);
   };
 
   const handleSave = async () => {
@@ -118,6 +126,7 @@ const MentorLogs = () => {
           mentor_comments: newLog.mentorComments || null,
           competencies: newLog.competencies,
           project_id: newLog.projectId,
+          selected_task_ids: newLog.selectedTaskIds.length > 0 ? newLog.selectedTaskIds : null,
         }).eq("id", editingLog.id);
 
         if (error) throw error;
@@ -132,6 +141,7 @@ const MentorLogs = () => {
           mentor_comments: newLog.mentorComments || null,
           competencies: newLog.competencies,
           project_id: newLog.projectId,
+          selected_task_ids: newLog.selectedTaskIds.length > 0 ? newLog.selectedTaskIds : null,
           mode: currentMode,
         });
 
@@ -152,6 +162,7 @@ const MentorLogs = () => {
         mentorComments: "",
         competencies: ["Create"],
         projectId: null,
+        selectedTaskIds: [],
       });
     } catch (error: any) {
       toast.error(error.message || "Failed to save mentor log");
@@ -204,7 +215,7 @@ const MentorLogs = () => {
                     <Label htmlFor="project">Project (optional)</Label>
                     <Select
                       value={newLog.projectId || ""}
-                      onValueChange={(value) => setNewLog({ ...newLog, projectId: value })}
+                      onValueChange={(value) => setNewLog({ ...newLog, projectId: value, selectedTaskIds: [] })}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select a project..." />
@@ -218,6 +229,53 @@ const MentorLogs = () => {
                       </SelectContent>
                     </Select>
                   </div>
+
+                  {/* Project Tasks Selection */}
+                  {newLog.projectId && (() => {
+                    const selectedProject = projects.find(p => p.id === newLog.projectId);
+                    const projectTasks = selectedProject?.key_tasks || [];
+                    
+                    if (projectTasks.length > 0) {
+                      return (
+                        <div className="p-4 bg-muted/30 rounded-lg">
+                          <Label className="mb-3 block">Reference Project Tasks (optional)</Label>
+                          <p className="text-xs text-muted-foreground mb-3">
+                            Select tasks to reference during this consultation
+                          </p>
+                          <div className="space-y-2 max-h-48 overflow-y-auto">
+                            {projectTasks.map((task: any) => (
+                              <div key={task.id} className="flex items-start space-x-2">
+                                <Checkbox
+                                  id={`task-${task.id}`}
+                                  checked={newLog.selectedTaskIds.includes(task.id)}
+                                  onCheckedChange={(checked) => {
+                                    setNewLog(prev => ({
+                                      ...prev,
+                                      selectedTaskIds: checked
+                                        ? [...prev.selectedTaskIds, task.id]
+                                        : prev.selectedTaskIds.filter(id => id !== task.id)
+                                    }));
+                                  }}
+                                />
+                                <label
+                                  htmlFor={`task-${task.id}`}
+                                  className="text-sm leading-tight cursor-pointer flex-1"
+                                >
+                                  <span className="font-medium">{task.name}</span>
+                                  {task.status && (
+                                    <span className="ml-2 text-xs text-muted-foreground">
+                                      ({task.status === "completed" ? "✅" : task.status === "not-completed" ? "🕓" : "🔮"})
+                                    </span>
+                                  )}
+                                </label>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -329,6 +387,7 @@ const MentorLogs = () => {
                         mentorComments: "",
                         competencies: ["Create"],
                         projectId: null,
+                        selectedTaskIds: [],
                       });
                     }}
                   >
@@ -365,8 +424,9 @@ const MentorLogs = () => {
               return (
                 <Card
                   key={log.id}
-                  className="overflow-hidden hover:shadow-lg transition-all hover-scale animate-fade-in"
+                  className="overflow-hidden hover:shadow-lg transition-all hover-scale animate-fade-in cursor-pointer"
                   style={{ borderTop: `4px solid ${primaryColor}` }}
+                  onClick={() => handleCardClick(log)}
                 >
                   <CardHeader>
                     <div className="flex justify-between items-start">
@@ -391,14 +451,20 @@ const MentorLogs = () => {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => handleOpenEdit(log)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenEdit(log);
+                          }}
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => handleDelete(log.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(log.id);
+                          }}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -486,6 +552,23 @@ const MentorLogs = () => {
             </Button>
           </div>
         </section>
+
+        {/* Detail View Dialog */}
+        {detailViewLog && (
+          <MentorLogDetailView
+            log={detailViewLog}
+            open={!!detailViewLog}
+            onOpenChange={(open) => !open && setDetailViewLog(null)}
+            onUpdate={loadData}
+            selectedTasks={
+              detailViewLog.selected_task_ids && detailViewLog.projects?.key_tasks
+                ? detailViewLog.projects.key_tasks.filter((task: any) => 
+                    detailViewLog.selected_task_ids.includes(task.id)
+                  )
+                : []
+            }
+          />
+        )}
       </div>
     </div>
   );

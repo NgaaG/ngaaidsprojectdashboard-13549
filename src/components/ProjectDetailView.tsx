@@ -150,6 +150,68 @@ export const ProjectDetailView = ({
               </Card>
             )}
 
+            {/* Achievement Tracking Section */}
+            {project.learningGoalsAchievements && Object.values(project.learningGoalsAchievements).some(achievements => Array.isArray(achievements) && achievements.length > 0) && (
+              <Card className="border-l-4 border-l-green-500">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    ✨ Goals Achievement Tracking
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    {Object.entries(project.learningGoalsAchievements).map(([competency, achievements]) => {
+                      if (!Array.isArray(achievements) || achievements.length === 0) return null;
+                      
+                      return (
+                        <div key={competency} className="space-y-3">
+                          <h4 className="font-semibold text-primary">{competency}</h4>
+                          {achievements.map((achievement, idx) => (
+                            <div key={idx} className="p-4 bg-muted/30 rounded-lg border space-y-3">
+                              <div className="flex items-start justify-between">
+                                <p className="text-sm font-medium flex-1">{achievement.goal}</p>
+                                <span className={`text-xs px-2 py-1 rounded-full ${
+                                  achievement.achieved 
+                                    ? "bg-green-500/20 text-green-700 dark:text-green-300" 
+                                    : "bg-amber-500/20 text-amber-700 dark:text-amber-300"
+                                }`}>
+                                  {achievement.achieved ? "✅ Achieved" : "🕓 In Progress"}
+                                </span>
+                              </div>
+                              
+                              {achievement.achieved && (
+                                <>
+                                  <div>
+                                    <p className="text-xs text-muted-foreground mb-2">Satisfaction Level</p>
+                                    <div className="flex items-center gap-3">
+                                      <div className="flex-1 bg-muted rounded-full h-2 overflow-hidden">
+                                        <div 
+                                          className="bg-green-500 h-full transition-all"
+                                          style={{ width: `${achievement.satisfaction}%` }}
+                                        />
+                                      </div>
+                                      <span className="text-sm font-medium">{achievement.satisfaction}%</span>
+                                    </div>
+                                  </div>
+                                  
+                                  {achievement.explanation && (
+                                    <div>
+                                      <p className="text-xs text-muted-foreground mb-1">Explanation</p>
+                                      <p className="text-sm">{achievement.explanation}</p>
+                                    </div>
+                                  )}
+                                </>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Key Tasks Section */}
             {project.keyTasks && project.keyTasks.length > 0 && (
               <Card className="border-l-4 border-l-secondary">
