@@ -49,6 +49,7 @@ export type Database = {
       }
       mentor_logs: {
         Row: {
+          achieved_goals: string[] | null
           competencies: string[] | null
           created_at: string | null
           date: string
@@ -60,6 +61,7 @@ export type Database = {
           mode: string | null
           outcomes: string | null
           project_id: string | null
+          resource_links: string | null
           selected_task_ids: string[] | null
           share_token: string | null
           title: string
@@ -67,6 +69,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          achieved_goals?: string[] | null
           competencies?: string[] | null
           created_at?: string | null
           date: string
@@ -78,6 +81,7 @@ export type Database = {
           mode?: string | null
           outcomes?: string | null
           project_id?: string | null
+          resource_links?: string | null
           selected_task_ids?: string[] | null
           share_token?: string | null
           title: string
@@ -85,6 +89,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          achieved_goals?: string[] | null
           competencies?: string[] | null
           created_at?: string | null
           date?: string
@@ -96,6 +101,7 @@ export type Database = {
           mode?: string | null
           outcomes?: string | null
           project_id?: string | null
+          resource_links?: string | null
           selected_task_ids?: string[] | null
           share_token?: string | null
           title?: string

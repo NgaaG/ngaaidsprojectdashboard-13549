@@ -450,13 +450,17 @@ const MentorLogs = () => {
                       <div className="flex gap-1">
                         <Button
                           variant="ghost"
-                          size="icon"
+                          size="sm"
+                          className="gap-1 text-xs"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleOpenEdit(log);
                           }}
+                          disabled={currentMode === "lecturer"}
+                          title={currentMode === "lecturer" ? "Lecturers cannot edit pre-session" : "Edit pre-session"}
                         >
-                          <Edit className="h-4 w-4" />
+                          <Edit className="h-3 w-3" />
+                          Edit Pre-Session
                         </Button>
                         <Button
                           variant="ghost"
@@ -484,31 +488,21 @@ const MentorLogs = () => {
                         </p>
                       )}
                       
-                      <div className="space-y-3 border-l-2 border-primary/30 pl-4 py-2">
-                        <div>
-                          <p className="text-sm font-semibold mb-1 text-primary">📝 Key Goals</p>
-                          <p className="text-sm text-muted-foreground whitespace-pre-line">
-                            {log.key_goals || "No goals set"}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold mb-1 text-primary">✅ Outcomes</p>
-                          <p className="text-sm text-muted-foreground whitespace-pre-line">
-                            {log.outcomes || "No outcomes recorded"}
-                          </p>
-                        </div>
+                      <div className="text-sm text-muted-foreground line-clamp-3 mb-3">
+                        {log.key_goals && <p>📝 {log.key_goals.substring(0, 80)}...</p>}
                       </div>
                       
-                      {log.mentor_comments && (
-                        <div className="border-t pt-3 mt-3 bg-accent/10 -mx-6 px-6 pb-3 border-l-2 border-accent/50">
-                          <p className="text-sm font-semibold mb-1 text-accent flex items-center gap-1">
-                            🎓 Lecturer Feedback
-                          </p>
-                          <p className="text-sm text-muted-foreground whitespace-pre-line">
-                            {log.mentor_comments}
-                          </p>
-                        </div>
-                      )}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCardClick(log);
+                        }}
+                      >
+                        View Full Mentor Log Session
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>

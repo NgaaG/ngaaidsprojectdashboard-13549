@@ -3,7 +3,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Edit, Calendar, X } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Edit, Calendar, ExternalLink } from "lucide-react";
 import { Competency } from "@/types";
 import { db } from "@/lib/supabaseHelpers";
 import { toast } from "sonner";
@@ -35,7 +36,12 @@ export const MentorLogDetailView = ({
   const [isEditing, setIsEditing] = useState(false);
   const [mentorComments, setMentorComments] = useState(log.mentor_comments || "");
   const [outcomes, setOutcomes] = useState(log.outcomes || "");
+  const [resourceLinks, setResourceLinks] = useState(log.resource_links || "");
+  const [achievedGoals, setAchievedGoals] = useState<string[]>(log.achieved_goals || []);
   const [loading, setLoading] = useState(false);
+
+  // Parse key goals into individual goals
+  const keyGoalsList = (log.key_goals || "").split('\n').filter((g: string) => g.trim());
 
   const handleSave = async () => {
     setLoading(true);
@@ -43,6 +49,8 @@ export const MentorLogDetailView = ({
       const { error } = await db.from("mentor_logs").update({
         outcomes,
         mentor_comments: mentorComments || null,
+        resource_links: resourceLinks || null,
+        achieved_goals: achievedGoals.length > 0 ? achievedGoals : null,
       }).eq("id", log.id);
 
       if (error) throw error;
@@ -55,6 +63,14 @@ export const MentorLogDetailView = ({
     } finally {
       setLoading(false);
     }
+  };
+
+  const toggleGoalAchievement = (goal: string) => {
+    setAchievedGoals(prev => 
+      prev.includes(goal) 
+        ? prev.filter(g => g !== goal)
+        : [...prev, goal]
+    );
   };
 
   const primaryColor = COMPETENCY_COLORS[log.competencies?.[0] || "Create"];
@@ -108,70 +124,96 @@ export const MentorLogDetailView = ({
             </div>
           )}
 
-          {/* Selected Tasks */}
+          {/* Selected Tasks Gallery */}
           {selectedTasks.length > 0 && (
             <div className="border rounded-lg p-5 bg-accent/10">
               <h3 className="font-semibold mb-4 flex items-center gap-2">
-                ✅ Referenced Tasks
+                ✅ Referenced Project Tasks
               </h3>
-              <div className="space-y-4">
+              <div className="space-y-5">
                 {selectedTasks.map((task) => (
-                  <div key={task.id} className="p-4 bg-background rounded-lg border">
-                    <div className="flex items-start justify-between mb-2">
-                      <h4 className="font-semibold">{task.name}</h4>
-                      <span className="text-xs px-2 py-1 rounded-full bg-primary/10">
-                        {task.status === "completed" ? "✅ Completed" : 
-                         task.status === "not-completed" ? "🕓 In Progress" : 
+                  <div key={task.id} className="p-5 bg-background rounded-lg border space-y-3">
+                    <div className="flex items-start justify-between">
+                      <h4 className="font-semibold text-base">{task.name}</h4>
+                      <span className={`text-xs px-2.5 py-1 rounded-full whitespace-nowrap ${
+                        task.status === "completed" ? "bg-green-500/20 text-green-700 dark:text-green-300" :
+                        task.status === "not-completed" ? "bg-amber-500/20 text-amber-700 dark:text-amber-300" :
+                        "bg-blue-500/20 text-blue-700 dark:text-blue-300"
+                      }`}>
+                        {task.status === "completed" ? "✅ Completed" :
+                         task.status === "not-completed" ? "🕓 In Sprint" :
                          "🔮 Future"}
                       </span>
                     </div>
-                    {task.competency && (
-                      <p className="text-xs text-muted-foreground mb-2">
-                        <span className="font-semibold">Competency:</span> {task.competency}
-                      </p>
-                    )}
-                    {task.learningGoal && (
-                      <p className="text-xs text-muted-foreground mb-3">
-                        <span className="font-semibold">Learning Goal:</span> {task.learningGoal}
-                      </p>
-                    )}
-                    {task.description && (
-                      <p className="text-sm mb-3">{task.description}</p>
+
+                    {/* Competency & Learning Goal */}
+                    {(task.competency || task.learningGoal) && (
+                      <div className="space-y-1 text-xs">
+                        {task.competency && (
+                          <p className="text-muted-foreground">
+                            <span className="font-semibold text-primary">Competency:</span> {task.competency}
+                          </p>
+                        )}
+                        {task.learningGoal && (
+                          <p className="text-muted-foreground">
+                            <span className="font-semibold text-primary">Learning Goal:</span> {task.learningGoal}
+                          </p>
+                        )}
+                      </div>
                     )}
                     
-                    {/* Task Files & Links */}
+                    {task.description && (
+                      <p className="text-sm text-muted-foreground">{task.description}</p>
+                    )}
+
+                    {/* Media Gallery */}
                     {task.files && task.files.length > 0 && (
-                      <div className="mt-3">
-                        <p className="text-xs font-semibold mb-2">Files:</p>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                      <div className="pt-3 border-t">
+                        <p className="text-xs font-semibold mb-3">Files & Media</p>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                           {task.files.map((file: any, idx: number) => (
                             <a
                               key={idx}
                               href={file.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-xs text-primary hover:underline truncate block p-2 bg-muted/20 rounded"
+                              className="group relative aspect-video rounded-lg overflow-hidden border hover:border-primary transition-colors"
                             >
-                              📎 {file.name}
+                              {file.url.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                                <img 
+                                  src={file.url} 
+                                  alt={file.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-muted">
+                                  <div className="text-center p-3">
+                                    <p className="text-xs truncate">{file.name}</p>
+                                  </div>
+                                </div>
+                              )}
                             </a>
                           ))}
                         </div>
                       </div>
                     )}
-                    
+
+                    {/* Links */}
                     {task.links && task.links.length > 0 && (
-                      <div className="mt-3">
-                        <p className="text-xs font-semibold mb-2">Links:</p>
-                        <div className="space-y-1">
+                      <div className="pt-3 border-t">
+                        <p className="text-xs font-semibold mb-2">Links</p>
+                        <div className="space-y-2">
                           {task.links.map((link: any, idx: number) => (
                             <a
                               key={idx}
                               href={link.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-xs text-primary hover:underline block"
+                              className="flex items-center gap-2 p-2.5 bg-muted/30 rounded border hover:border-primary transition-colors group text-sm"
                             >
-                              🔗 {link.title}
+                              <span className="text-primary hover:underline truncate">
+                                {link.title}
+                              </span>
                             </a>
                           ))}
                         </div>
@@ -186,17 +228,43 @@ export const MentorLogDetailView = ({
           {/* Pre-Session: Key Goals */}
           <div className="border-l-4 pl-4 py-2" style={{ borderColor: primaryColor }}>
             <div>
-              <p className="text-sm font-semibold mb-2 text-primary">📝 Key Goals (Pre-Session)</p>
-              <p className="text-sm text-muted-foreground whitespace-pre-line">
-                {log.key_goals || "No goals set"}
-              </p>
+              <p className="text-sm font-semibold mb-3 text-primary">📝 Key Goals (Pre-Session)</p>
+              {keyGoalsList.length > 0 ? (
+                <div className="space-y-2">
+                  {keyGoalsList.map((goal: string, idx: number) => {
+                    const isAchieved = achievedGoals.includes(goal.trim());
+                    return (
+                      <div key={idx} className="flex items-start gap-3 group">
+                        {isEditing && (
+                          <input
+                            type="checkbox"
+                            checked={isAchieved}
+                            onChange={() => toggleGoalAchievement(goal.trim())}
+                            className="mt-1 h-4 w-4 rounded border-gray-300"
+                          />
+                        )}
+                        <p className={`text-sm flex-1 ${isAchieved ? 'text-green-600 dark:text-green-400 line-through' : 'text-muted-foreground'}`}>
+                          {isAchieved && '✅ '}{goal.trim()}
+                        </p>
+                      </div>
+                    );
+                  })}
+                  {isEditing && (
+                    <p className="text-xs text-muted-foreground mt-3 italic">
+                      Check the goals that were achieved during the session
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">No goals set</p>
+              )}
             </div>
           </div>
 
           {/* Post-Session: Outcomes */}
           <div className="border-l-4 border-accent/50 pl-4 py-2">
             <div>
-              <p className="text-sm font-semibold mb-2 text-primary">✅ Outcomes / Notes (Post-Session)</p>
+              <p className="text-sm font-semibold mb-2 text-primary">✅ Key Outcomes (Ngaa) - Post-Session</p>
               {isEditing ? (
                 <Textarea
                   value={outcomes}
@@ -214,24 +282,43 @@ export const MentorLogDetailView = ({
           </div>
 
           {/* Lecturer Feedback */}
-          <div className="border rounded-lg p-5 bg-accent/5">
-            <div className="flex items-center gap-2 mb-3">
-              <p className="text-sm font-semibold text-accent">🎓 Lecturer Feedback</p>
-              {isEditing && <span className="text-xs text-muted-foreground">(editable)</span>}
+          <div className="border rounded-lg p-5 bg-accent/5 space-y-4">
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <p className="text-sm font-semibold text-accent">🎓 Lecturer Feedback</p>
+                {isEditing && <span className="text-xs text-muted-foreground">(editable)</span>}
+              </div>
+              {isEditing ? (
+                <Textarea
+                  value={mentorComments}
+                  onChange={(e) => setMentorComments(e.target.value)}
+                  placeholder="Add feedback, comments, or next-step recommendations..."
+                  rows={5}
+                  className="text-sm"
+                />
+              ) : (
+                <p className="text-sm text-muted-foreground whitespace-pre-line">
+                  {mentorComments || "No feedback provided yet"}
+                </p>
+              )}
             </div>
-            {isEditing ? (
-              <Textarea
-                value={mentorComments}
-                onChange={(e) => setMentorComments(e.target.value)}
-                placeholder="Add feedback, links, or next-step recommendations..."
-                rows={5}
-                className="text-sm"
-              />
-            ) : (
-              <p className="text-sm text-muted-foreground whitespace-pre-line">
-                {mentorComments || "No feedback provided yet"}
-              </p>
-            )}
+
+            <div>
+              <Label className="text-sm font-semibold text-accent mb-2 block">📚 Resource Links</Label>
+              {isEditing ? (
+                <Textarea
+                  value={resourceLinks}
+                  onChange={(e) => setResourceLinks(e.target.value)}
+                  placeholder="Add links to resources, articles, tutorials, etc.&#10;• https://example.com/resource1&#10;• https://example.com/resource2"
+                  rows={3}
+                  className="text-sm"
+                />
+              ) : (
+                <p className="text-sm text-muted-foreground whitespace-pre-line">
+                  {resourceLinks || "No resource links added yet"}
+                </p>
+              )}
+            </div>
           </div>
         </div>
 
@@ -244,6 +331,8 @@ export const MentorLogDetailView = ({
                 setIsEditing(false);
                 setMentorComments(log.mentor_comments || "");
                 setOutcomes(log.outcomes || "");
+                setResourceLinks(log.resource_links || "");
+                setAchievedGoals(log.achieved_goals || []);
               }}
             >
               Cancel

@@ -137,14 +137,24 @@ export const ProjectDetailView = ({
                 </CardHeader>
                 <CardContent>
                   <div className="grid gap-4">
-                    {Object.entries(project.learningGoals).map(([competency, goal]) => 
-                      goal ? (
+                    {Object.entries(project.learningGoals).map(([competency, goals]) => {
+                      if (!goals) return null;
+                      // Split goals by line breaks and filter out empty lines
+                      const goalsList = goals.split('\n').filter(g => g.trim());
+                      
+                      return (
                         <div key={competency} className="border-l-2 border-primary/30 pl-4 py-2">
-                          <p className="text-sm font-semibold text-primary mb-1">{competency}</p>
-                          <p className="text-sm text-muted-foreground whitespace-pre-line">{goal}</p>
+                          <p className="text-sm font-semibold text-primary mb-2">{competency}</p>
+                          <div className="space-y-1">
+                            {goalsList.map((goal, idx) => (
+                              <p key={idx} className="text-sm text-muted-foreground">
+                                <strong>• {goal.trim()}</strong>
+                              </p>
+                            ))}
+                          </div>
                         </div>
-                      ) : null
-                    )}
+                      );
+                    })}
                   </div>
                 </CardContent>
               </Card>
@@ -221,7 +231,7 @@ export const ProjectDetailView = ({
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-5">
+                   <div className="space-y-5">
                     {project.keyTasks.map((task) => (
                       <div key={task.id} className="p-5 bg-muted/30 rounded-lg border space-y-3">
                         <div className="flex items-start justify-between">
@@ -236,6 +246,22 @@ export const ProjectDetailView = ({
                              "🔮 Future"}
                           </span>
                         </div>
+
+                        {/* Competency & Learning Goal */}
+                        {(task.competency || task.learningGoal) && (
+                          <div className="space-y-1 text-xs">
+                            {task.competency && (
+                              <p className="text-muted-foreground">
+                                <span className="font-semibold text-primary">Competency:</span> {task.competency}
+                              </p>
+                            )}
+                            {task.learningGoal && (
+                              <p className="text-muted-foreground">
+                                <span className="font-semibold text-primary">Learning Goal:</span> {task.learningGoal}
+                              </p>
+                            )}
+                          </div>
+                        )}
                         
                         {task.description && (
                           <p className="text-sm text-muted-foreground">{task.description}</p>
