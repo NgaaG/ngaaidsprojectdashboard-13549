@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, Upload, X } from "lucide-react";
-import { Competency, Mode } from "@/types";
+import { Competency, Mode, LearningGoals } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 import { db } from "@/lib/supabaseHelpers";
 import { toast } from "sonner";
@@ -27,6 +27,13 @@ export const ProjectDialog = ({ onProjectCreated, currentMode }: ProjectDialogPr
   const [githubLink, setGithubLink] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
+  const [learningGoals] = useState<LearningGoals>({
+    Research: "",
+    Create: "",
+    Organize: "",
+    Communicate: "",
+    Learn: "",
+  });
 
   const toggleCompetency = (comp: Competency) => {
     setCompetencies(prev =>
@@ -79,6 +86,8 @@ export const ProjectDialog = ({ onProjectCreated, currentMode }: ProjectDialogPr
         visual_url: visualUrl || null,
         completion: 0,
         mode: currentMode,
+        learning_goals: learningGoals,
+        key_tasks: [],
       });
 
       if (error) throw error;
@@ -129,13 +138,13 @@ export const ProjectDialog = ({ onProjectCreated, currentMode }: ProjectDialogPr
 
           <div>
             <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe your project..."
-              rows={3}
-            />
+              <Textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Describe my project..."
+                rows={3}
+              />
           </div>
 
           <div>

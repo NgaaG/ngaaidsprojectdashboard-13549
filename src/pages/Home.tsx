@@ -4,10 +4,11 @@ import { ProjectCard } from "@/components/ProjectCard";
 import { ProjectDialog } from "@/components/ProjectDialog";
 import { ProjectDetailView } from "@/components/ProjectDetailView";
 import { ModeToggle } from "@/components/ModeToggle";
+import { OnboardingOverlay } from "@/components/OnboardingOverlay";
 import { getMode, setMode } from "@/lib/storage";
 import { Mode, Project, CompetencyProgress } from "@/types";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { Download, HelpCircle } from "lucide-react";
 import { db } from "@/lib/supabaseHelpers";
 import { exportToJSON, exportToCSV } from "@/lib/exportUtils";
 import { toast } from "sonner";
@@ -17,6 +18,7 @@ const Home = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [detailViewOpen, setDetailViewOpen] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const [competencyProgress, setCompetencyProgress] = useState<CompetencyProgress>({
     Research: 0,
     Create: 0,
@@ -25,6 +27,15 @@ const Home = () => {
     Learn: 0,
     "Unsure/TBD": 0,
   });
+
+  // Check if first visit
+  useEffect(() => {
+    const hasSeenOnboarding = sessionStorage.getItem("hasSeenOnboarding");
+    if (!hasSeenOnboarding) {
+      setShowOnboarding(true);
+      sessionStorage.setItem("hasSeenOnboarding", "true");
+    }
+  }, []);
 
   const loadData = async () => {
     // Load projects
@@ -45,8 +56,13 @@ const Home = () => {
         figmaLink: p.figma_link,
         githubLink: p.github_link,
         mode: p.mode || "personal",
+        learningGoals: p.learning_goals,
+        keyTasks: p.key_tasks,
       }));
-      setProjects(mappedProjects);
+      
+      // Filter projects by current mode
+      const filteredProjects = mappedProjects.filter(p => p.mode === mode);
+      setProjects(filteredProjects);
     }
 
     const filteredProjects = projects.filter(p => p.mode === mode);
@@ -70,7 +86,7 @@ const Home = () => {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [mode]);
 
   const handleModeChange = (newMode: Mode) => {
     setModeState(newMode);
@@ -139,8 +155,18 @@ const Home = () => {
 
   return (
     <div className="min-h-screen">
+      {/* Onboarding Overlay */}
+      {showOnboarding && (
+        <OnboardingOverlay
+          onSelectMode={(selectedMode) => {
+            handleModeChange(selectedMode);
+          }}
+          onClose={() => setShowOnboarding(false)}
+        />
+      )}
+
       {/* Animated gradient header */}
-      <header className="gradient-calm bg-[length:200%_200%] py-16 px-8 rounded-b-3xl shadow-lg">
+      <header className="gradient-calm bg-[length:200%_200%] py-16 px-8 rounded-b-3xl shadow-lg relative">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-8">
             <div>
@@ -148,10 +174,19 @@ const Home = () => {
                 ADHD Creative Studio
               </h1>
               <p className="text-muted-foreground">
-                Track your progress with clarity and calm
+                Track my progress with clarity and calm
               </p>
             </div>
             <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowOnboarding(true)}
+                className="rounded-full hover:bg-primary/20"
+                title="Show onboarding"
+              >
+                <HelpCircle className="h-5 w-5" />
+              </Button>
               <Button variant="outline" onClick={handleExportJSON} className="gap-2">
                 <Download className="h-4 w-4" />
                 Export JSON
@@ -187,7 +222,7 @@ const Home = () => {
           {projects.length === 0 ? (
             <div className="text-center py-16 bg-card rounded-2xl border-2 border-dashed">
               <p className="text-muted-foreground text-lg mb-4">
-                No projects yet. Create your first one!
+                No projects yet. Create my first one!
               </p>
               <ProjectDialog onProjectCreated={loadData} currentMode={mode} />
             </div>

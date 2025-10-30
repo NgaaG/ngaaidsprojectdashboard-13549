@@ -23,7 +23,7 @@ export const ModeToggle = ({ mode, onModeChange }: ModeToggleProps) => {
         variant={mode === "lecturer" ? "default" : "ghost"}
         size="sm"
         onClick={() => onModeChange("lecturer")}
-        className="rounded-full gap-2"
+        className="rounded-full gap-2 pulse-glow"
       >
         <GraduationCap className="h-4 w-4" />
         Lecturer

@@ -142,7 +142,9 @@ export type Database = {
           figma_link: string | null
           github_link: string | null
           id: string
+          key_tasks: Json | null
           last_reflection_mood: string | null
+          learning_goals: Json | null
           mode: string | null
           name: string
           updated_at: string | null
@@ -157,7 +159,9 @@ export type Database = {
           figma_link?: string | null
           github_link?: string | null
           id?: string
+          key_tasks?: Json | null
           last_reflection_mood?: string | null
+          learning_goals?: Json | null
           mode?: string | null
           name: string
           updated_at?: string | null
@@ -172,7 +176,9 @@ export type Database = {
           figma_link?: string | null
           github_link?: string | null
           id?: string
+          key_tasks?: Json | null
           last_reflection_mood?: string | null
+          learning_goals?: Json | null
           mode?: string | null
           name?: string
           updated_at?: string | null

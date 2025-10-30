@@ -28,6 +28,21 @@ export interface MentorLog {
   evidenceImages: string[];
 }
 
+export interface KeyTask {
+  id: string;
+  name: string;
+  status: "completed" | "not-completed" | "to-be-completed";
+  description?: string;
+}
+
+export interface LearningGoals {
+  Research: string;
+  Create: string;
+  Organize: string;
+  Communicate: string;
+  Learn: string;
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -39,6 +54,8 @@ export interface Project {
   figmaLink?: string;
   githubLink?: string;
   mode: Mode;
+  learningGoals?: LearningGoals;
+  keyTasks?: KeyTask[];
 }
 
 export interface CompetencyProgress {
