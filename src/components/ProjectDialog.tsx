@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Upload, X, Trash2, Link as LinkIcon } from "lucide-react";
 import { Competency, Mode, LearningGoals, KeyTask } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,11 +28,11 @@ export const ProjectDialog = ({ onProjectCreated, currentMode }: ProjectDialogPr
   const [competencies, setCompetencies] = useState<Competency[]>(["Create"]);
   const [loading, setLoading] = useState(false);
   const [learningGoals, setLearningGoals] = useState<LearningGoals>({
-    Research: "",
-    Create: "",
-    Organize: "",
-    Communicate: "",
-    Learn: "",
+    Research: [],
+    Create: [],
+    Organize: [],
+    Communicate: [],
+    Learn: [],
   });
   const [keyTasks, setKeyTasks] = useState<KeyTask[]>([]);
 
@@ -39,6 +40,21 @@ export const ProjectDialog = ({ onProjectCreated, currentMode }: ProjectDialogPr
     setCompetencies(prev =>
       prev.includes(comp) ? prev.filter(c => c !== comp) : [...prev, comp]
     );
+  };
+
+  const addGoalToCompetency = (comp: keyof LearningGoals, goal: string) => {
+    if (!goal.trim()) return;
+    setLearningGoals(prev => ({
+      ...prev,
+      [comp]: [...prev[comp], goal.trim()],
+    }));
+  };
+
+  const removeGoalFromCompetency = (comp: keyof LearningGoals, index: number) => {
+    setLearningGoals(prev => ({
+      ...prev,
+      [comp]: prev[comp].filter((_, i) => i !== index),
+    }));
   };
 
   const addTask = () => {
@@ -114,7 +130,6 @@ export const ProjectDialog = ({ onProjectCreated, currentMode }: ProjectDialogPr
     setLoading(true);
 
     try {
-      // Create project
       const { error } = await db.from("projects").insert({
         name,
         description,
@@ -144,13 +159,17 @@ export const ProjectDialog = ({ onProjectCreated, currentMode }: ProjectDialogPr
     setCompetencies(["Create"]);
     setKeyTasks([]);
     setLearningGoals({
-      Research: "",
-      Create: "",
-      Organize: "",
-      Communicate: "",
-      Learn: "",
+      Research: [],
+      Create: [],
+      Organize: [],
+      Communicate: [],
+      Learn: [],
     });
   };
+
+  const allLearningGoals = Object.entries(learningGoals).flatMap(([comp, goals]) => 
+    goals.map(goal => ({ competency: comp as Competency, goal }))
+  );
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -229,28 +248,58 @@ export const ProjectDialog = ({ onProjectCreated, currentMode }: ProjectDialogPr
             {/* Learning Goals Tab */}
             <TabsContent value="goals" className="space-y-4 mt-6">
               <p className="text-sm text-muted-foreground mb-4">
-                What do you aim to learn or achieve with each competency?
+                Add learning goals for each competency. Each goal will appear as a bullet point.
               </p>
               
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {COMPETENCIES.filter(c => c !== "Unsure/TBD").map((comp) => (
-                  <div key={comp}>
-                    <Label htmlFor={`goal-${comp}`} className="text-sm font-semibold">
-                      {comp}
-                    </Label>
-                    <Textarea
-                      id={`goal-${comp}`}
-                      value={learningGoals[comp as keyof LearningGoals] || ""}
-                      onChange={(e) => {
-                        setLearningGoals({
-                          ...learningGoals,
-                          [comp]: e.target.value,
-                        });
-                      }}
-                      placeholder={`Learning goals for ${comp}...`}
-                      rows={2}
-                      className="mt-1.5 text-sm"
-                    />
+                  <div key={comp} className="border rounded-lg p-4 bg-muted/20">
+                    <Label className="text-sm font-semibold mb-2 block">{comp}</Label>
+                    
+                    {learningGoals[comp as keyof LearningGoals].map((goal, index) => (
+                      <div key={index} className="flex items-start gap-2 mb-2 p-2 bg-background rounded">
+                        <span className="font-bold text-sm mt-1">•</span>
+                        <span className="flex-1 text-sm">{goal}</span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeGoalFromCompetency(comp as keyof LearningGoals, index)}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
+                    
+                    <div className="flex gap-2 mt-2">
+                      <Input
+                        id={`new-goal-${comp}`}
+                        placeholder="Add a learning goal..."
+                        className="text-sm"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            const input = e.currentTarget;
+                            addGoalToCompetency(comp as keyof LearningGoals, input.value);
+                            input.value = "";
+                          }
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const input = document.getElementById(`new-goal-${comp}`) as HTMLInputElement;
+                          if (input) {
+                            addGoalToCompetency(comp as keyof LearningGoals, input.value);
+                            input.value = "";
+                          }
+                        }}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -269,8 +318,45 @@ export const ProjectDialog = ({ onProjectCreated, currentMode }: ProjectDialogPr
               </div>
 
               <div className="space-y-4">
-                {keyTasks.map((task, taskIndex) => (
+                {keyTasks.map((task) => (
                   <div key={task.id} className="p-5 bg-muted/30 rounded-lg border space-y-4">
+                    {/* Competency and Learning Goal Dropdowns */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label className="text-xs mb-1.5 block">Competency</Label>
+                        <Select
+                          value={task.competency || ""}
+                          onValueChange={(value) => updateTask(task.id, "competency", value as Competency)}
+                        >
+                          <SelectTrigger className="text-sm">
+                            <SelectValue placeholder="Select competency..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {COMPETENCIES.filter(c => c !== "Unsure/TBD").map((comp) => (
+                              <SelectItem key={comp} value={comp}>{comp}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label className="text-xs mb-1.5 block">Learning Goal</Label>
+                        <Select
+                          value={task.learningGoal || ""}
+                          onValueChange={(value) => updateTask(task.id, "learningGoal", value)}
+                          disabled={!task.competency}
+                        >
+                          <SelectTrigger className="text-sm">
+                            <SelectValue placeholder="Select learning goal..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {task.competency && learningGoals[task.competency as keyof LearningGoals].map((goal, idx) => (
+                              <SelectItem key={idx} value={goal}>{goal}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
                     <div className="flex justify-between items-start gap-2">
                       <Input
                         value={task.name}
@@ -431,19 +517,30 @@ export const ProjectDialog = ({ onProjectCreated, currentMode }: ProjectDialogPr
                 ))}
 
                 {keyTasks.length === 0 && (
-                  <div className="text-center py-12 text-muted-foreground bg-muted/30 rounded-lg border-2 border-dashed">
-                    No tasks yet. Click "Add Task" to create one.
+                  <div className="text-center py-8 border-2 border-dashed rounded-lg">
+                    <p className="text-sm text-muted-foreground">No tasks added yet</p>
+                    <Button type="button" variant="ghost" onClick={addTask} className="mt-2">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Your First Task
+                    </Button>
                   </div>
                 )}
               </div>
             </TabsContent>
           </Tabs>
 
-          <div className="flex justify-end gap-3 pt-6 border-t">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setOpen(false);
+                resetForm();
+              }}
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading || competencies.length === 0} className="px-6">
+            <Button type="submit" disabled={loading || competencies.length === 0}>
               {loading ? "Creating..." : "Create Project"}
             </Button>
           </div>

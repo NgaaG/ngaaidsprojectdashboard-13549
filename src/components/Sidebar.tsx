@@ -4,8 +4,8 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { icon: Home, label: "Home", path: "/" },
-  { icon: MessageCircle, label: "Reflections", path: "/reflections" },
   { icon: Compass, label: "Mentor Logs", path: "/mentor-logs" },
+  { icon: MessageCircle, label: "Reflections", path: "/reflections" },
   { icon: TrendingUp, label: "Growth", path: "/growth" },
   { icon: Moon, label: "Focus", path: "/focus" },
 ];

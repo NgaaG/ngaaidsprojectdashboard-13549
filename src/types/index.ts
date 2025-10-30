@@ -26,6 +26,7 @@ export interface MentorLog {
   outcomes: string;
   competency: Competency;
   evidenceImages: string[];
+  selectedTaskIds?: string[];
 }
 
 export interface KeyTask {
@@ -35,14 +36,31 @@ export interface KeyTask {
   description?: string;
   files?: { url: string; name: string }[];
   links?: { url: string; title: string }[];
+  competency?: Competency;
+  learningGoal?: string;
+}
+
+export interface LearningGoalAchievement {
+  goal: string;
+  achieved: boolean;
+  satisfaction: number; // 0-100
+  explanation: string;
 }
 
 export interface LearningGoals {
-  Research: string;
-  Create: string;
-  Organize: string;
-  Communicate: string;
-  Learn: string;
+  Research: string[];
+  Create: string[];
+  Organize: string[];
+  Communicate: string[];
+  Learn: string[];
+}
+
+export interface LearningGoalsAchievements {
+  Research: LearningGoalAchievement[];
+  Create: LearningGoalAchievement[];
+  Organize: LearningGoalAchievement[];
+  Communicate: LearningGoalAchievement[];
+  Learn: LearningGoalAchievement[];
 }
 
 export interface Project {
@@ -57,6 +75,7 @@ export interface Project {
   githubLink?: string;
   mode: Mode;
   learningGoals?: LearningGoals;
+  learningGoalsAchievements?: LearningGoalsAchievements;
   keyTasks?: KeyTask[];
 }
 
