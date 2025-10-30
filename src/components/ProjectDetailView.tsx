@@ -70,8 +70,8 @@ export const ProjectDetailView = ({
           <DialogHeader>
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <DialogTitle className="text-2xl">{project.name}</DialogTitle>
-                <p className="text-sm text-muted-foreground mt-1">
+                <DialogTitle className="text-2xl mb-1">{project.name}</DialogTitle>
+                <p className="text-sm text-muted-foreground">
                   {project.competencies.join(", ")} • {project.completion}% Complete
                 </p>
               </div>
@@ -87,45 +87,112 @@ export const ProjectDetailView = ({
             </div>
           </DialogHeader>
 
-          <div className="space-y-6">
-            {/* Project Overview */}
-            <Card>
+          <div className="space-y-6 mt-6">
+            {/* Project Overview Section */}
+            <Card className="border-l-4 border-l-primary">
               <CardHeader>
-                <CardTitle>Project Overview</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  📋 Project Overview
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {project.visualUrl && (
-                  <div className="rounded-lg overflow-hidden">
+                  <div className="rounded-lg overflow-hidden border">
                     <img
                       src={project.visualUrl}
                       alt={project.name}
-                      className="w-full h-48 object-cover"
+                      className="w-full h-64 object-cover"
                     />
                   </div>
                 )}
                 {project.description && (
-                  <p className="text-muted-foreground">{project.description}</p>
+                  <div>
+                    <p className="text-sm font-medium mb-2">Description</p>
+                    <p className="text-muted-foreground">{project.description}</p>
+                  </div>
                 )}
-                <div className="flex gap-4">
-                  {project.figmaLink && (
-                    <Button variant="outline" size="sm" asChild>
-                      <a href={project.figmaLink} target="_blank" rel="noopener noreferrer">
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        Figma
-                      </a>
-                    </Button>
-                  )}
-                  {project.githubLink && (
-                    <Button variant="outline" size="sm" asChild>
-                      <a href={project.githubLink} target="_blank" rel="noopener noreferrer">
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        GitHub
-                      </a>
-                    </Button>
-                  )}
-                </div>
+                {(project.figmaLink || project.githubLink) && (
+                  <div>
+                    <p className="text-sm font-medium mb-3">Project Links</p>
+                    <div className="flex gap-3">
+                      {project.figmaLink && (
+                        <Button variant="outline" size="sm" asChild>
+                          <a href={project.figmaLink} target="_blank" rel="noopener noreferrer">
+                            <ExternalLink className="h-4 w-4 mr-2" />
+                            Figma
+                          </a>
+                        </Button>
+                      )}
+                      {project.githubLink && (
+                        <Button variant="outline" size="sm" asChild>
+                          <a href={project.githubLink} target="_blank" rel="noopener noreferrer">
+                            <ExternalLink className="h-4 w-4 mr-2" />
+                            GitHub
+                          </a>
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
+
+            {/* Learning Goals Section */}
+            {project.learningGoals && Object.values(project.learningGoals).some(g => g) && (
+              <Card className="border-l-4 border-l-accent">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    🎯 Learning Goals
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4">
+                    {Object.entries(project.learningGoals).map(([competency, goal]) => 
+                      goal ? (
+                        <div key={competency} className="border-l-2 border-primary/30 pl-4 py-2">
+                          <p className="text-sm font-semibold text-primary mb-1">{competency}</p>
+                          <p className="text-sm text-muted-foreground whitespace-pre-line">{goal}</p>
+                        </div>
+                      ) : null
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Key Tasks Section */}
+            {project.keyTasks && project.keyTasks.length > 0 && (
+              <Card className="border-l-4 border-l-secondary">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    ✅ Key Tasks
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {project.keyTasks.map((task) => (
+                      <div key={task.id} className="p-4 bg-muted/50 rounded-lg border">
+                        <div className="flex items-start justify-between mb-2">
+                          <p className="font-medium">{task.name}</p>
+                          <span className={`text-xs px-2 py-1 rounded-full ${
+                            task.status === "completed" ? "bg-green-500/20 text-green-700 dark:text-green-300" :
+                            task.status === "not-completed" ? "bg-amber-500/20 text-amber-700 dark:text-amber-300" :
+                            "bg-blue-500/20 text-blue-700 dark:text-blue-300"
+                          }`}>
+                            {task.status === "completed" ? "✅ Completed" :
+                             task.status === "not-completed" ? "🕓 In Sprint" :
+                             "🔮 Future"}
+                          </span>
+                        </div>
+                        {task.description && (
+                          <p className="text-sm text-muted-foreground">{task.description}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Mode-specific content */}
             <Tabs defaultValue={mode === "personal" ? "reflections" : "mentor-logs"}>

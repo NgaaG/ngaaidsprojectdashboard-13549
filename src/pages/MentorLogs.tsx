@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Trash2, Calendar } from "lucide-react";
+import { Plus, Trash2, Calendar, Edit } from "lucide-react";
 import { Competency, Mode } from "@/types";
 import { db } from "@/lib/supabaseHelpers";
 import { toast } from "sonner";
@@ -41,6 +41,7 @@ const MentorLogs = () => {
   const [projects, setProjects] = useState<any[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentMode, setCurrentMode] = useState<Mode>("lecturer");
+  const [editingLog, setEditingLog] = useState<any | null>(null);
   const [newLog, setNewLog] = useState({
     date: new Date().toISOString().split("T")[0],
     title: "",
@@ -81,6 +82,20 @@ const MentorLogs = () => {
     }));
   };
 
+  const handleOpenEdit = (log: any) => {
+    setEditingLog(log);
+    setNewLog({
+      date: log.date,
+      title: log.title,
+      keyGoals: log.key_goals || "",
+      outcomes: log.outcomes || "",
+      mentorComments: log.mentor_comments || "",
+      competencies: log.competencies || ["Create"],
+      projectId: log.project_id,
+    });
+    setIsDialogOpen(true);
+  };
+
   const handleSave = async () => {
     if (!newLog.title.trim()) {
       toast.error("Please add a title");
@@ -93,21 +108,39 @@ const MentorLogs = () => {
     }
 
     try {
-      const { error } = await db.from("mentor_logs").insert({
-        date: newLog.date,
-        title: newLog.title,
-        key_goals: newLog.keyGoals,
-        outcomes: newLog.outcomes,
-        mentor_comments: newLog.mentorComments || null,
-        competencies: newLog.competencies,
-        project_id: newLog.projectId,
-        mode: currentMode,
-      });
+      if (editingLog) {
+        // Update existing log
+        const { error } = await db.from("mentor_logs").update({
+          date: newLog.date,
+          title: newLog.title,
+          key_goals: newLog.keyGoals,
+          outcomes: newLog.outcomes,
+          mentor_comments: newLog.mentorComments || null,
+          competencies: newLog.competencies,
+          project_id: newLog.projectId,
+        }).eq("id", editingLog.id);
 
-      if (error) throw error;
+        if (error) throw error;
+        toast.success("Mentor log updated!");
+      } else {
+        // Create new log
+        const { error } = await db.from("mentor_logs").insert({
+          date: newLog.date,
+          title: newLog.title,
+          key_goals: newLog.keyGoals,
+          outcomes: newLog.outcomes,
+          mentor_comments: newLog.mentorComments || null,
+          competencies: newLog.competencies,
+          project_id: newLog.projectId,
+          mode: currentMode,
+        });
 
-      toast.success("Mentor log saved!");
+        if (error) throw error;
+        toast.success("Mentor log saved!");
+      }
+
       setIsDialogOpen(false);
+      setEditingLog(null);
       loadData();
 
       // Reset form
@@ -159,9 +192,11 @@ const MentorLogs = () => {
                   New Mentor Log
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>Add New Mentor Log ({currentMode === "personal" ? "Personal" : "Lecture"} Mode)</DialogTitle>
+                  <DialogTitle>
+                    {editingLog ? "Edit Mentor Log" : `Add New Mentor Log (${currentMode === "personal" ? "Personal" : "Lecture"} Mode)`}
+                  </DialogTitle>
                 </DialogHeader>
                 
                 <div className="space-y-4 py-4">
@@ -228,46 +263,79 @@ const MentorLogs = () => {
                     />
                   </div>
 
-                  <div>
-                    <Label htmlFor="goals">Key Goals</Label>
-                    <Textarea
-                      placeholder="What were the main goals for this session?"
-                      value={newLog.keyGoals}
-                      onChange={(e) => setNewLog({ ...newLog, keyGoals: e.target.value })}
-                      className="min-h-24"
-                    />
+                  <div className="space-y-6 border rounded-lg p-5 bg-muted/20">
+                    <div className="border-b pb-3">
+                      <h3 className="font-semibold text-sm flex items-center gap-2">
+                        📝 Student Section
+                      </h3>
+                      <p className="text-xs text-muted-foreground mt-1">Pre-session goals and post-session reflections</p>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="goals" className="text-sm font-medium">Key Goals (Pre-Session)</Label>
+                      <p className="text-xs text-muted-foreground mb-2">What do you hope to achieve in this session?</p>
+                      <Textarea
+                        placeholder="• Goal 1&#10;• Goal 2&#10;• Goal 3"
+                        value={newLog.keyGoals}
+                        onChange={(e) => setNewLog({ ...newLog, keyGoals: e.target.value })}
+                        className="min-h-28 font-mono text-sm"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="outcomes" className="text-sm font-medium">Outcomes / Notes (Post-Session)</Label>
+                      <p className="text-xs text-muted-foreground mb-2">What did you learn, achieve, or discover?</p>
+                      <Textarea
+                        placeholder="• Outcome 1&#10;• Outcome 2&#10;• Next steps..."
+                        value={newLog.outcomes}
+                        onChange={(e) => setNewLog({ ...newLog, outcomes: e.target.value })}
+                        className="min-h-28 font-mono text-sm"
+                      />
+                    </div>
                   </div>
 
-                  <div>
-                    <Label htmlFor="outcomes">Outcomes</Label>
-                    <Textarea
-                      placeholder="What did you learn or achieve?"
-                      value={newLog.outcomes}
-                      onChange={(e) => setNewLog({ ...newLog, outcomes: e.target.value })}
-                      className="min-h-24"
-                    />
-                  </div>
-
-                  <div className="border-t pt-4">
-                    <Label htmlFor="mentorComments">Mentor Comments/Notes/Suggestions (optional)</Label>
-                    <Textarea
-                      placeholder="Additional feedback, challenges, or suggestions from your mentor..."
-                      value={newLog.mentorComments}
-                      onChange={(e) => setNewLog({ ...newLog, mentorComments: e.target.value })}
-                      className="min-h-32 bg-accent/10"
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      This section is for your lecturer/mentor to add notes based on the consultation outcome
-                    </p>
+                  <div className="space-y-4 border rounded-lg p-5 bg-accent/5">
+                    <div className="border-b pb-3">
+                      <h3 className="font-semibold text-sm flex items-center gap-2">
+                        🎓 Lecturer Section
+                      </h3>
+                      <p className="text-xs text-muted-foreground mt-1">Mentor feedback, resources, and guidance</p>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="mentorComments" className="text-sm font-medium">Comments / Resources / Suggestions</Label>
+                      <p className="text-xs text-muted-foreground mb-2">Add feedback, links, or next-step recommendations</p>
+                      <Textarea
+                        placeholder="• Feedback on progress&#10;• Suggested resources: [link]&#10;• Next steps or challenges to consider..."
+                        value={newLog.mentorComments}
+                        onChange={(e) => setNewLog({ ...newLog, mentorComments: e.target.value })}
+                        className="min-h-32 font-mono text-sm"
+                      />
+                    </div>
                   </div>
                 </div>
 
                 <div className="flex justify-end gap-2">
-                  <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setIsDialogOpen(false);
+                      setEditingLog(null);
+                      setNewLog({
+                        date: new Date().toISOString().split("T")[0],
+                        title: "",
+                        keyGoals: "",
+                        outcomes: "",
+                        mentorComments: "",
+                        competencies: ["Create"],
+                        projectId: null,
+                      });
+                    }}
+                  >
                     Cancel
                   </Button>
                   <Button onClick={handleSave} disabled={newLog.competencies.length === 0}>
-                    Save Log
+                    {editingLog ? "Update Log" : "Save Log"}
                   </Button>
                 </div>
               </DialogContent>
@@ -319,13 +387,22 @@ const MentorLogs = () => {
                         </div>
                         <CardTitle className="text-lg">{log.title}</CardTitle>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDelete(log.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleOpenEdit(log)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDelete(log.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -334,28 +411,34 @@ const MentorLogs = () => {
                       {new Date(log.date).toLocaleDateString()}
                     </div>
                     
-                    <div className="space-y-3">
-                      <div>
-                        {log.projects && (
-                          <p className="text-xs text-muted-foreground mb-2">
-                            Project: {log.projects.name}
+                    <div className="space-y-4">
+                      {log.projects && (
+                        <p className="text-xs text-muted-foreground flex items-center gap-1">
+                          📁 Project: <span className="font-medium">{log.projects.name}</span>
+                        </p>
+                      )}
+                      
+                      <div className="space-y-3 border-l-2 border-primary/30 pl-4 py-2">
+                        <div>
+                          <p className="text-sm font-semibold mb-1 text-primary">📝 Key Goals</p>
+                          <p className="text-sm text-muted-foreground whitespace-pre-line">
+                            {log.key_goals || "No goals set"}
                           </p>
-                        )}
-                        <p className="text-sm font-medium mb-1">Key Goals:</p>
-                        <p className="text-sm text-muted-foreground line-clamp-2">
-                          {log.key_goals}
-                        </p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold mb-1 text-primary">✅ Outcomes</p>
+                          <p className="text-sm text-muted-foreground whitespace-pre-line">
+                            {log.outcomes || "No outcomes recorded"}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm font-medium mb-1">Outcomes:</p>
-                        <p className="text-sm text-muted-foreground line-clamp-2">
-                          {log.outcomes}
-                        </p>
-                      </div>
+                      
                       {log.mentor_comments && (
-                        <div className="border-t pt-3 mt-3 bg-accent/5 -mx-6 px-6 pb-3">
-                          <p className="text-sm font-medium mb-1 text-accent">Mentor Notes:</p>
-                          <p className="text-sm text-muted-foreground line-clamp-3">
+                        <div className="border-t pt-3 mt-3 bg-accent/10 -mx-6 px-6 pb-3 border-l-2 border-accent/50">
+                          <p className="text-sm font-semibold mb-1 text-accent flex items-center gap-1">
+                            🎓 Lecturer Feedback
+                          </p>
+                          <p className="text-sm text-muted-foreground whitespace-pre-line">
                             {log.mentor_comments}
                           </p>
                         </div>

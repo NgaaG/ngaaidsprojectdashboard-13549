@@ -27,7 +27,7 @@ export const ProjectDialog = ({ onProjectCreated, currentMode }: ProjectDialogPr
   const [githubLink, setGithubLink] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
-  const [learningGoals] = useState<LearningGoals>({
+  const [learningGoals, setLearningGoals] = useState<LearningGoals>({
     Research: "",
     Create: "",
     Organize: "",
@@ -110,6 +110,13 @@ export const ProjectDialog = ({ onProjectCreated, currentMode }: ProjectDialogPr
     setFigmaLink("");
     setGithubLink("");
     setFiles([]);
+    setLearningGoals({
+      Research: "",
+      Create: "",
+      Organize: "",
+      Communicate: "",
+      Learn: "",
+    });
   };
 
   return (
@@ -120,127 +127,186 @@ export const ProjectDialog = ({ onProjectCreated, currentMode }: ProjectDialogPr
           New Project
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create New Project</DialogTitle>
+          <p className="text-sm text-muted-foreground mt-1">
+            Set up your project with clear goals, tasks, and resources
+          </p>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="name">Project Name</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              placeholder="Enter project name"
-            />
-          </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Basic Info Section */}
+          <div className="space-y-4 border rounded-lg p-5 bg-muted/20">
+            <h3 className="font-semibold flex items-center gap-2 text-base">
+              📋 Basic Information
+            </h3>
+            
+            <div>
+              <Label htmlFor="name">Project Name</Label>
+              <Input
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                placeholder="Enter project name"
+                className="mt-1.5"
+              />
+            </div>
 
-          <div>
-            <Label htmlFor="description">Description</Label>
+            <div>
+              <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Describe my project..."
                 rows={3}
+                className="mt-1.5"
               />
-          </div>
-
-          <div>
-            <Label>CMD Competencies (select all that apply)</Label>
-            <div className="grid grid-cols-2 gap-3 mt-3 p-4 bg-muted/50 rounded-lg">
-              {COMPETENCIES.map((comp) => (
-                <div key={comp} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={comp}
-                    checked={competencies.includes(comp)}
-                    onCheckedChange={() => toggleCompetency(comp)}
-                  />
-                  <label
-                    htmlFor={comp}
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                  >
-                    {comp}
-                  </label>
-                </div>
-              ))}
             </div>
-            {competencies.length === 0 && (
-              <p className="text-xs text-destructive mt-2">Select at least one competency</p>
-            )}
-          </div>
 
-          <div>
-            <Label htmlFor="figma">Figma Link (optional)</Label>
-            <Input
-              id="figma"
-              type="url"
-              value={figmaLink}
-              onChange={(e) => setFigmaLink(e.target.value)}
-              placeholder="https://figma.com/..."
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="github">GitHub Link (optional)</Label>
-            <Input
-              id="github"
-              type="url"
-              value={githubLink}
-              onChange={(e) => setGithubLink(e.target.value)}
-              placeholder="https://github.com/..."
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="files">Upload Files (Images, Videos, PDFs)</Label>
-            <div className="mt-2">
-              <label htmlFor="files" className="cursor-pointer">
-                <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary transition-colors">
-                  <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">
-                    Click to upload or drag and drop
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Images, videos, documents
-                  </p>
-                </div>
-                <Input
-                  id="files"
-                  type="file"
-                  multiple
-                  className="hidden"
-                  onChange={handleFileChange}
-                  accept="image/*,video/*,.pdf,.doc,.docx"
-                />
-              </label>
-            </div>
-            
-            {files.length > 0 && (
-              <div className="mt-4 space-y-2">
-                {files.map((file, index) => (
-                  <div key={index} className="flex items-center justify-between p-2 bg-muted rounded">
-                    <span className="text-sm truncate flex-1">{file.name}</span>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeFile(index)}
+            <div>
+              <Label>CMD Competencies (select all that apply)</Label>
+              <div className="grid grid-cols-2 gap-3 mt-3 p-4 bg-background rounded-lg border">
+                {COMPETENCIES.map((comp) => (
+                  <div key={comp} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={comp}
+                      checked={competencies.includes(comp)}
+                      onCheckedChange={() => toggleCompetency(comp)}
+                    />
+                    <label
+                      htmlFor={comp}
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                     >
-                      <X className="h-4 w-4" />
-                    </Button>
+                      {comp}
+                    </label>
                   </div>
                 ))}
               </div>
-            )}
+              {competencies.length === 0 && (
+                <p className="text-xs text-destructive mt-2">Select at least one competency</p>
+              )}
+            </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-4">
+          {/* Learning Goals Section */}
+          <div className="space-y-4 border rounded-lg p-5 bg-primary/5">
+            <h3 className="font-semibold flex items-center gap-2 text-base">
+              🎯 Learning Goals
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              What do you aim to learn or achieve with each competency?
+            </p>
+            
+            <div className="grid gap-4">
+              {COMPETENCIES.filter(c => c !== "Unsure/TBD").map((comp) => (
+                <div key={comp}>
+                  <Label htmlFor={`goal-${comp}`} className="text-sm font-semibold">
+                    {comp}
+                  </Label>
+                  <Textarea
+                    id={`goal-${comp}`}
+                    value={learningGoals[comp as keyof LearningGoals] || ""}
+                    onChange={(e) => {
+                      setLearningGoals({
+                        ...learningGoals,
+                        [comp]: e.target.value,
+                      });
+                    }}
+                    placeholder={`Learning goals for ${comp}...`}
+                    rows={2}
+                    className="mt-1.5 text-sm"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Key Tasks & Resources Section */}
+          <div className="space-y-4 border rounded-lg p-5 bg-accent/5">
+            <h3 className="font-semibold flex items-center gap-2 text-base">
+              ✅ Key Tasks & Resources
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              Upload project files, add links to Figma, GitHub, or other resources
+            </p>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="figma">Figma Link</Label>
+                <Input
+                  id="figma"
+                  type="url"
+                  value={figmaLink}
+                  onChange={(e) => setFigmaLink(e.target.value)}
+                  placeholder="https://figma.com/..."
+                  className="mt-1.5"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="github">GitHub Link</Label>
+                <Input
+                  id="github"
+                  type="url"
+                  value={githubLink}
+                  onChange={(e) => setGithubLink(e.target.value)}
+                  placeholder="https://github.com/..."
+                  className="mt-1.5"
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="files">Project Files & Media</Label>
+              <div className="mt-2">
+                <label htmlFor="files" className="cursor-pointer">
+                  <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary transition-colors bg-background">
+                    <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">
+                      Click to upload or drag and drop
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Images, videos, documents
+                    </p>
+                  </div>
+                  <Input
+                    id="files"
+                    type="file"
+                    multiple
+                    className="hidden"
+                    onChange={handleFileChange}
+                    accept="image/*,video/*,.pdf,.doc,.docx"
+                  />
+                </label>
+              </div>
+              
+              {files.length > 0 && (
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  {files.map((file, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-background rounded-lg border">
+                      <span className="text-sm truncate flex-1">{file.name}</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeFile(index)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-6 border-t">
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading || competencies.length === 0}>
+            <Button type="submit" disabled={loading || competencies.length === 0} className="px-6">
               {loading ? "Creating..." : "Create Project"}
             </Button>
           </div>
