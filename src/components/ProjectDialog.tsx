@@ -6,8 +6,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Upload, X } from "lucide-react";
-import { Competency, Mode, LearningGoals } from "@/types";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Plus, Upload, X, Trash2, Link as LinkIcon } from "lucide-react";
+import { Competency, Mode, LearningGoals, KeyTask } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 import { db } from "@/lib/supabaseHelpers";
 import { toast } from "sonner";
@@ -24,9 +25,6 @@ export const ProjectDialog = ({ onProjectCreated, currentMode }: ProjectDialogPr
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [competencies, setCompetencies] = useState<Competency[]>(["Create"]);
-  const [figmaLink, setFigmaLink] = useState("");
-  const [githubLink, setGithubLink] = useState("");
-  const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
   const [learningGoals, setLearningGoals] = useState<LearningGoals>({
     Research: "",
@@ -35,6 +33,7 @@ export const ProjectDialog = ({ onProjectCreated, currentMode }: ProjectDialogPr
     Communicate: "",
     Learn: "",
   });
+  const [keyTasks, setKeyTasks] = useState<KeyTask[]>([]);
 
   const toggleCompetency = (comp: Competency) => {
     setCompetencies(prev =>
@@ -42,14 +41,72 @@ export const ProjectDialog = ({ onProjectCreated, currentMode }: ProjectDialogPr
     );
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setFiles(Array.from(e.target.files));
-    }
+  const addTask = () => {
+    setKeyTasks([
+      ...keyTasks,
+      {
+        id: Date.now().toString(),
+        name: "",
+        status: "not-completed",
+        description: "",
+        files: [],
+        links: [],
+      },
+    ]);
   };
 
-  const removeFile = (index: number) => {
-    setFiles(files.filter((_, i) => i !== index));
+  const updateTask = (id: string, field: keyof KeyTask, value: any) => {
+    setKeyTasks(keyTasks.map(task => task.id === id ? { ...task, [field]: value } : task));
+  };
+
+  const removeTask = (id: string) => {
+    setKeyTasks(keyTasks.filter(task => task.id !== id));
+  };
+
+  const handleTaskFileUpload = async (taskId: string, files: FileList) => {
+    const task = keyTasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    const uploadedFiles = [];
+    for (const file of Array.from(files)) {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from("project-files")
+        .upload(fileName, file);
+
+      if (uploadError) {
+        toast.error(`Failed to upload ${file.name}`);
+        continue;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("project-files")
+        .getPublicUrl(fileName);
+      
+      uploadedFiles.push({ url: publicUrl, name: file.name });
+    }
+
+    updateTask(taskId, "files", [...(task.files || []), ...uploadedFiles]);
+  };
+
+  const removeTaskFile = (taskId: string, fileIndex: number) => {
+    const task = keyTasks.find(t => t.id === taskId);
+    if (!task || !task.files) return;
+    updateTask(taskId, "files", task.files.filter((_, i) => i !== fileIndex));
+  };
+
+  const addTaskLink = (taskId: string, url: string, title: string) => {
+    const task = keyTasks.find(t => t.id === taskId);
+    if (!task || !url) return;
+    updateTask(taskId, "links", [...(task.links || []), { url, title: title || url }]);
+  };
+
+  const removeTaskLink = (taskId: string, linkIndex: number) => {
+    const task = keyTasks.find(t => t.id === taskId);
+    if (!task || !task.links) return;
+    updateTask(taskId, "links", task.links.filter((_, i) => i !== linkIndex));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -57,38 +114,15 @@ export const ProjectDialog = ({ onProjectCreated, currentMode }: ProjectDialogPr
     setLoading(true);
 
     try {
-      // Upload files to storage
-      let visualUrl = "";
-      if (files.length > 0) {
-        const file = files[0]; // Use first file as visual
-        const fileExt = file.name.split(".").pop();
-        const fileName = `${Date.now()}.${fileExt}`;
-        
-        const { error: uploadError, data } = await supabase.storage
-          .from("project-files")
-          .upload(fileName, file);
-
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from("project-files")
-          .getPublicUrl(fileName);
-        
-        visualUrl = publicUrl;
-      }
-
       // Create project
       const { error } = await db.from("projects").insert({
         name,
         description,
         competencies,
-        figma_link: figmaLink || null,
-        github_link: githubLink || null,
-        visual_url: visualUrl || null,
         completion: 0,
         mode: currentMode,
         learning_goals: learningGoals,
-        key_tasks: [],
+        key_tasks: keyTasks,
       });
 
       if (error) throw error;
@@ -108,9 +142,7 @@ export const ProjectDialog = ({ onProjectCreated, currentMode }: ProjectDialogPr
     setName("");
     setDescription("");
     setCompetencies(["Create"]);
-    setFigmaLink("");
-    setGithubLink("");
-    setFiles([]);
+    setKeyTasks([]);
     setLearningGoals({
       Research: "",
       Create: "",
@@ -226,89 +258,183 @@ export const ProjectDialog = ({ onProjectCreated, currentMode }: ProjectDialogPr
 
             {/* Key Tasks Tab */}
             <TabsContent value="tasks" className="space-y-4 mt-6">
-              <p className="text-sm text-muted-foreground mb-4">
-                Upload project files, add links to Figma, GitHub, or other resources
-              </p>
+              <div className="flex justify-between items-start mb-4">
+                <p className="text-sm text-muted-foreground">
+                  Create tasks and add files/links for each task
+                </p>
+                <Button type="button" onClick={addTask} size="sm" className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  Add Task
+                </Button>
+              </div>
 
               <div className="space-y-4">
-                <div>
-                  <Label htmlFor="figma">Figma Link</Label>
-                  <Input
-                    id="figma"
-                    type="url"
-                    value={figmaLink}
-                    onChange={(e) => setFigmaLink(e.target.value)}
-                    placeholder="https://figma.com/..."
-                    className="mt-1.5"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="github">GitHub Link</Label>
-                  <Input
-                    id="github"
-                    type="url"
-                    value={githubLink}
-                    onChange={(e) => setGithubLink(e.target.value)}
-                    placeholder="https://github.com/..."
-                    className="mt-1.5"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="files">Project Files & Media</Label>
-                  <div className="mt-2">
-                    <label htmlFor="files" className="cursor-pointer">
-                      <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary transition-colors bg-background">
-                        <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                        <p className="text-sm text-muted-foreground">
-                          Click to upload or drag and drop
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Images, videos, documents
-                        </p>
-                      </div>
+                {keyTasks.map((task, taskIndex) => (
+                  <div key={task.id} className="p-5 bg-muted/30 rounded-lg border space-y-4">
+                    <div className="flex justify-between items-start gap-2">
                       <Input
-                        id="files"
-                        type="file"
-                        multiple
-                        className="hidden"
-                        onChange={handleFileChange}
-                        accept="image/*,video/*,.pdf,.doc,.docx"
+                        value={task.name}
+                        onChange={(e) => updateTask(task.id, "name", e.target.value)}
+                        placeholder="Task name..."
+                        className="flex-1"
                       />
-                    </label>
-                  </div>
-                  
-                  {files.length > 0 && (
-                    <div className="mt-4 space-y-2">
-                      <div className="grid grid-cols-2 gap-2">
-                        {files.map((file, index) => (
-                          <div key={index} className="flex items-center justify-between p-3 bg-background rounded-lg border">
-                            <span className="text-sm truncate flex-1">{file.name}</span>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => removeFile(index)}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
                       <Button
                         type="button"
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
-                        className="w-full"
-                        onClick={() => document.getElementById('files')?.click()}
+                        onClick={() => removeTask(task.id)}
                       >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add More Files
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
-                  )}
-                </div>
+
+                    <RadioGroup
+                      value={task.status}
+                      onValueChange={(value) => updateTask(task.id, "status", value)}
+                      className="space-y-2"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="completed" id={`${task.id}-completed`} />
+                        <Label htmlFor={`${task.id}-completed`} className="text-sm cursor-pointer">
+                          ✅ Completed
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="not-completed" id={`${task.id}-not-completed`} />
+                        <Label htmlFor={`${task.id}-not-completed`} className="text-sm cursor-pointer">
+                          🕓 Not completed (within sprint)
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="to-be-completed" id={`${task.id}-to-be-completed`} />
+                        <Label htmlFor={`${task.id}-to-be-completed`} className="text-sm cursor-pointer">
+                          🔮 To be completed (future)
+                        </Label>
+                      </div>
+                    </RadioGroup>
+
+                    <Textarea
+                      value={task.description || ""}
+                      onChange={(e) => updateTask(task.id, "description", e.target.value)}
+                      placeholder="Task description (optional)..."
+                      rows={2}
+                      className="text-sm"
+                    />
+
+                    {/* Task Resources Section */}
+                    <div className="pt-3 border-t space-y-3">
+                      <h4 className="text-sm font-semibold">Task Resources</h4>
+                      
+                      {/* File Upload */}
+                      <div>
+                        <Label className="text-xs">Files & Media</Label>
+                        <label htmlFor={`task-files-${task.id}`} className="cursor-pointer mt-1.5 block">
+                          <div className="border-2 border-dashed rounded-lg p-4 text-center hover:border-primary transition-colors">
+                            <Upload className="h-6 w-6 mx-auto mb-1 text-muted-foreground" />
+                            <p className="text-xs text-muted-foreground">Upload files</p>
+                          </div>
+                          <Input
+                            id={`task-files-${task.id}`}
+                            type="file"
+                            multiple
+                            className="hidden"
+                            onChange={(e) => e.target.files && handleTaskFileUpload(task.id, e.target.files)}
+                            accept="image/*,video/*,.pdf,.doc,.docx"
+                          />
+                        </label>
+
+                        {task.files && task.files.length > 0 && (
+                          <div className="mt-2 space-y-2">
+                            {task.files.map((file, fileIndex) => (
+                              <div key={fileIndex} className="flex items-center justify-between p-2 bg-background rounded border text-xs">
+                                <span className="truncate flex-1">{file.name}</span>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => removeTaskFile(task.id, fileIndex)}
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            ))}
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="w-full text-xs"
+                              onClick={() => document.getElementById(`task-files-${task.id}`)?.click()}
+                            >
+                              <Plus className="h-3 w-3 mr-1" />
+                              Add More Files
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Links */}
+                      <div>
+                        <Label className="text-xs">Links</Label>
+                        <div className="mt-1.5 space-y-2">
+                          {task.links && task.links.map((link, linkIndex) => (
+                            <div key={linkIndex} className="flex items-center gap-2 p-2 bg-background rounded border">
+                              <a 
+                                href={link.url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-xs text-primary hover:underline truncate flex-1"
+                              >
+                                {link.title}
+                              </a>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => removeTaskLink(task.id, linkIndex)}
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          ))}
+                          <div className="flex gap-2">
+                            <Input
+                              id={`link-url-${task.id}`}
+                              placeholder="https://..."
+                              className="text-xs"
+                            />
+                            <Input
+                              id={`link-title-${task.id}`}
+                              placeholder="Title (optional)"
+                              className="text-xs"
+                            />
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                const urlInput = document.getElementById(`link-url-${task.id}`) as HTMLInputElement;
+                                const titleInput = document.getElementById(`link-title-${task.id}`) as HTMLInputElement;
+                                if (urlInput.value) {
+                                  addTaskLink(task.id, urlInput.value, titleInput.value);
+                                  urlInput.value = "";
+                                  titleInput.value = "";
+                                }
+                              }}
+                            >
+                              <Plus className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {keyTasks.length === 0 && (
+                  <div className="text-center py-12 text-muted-foreground bg-muted/30 rounded-lg border-2 border-dashed">
+                    No tasks yet. Click "Add Task" to create one.
+                  </div>
+                )}
               </div>
             </TabsContent>
           </Tabs>

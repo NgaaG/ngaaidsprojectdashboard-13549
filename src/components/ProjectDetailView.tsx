@@ -88,52 +88,42 @@ export const ProjectDetailView = ({
           </DialogHeader>
 
           <div className="space-y-6 mt-6">
-            {/* Project Overview Section */}
+            {/* Basic Info Section */}
             <Card className="border-l-4 border-l-primary">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  📋 Project Overview
+                  📋 Basic Information
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {project.visualUrl && (
-                  <div className="rounded-lg overflow-hidden border">
-                    <img
-                      src={project.visualUrl}
-                      alt={project.name}
-                      className="w-full h-64 object-cover"
-                    />
-                  </div>
-                )}
                 {project.description && (
                   <div>
-                    <p className="text-sm font-medium mb-2">Description</p>
+                    <p className="text-sm font-semibold mb-2">Description</p>
                     <p className="text-muted-foreground">{project.description}</p>
                   </div>
                 )}
-                {(project.figmaLink || project.githubLink) && (
-                  <div>
-                    <p className="text-sm font-medium mb-3">Project Links</p>
-                    <div className="flex gap-3">
-                      {project.figmaLink && (
-                        <Button variant="outline" size="sm" asChild>
-                          <a href={project.figmaLink} target="_blank" rel="noopener noreferrer">
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            Figma
-                          </a>
-                        </Button>
-                      )}
-                      {project.githubLink && (
-                        <Button variant="outline" size="sm" asChild>
-                          <a href={project.githubLink} target="_blank" rel="noopener noreferrer">
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            GitHub
-                          </a>
-                        </Button>
-                      )}
-                    </div>
+                <div>
+                  <p className="text-sm font-semibold mb-2">Competencies</p>
+                  <div className="flex flex-wrap gap-2">
+                    {project.competencies.map((comp) => (
+                      <span key={comp} className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
+                        {comp}
+                      </span>
+                    ))}
                   </div>
-                )}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold mb-2">Completion</p>
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 bg-muted rounded-full h-2 overflow-hidden">
+                      <div 
+                        className="bg-primary h-full transition-all"
+                        style={{ width: `${project.completion}%` }}
+                      />
+                    </div>
+                    <span className="text-sm font-medium">{project.completion}%</span>
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
@@ -165,16 +155,16 @@ export const ProjectDetailView = ({
               <Card className="border-l-4 border-l-secondary">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    ✅ Key Tasks
+                    ✅ Key Tasks & Resources
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3">
+                  <div className="space-y-5">
                     {project.keyTasks.map((task) => (
-                      <div key={task.id} className="p-4 bg-muted/50 rounded-lg border">
-                        <div className="flex items-start justify-between mb-2">
-                          <p className="font-medium">{task.name}</p>
-                          <span className={`text-xs px-2 py-1 rounded-full ${
+                      <div key={task.id} className="p-5 bg-muted/30 rounded-lg border space-y-3">
+                        <div className="flex items-start justify-between">
+                          <h4 className="font-semibold text-base">{task.name}</h4>
+                          <span className={`text-xs px-2.5 py-1 rounded-full whitespace-nowrap ${
                             task.status === "completed" ? "bg-green-500/20 text-green-700 dark:text-green-300" :
                             task.status === "not-completed" ? "bg-amber-500/20 text-amber-700 dark:text-amber-300" :
                             "bg-blue-500/20 text-blue-700 dark:text-blue-300"
@@ -184,8 +174,68 @@ export const ProjectDetailView = ({
                              "🔮 Future"}
                           </span>
                         </div>
+                        
                         {task.description && (
                           <p className="text-sm text-muted-foreground">{task.description}</p>
+                        )}
+
+                        {/* Media Gallery */}
+                        {task.files && task.files.length > 0 && (
+                          <div className="pt-3 border-t">
+                            <p className="text-xs font-semibold mb-3">Files & Media</p>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                              {task.files.map((file, idx) => (
+                                <a
+                                  key={idx}
+                                  href={file.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="group relative aspect-video rounded-lg overflow-hidden border hover:border-primary transition-colors"
+                                >
+                                  {file.url.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                                    <img 
+                                      src={file.url} 
+                                      alt={file.name}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center bg-muted">
+                                      <div className="text-center p-3">
+                                        <ExternalLink className="h-5 w-5 mx-auto mb-1 text-muted-foreground" />
+                                        <p className="text-xs truncate">{file.name}</p>
+                                      </div>
+                                    </div>
+                                  )}
+                                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <ExternalLink className="h-5 w-5 text-white" />
+                                  </div>
+                                </a>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Links */}
+                        {task.links && task.links.length > 0 && (
+                          <div className="pt-3 border-t">
+                            <p className="text-xs font-semibold mb-2">Links</p>
+                            <div className="space-y-2">
+                              {task.links.map((link, idx) => (
+                                <a
+                                  key={idx}
+                                  href={link.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center gap-2 p-2.5 bg-background rounded border hover:border-primary transition-colors group"
+                                >
+                                  <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
+                                  <span className="text-sm text-primary hover:underline truncate">
+                                    {link.title}
+                                  </span>
+                                </a>
+                              ))}
+                            </div>
+                          </div>
                         )}
                       </div>
                     ))}

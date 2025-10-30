@@ -33,6 +33,8 @@ export interface KeyTask {
   name: string;
   status: "completed" | "not-completed" | "to-be-completed";
   description?: string;
+  files?: { url: string; name: string }[];
+  links?: { url: string; title: string }[];
 }
 
 export interface LearningGoals {

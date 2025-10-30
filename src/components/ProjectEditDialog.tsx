@@ -106,16 +106,64 @@ export const ProjectEditDialog = ({
         name: "",
         status: "not-completed",
         description: "",
+        files: [],
+        links: [],
       },
     ]);
   };
 
-  const updateTask = (id: string, field: keyof KeyTask, value: string) => {
+  const updateTask = (id: string, field: keyof KeyTask, value: any) => {
     setKeyTasks(keyTasks.map(task => task.id === id ? { ...task, [field]: value } : task));
   };
 
   const removeTask = (id: string) => {
     setKeyTasks(keyTasks.filter(task => task.id !== id));
+  };
+
+  const handleTaskFileUpload = async (taskId: string, files: FileList) => {
+    const task = keyTasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    const uploadedFiles = [];
+    for (const file of Array.from(files)) {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from("project-files")
+        .upload(fileName, file);
+
+      if (uploadError) {
+        toast.error(`Failed to upload ${file.name}`);
+        continue;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("project-files")
+        .getPublicUrl(fileName);
+      
+      uploadedFiles.push({ url: publicUrl, name: file.name });
+    }
+
+    updateTask(taskId, "files", [...(task.files || []), ...uploadedFiles]);
+  };
+
+  const removeTaskFile = (taskId: string, fileIndex: number) => {
+    const task = keyTasks.find(t => t.id === taskId);
+    if (!task || !task.files) return;
+    updateTask(taskId, "files", task.files.filter((_, i) => i !== fileIndex));
+  };
+
+  const addTaskLink = (taskId: string, url: string, title: string) => {
+    const task = keyTasks.find(t => t.id === taskId);
+    if (!task || !url) return;
+    updateTask(taskId, "links", [...(task.links || []), { url, title: title || url }]);
+  };
+
+  const removeTaskLink = (taskId: string, linkIndex: number) => {
+    const task = keyTasks.find(t => t.id === taskId);
+    if (!task || !task.links) return;
+    updateTask(taskId, "links", task.links.filter((_, i) => i !== linkIndex));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -311,7 +359,7 @@ export const ProjectEditDialog = ({
 
                   <div className="space-y-3">
                     {keyTasks.map((task) => (
-                      <div key={task.id} className="p-4 bg-background rounded-lg border space-y-3">
+                      <div key={task.id} className="p-5 bg-background rounded-lg border space-y-4">
                         <div className="flex justify-between items-start gap-2">
                           <Input
                             value={task.name}
@@ -361,6 +409,113 @@ export const ProjectEditDialog = ({
                           rows={2}
                           className="text-sm"
                         />
+
+                        {/* Task Resources Section */}
+                        <div className="pt-3 border-t space-y-3">
+                          <h4 className="text-sm font-semibold">Task Resources</h4>
+                          
+                          {/* File Upload */}
+                          <div>
+                            <Label className="text-xs">Files & Media</Label>
+                            <label htmlFor={`task-files-${task.id}`} className="cursor-pointer mt-1.5 block">
+                              <div className="border-2 border-dashed rounded-lg p-4 text-center hover:border-primary transition-colors">
+                                <Upload className="h-6 w-6 mx-auto mb-1 text-muted-foreground" />
+                                <p className="text-xs text-muted-foreground">Upload files</p>
+                              </div>
+                              <Input
+                                id={`task-files-${task.id}`}
+                                type="file"
+                                multiple
+                                className="hidden"
+                                onChange={(e) => e.target.files && handleTaskFileUpload(task.id, e.target.files)}
+                                accept="image/*,video/*,.pdf,.doc,.docx"
+                              />
+                            </label>
+
+                            {task.files && task.files.length > 0 && (
+                              <div className="mt-2 space-y-2">
+                                {task.files.map((file, fileIndex) => (
+                                  <div key={fileIndex} className="flex items-center justify-between p-2 bg-muted/30 rounded border text-xs">
+                                    <span className="truncate flex-1">{file.name}</span>
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => removeTaskFile(task.id, fileIndex)}
+                                    >
+                                      <X className="h-3 w-3" />
+                                    </Button>
+                                  </div>
+                                ))}
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  className="w-full text-xs"
+                                  onClick={() => document.getElementById(`task-files-${task.id}`)?.click()}
+                                >
+                                  <Plus className="h-3 w-3 mr-1" />
+                                  Add More Files
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Links */}
+                          <div>
+                            <Label className="text-xs">Links</Label>
+                            <div className="mt-1.5 space-y-2">
+                              {task.links && task.links.map((link, linkIndex) => (
+                                <div key={linkIndex} className="flex items-center gap-2 p-2 bg-muted/30 rounded border">
+                                  <a 
+                                    href={link.url} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-xs text-primary hover:underline truncate flex-1"
+                                  >
+                                    {link.title}
+                                  </a>
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => removeTaskLink(task.id, linkIndex)}
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              ))}
+                              <div className="flex gap-2">
+                                <Input
+                                  id={`link-url-${task.id}`}
+                                  placeholder="https://..."
+                                  className="text-xs"
+                                />
+                                <Input
+                                  id={`link-title-${task.id}`}
+                                  placeholder="Title (optional)"
+                                  className="text-xs"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    const urlInput = document.getElementById(`link-url-${task.id}`) as HTMLInputElement;
+                                    const titleInput = document.getElementById(`link-title-${task.id}`) as HTMLInputElement;
+                                    if (urlInput.value) {
+                                      addTaskLink(task.id, urlInput.value, titleInput.value);
+                                      urlInput.value = "";
+                                      titleInput.value = "";
+                                    }
+                                  }}
+                                >
+                                  <Plus className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     ))}
 
@@ -372,101 +527,6 @@ export const ProjectEditDialog = ({
                   </div>
                 </div>
 
-                {/* Project Resources Section */}
-                <div className="space-y-4 border rounded-lg p-5 bg-muted/20">
-                  <div className="border-b pb-3">
-                    <h3 className="font-semibold flex items-center gap-2">
-                      🔗 Project Resources
-                    </h3>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Add links and upload project files
-                    </p>
-                  </div>
-
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="figma">Figma Link</Label>
-                      <Input
-                        id="figma"
-                        type="url"
-                        value={figmaLink}
-                        onChange={(e) => setFigmaLink(e.target.value)}
-                        placeholder="https://figma.com/..."
-                        className="mt-1.5"
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="github">GitHub Link</Label>
-                      <Input
-                        id="github"
-                        type="url"
-                        value={githubLink}
-                        onChange={(e) => setGithubLink(e.target.value)}
-                        placeholder="https://github.com/..."
-                        className="mt-1.5"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="files">Project Files & Media</Label>
-                    <div className="mt-2">
-                      <label htmlFor="files" className="cursor-pointer">
-                        <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary transition-colors bg-background">
-                          <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                          <p className="text-sm text-muted-foreground">
-                            Click to upload new files
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Images, videos, documents
-                          </p>
-                        </div>
-                        <Input
-                          id="files"
-                          type="file"
-                          multiple
-                          className="hidden"
-                          onChange={handleFileChange}
-                          accept="image/*,video/*,.pdf,.doc,.docx"
-                        />
-                      </label>
-                    </div>
-
-                    {files.length > 0 && (
-                      <div className="mt-4 space-y-2">
-                        <div className="grid grid-cols-2 gap-2">
-                          {files.map((file, index) => (
-                            <div
-                              key={index}
-                              className="flex items-center justify-between p-3 bg-background rounded-lg border"
-                            >
-                              <span className="text-sm truncate flex-1">{file.name}</span>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => removeFile(index)}
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          ))}
-                        </div>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="w-full"
-                          onClick={() => document.getElementById('files')?.click()}
-                        >
-                          <Plus className="h-4 w-4 mr-2" />
-                          Add More Files
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </div>
               </div>
             </TabsContent>
           </Tabs>
