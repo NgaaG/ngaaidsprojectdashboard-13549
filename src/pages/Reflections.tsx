@@ -13,10 +13,10 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Plus, Save, Trash2 } from "lucide-react";
-import { MoodType } from "@/types";
+import { MoodType, Mode } from "@/types";
 import { db } from "@/lib/supabaseHelpers";
 import { toast } from "sonner";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ModeToggle } from "@/components/ModeToggle";
 
 const MOODS: { value: MoodType; emoji: string; label: string; color: string }[] = [
   { value: "calm", emoji: "😌", label: "Calm", color: "hsl(195 60% 76%)" },
@@ -27,7 +27,7 @@ const MOODS: { value: MoodType; emoji: string; label: string; color: string }[] 
 ];
 
 const Reflections = () => {
-  const [currentMode, setCurrentMode] = useState<"personal" | "lecturer">("personal");
+  const [currentMode, setCurrentMode] = useState<Mode>("personal");
   const [reflections, setReflections] = useState<any[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
@@ -146,21 +146,18 @@ const Reflections = () => {
       <div className="max-w-4xl mx-auto">
         <header className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-3xl font-bold">
-              {currentMode === "personal" ? "💭 Time-Out Reflection Studio" : "🎓 Sprint Reflection"}
-            </h1>
-            <Tabs value={currentMode} onValueChange={(v) => setCurrentMode(v as "personal" | "lecturer")}>
-              <TabsList>
-                <TabsTrigger value="personal">🌱 Personal</TabsTrigger>
-                <TabsTrigger value="lecturer">🎓 Lecture</TabsTrigger>
-              </TabsList>
-            </Tabs>
+            <div>
+              <h1 className="text-3xl font-bold mb-2">
+                {currentMode === "personal" ? "💭 Time-Out Reflection Studio" : "🎓 Sprint Reflection"}
+              </h1>
+              <p className="text-muted-foreground">
+                {currentMode === "personal" 
+                  ? "Process emotions and thoughts in a structured, calming space"
+                  : "Reflect on learning outcomes and sprint progress"}
+              </p>
+            </div>
+            <ModeToggle mode={currentMode} onModeChange={setCurrentMode} />
           </div>
-          <p className="text-muted-foreground">
-            {currentMode === "personal" 
-              ? "Process emotions and thoughts in a structured, calming space"
-              : "Reflect on learning outcomes and sprint progress"}
-          </p>
         </header>
 
         {/* Progress Ring */}

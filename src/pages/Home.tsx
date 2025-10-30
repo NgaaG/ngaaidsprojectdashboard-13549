@@ -165,38 +165,95 @@ const Home = () => {
         />
       )}
 
-      {/* Animated gradient header */}
-      <header className="gradient-calm bg-[length:200%_200%] py-16 px-8 rounded-b-3xl shadow-lg relative">
+      {/* Dashboard Intro Panel */}
+      <section className="bg-gradient-to-br from-primary/10 via-secondary/10 to-background py-8 px-8 border-b-2 border-border animate-fade-in">
         <div className="max-w-7xl mx-auto">
-          <div className="flex justify-between items-center mb-8">
-            <div>
-              <h1 className="text-4xl font-bold text-foreground mb-2">
-                ADHD Creative Studio
-              </h1>
-              <p className="text-muted-foreground">
-                Track my progress with clarity and calm
+          <h1 className="text-3xl font-bold text-foreground mb-4 flex items-center gap-3">
+            ✨ ADHD Creative Studio Dashboard — Overview
+          </h1>
+          <p className="text-muted-foreground mb-6 leading-relaxed">
+            A personalized self-management & reflection system built for neurodiverse creative students.
+          </p>
+          
+          <div className="grid md:grid-cols-2 gap-6 mb-6">
+            <div className="bg-card p-6 rounded-2xl border shadow-sm">
+              <h3 className="font-semibold text-lg mb-2 flex items-center gap-2">
+                <span className="text-2xl">🪷</span> Personal Mode
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Time-Out Reflections & emotion tracking
               </p>
             </div>
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowOnboarding(true)}
-                className="rounded-full hover:bg-primary/20"
-                title="Show onboarding"
-              >
-                <HelpCircle className="h-5 w-5" />
-              </Button>
-              <Button variant="outline" onClick={handleExportJSON} className="gap-2">
-                <Download className="h-4 w-4" />
-                Export JSON
-              </Button>
-              <Button variant="outline" onClick={handleExportCSV} className="gap-2">
-                <Download className="h-4 w-4" />
-                Export CSV
-              </Button>
-              <ModeToggle mode={mode} onModeChange={handleModeChange} />
+            
+            <div className="bg-card p-6 rounded-2xl border shadow-sm">
+              <h3 className="font-semibold text-lg mb-2 flex items-center gap-2">
+                <span className="text-2xl">🎓</span> Lecture Mode
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Mentorship Logs, Learning Tracker, & Sprint Deliverables
+              </p>
             </div>
+          </div>
+
+          <div className="bg-card/50 p-6 rounded-2xl border backdrop-blur-sm space-y-3">
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm font-medium mb-1">🎯 Purpose:</p>
+                <p className="text-sm text-muted-foreground">
+                  Visualize progress, simplify documentation, and make learning transparent.
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium mb-1">⚡ Automation:</p>
+                <p className="text-sm text-muted-foreground">
+                  Each "+New Entry" auto-generates a template, links it to the main dashboard table, and logs date/time.
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium mb-1">🔒 Privacy:</p>
+                <p className="text-sm text-muted-foreground">
+                  Personal mode = private. Lecture mode = shared view for mentors.
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium mb-1">🌱 Goal:</p>
+                <p className="text-sm text-muted-foreground">
+                  To communicate creative growth through visuals, not words.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Header with controls */}
+      <header className="bg-background py-8 px-8">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">My Dashboard</h2>
+            <p className="text-muted-foreground text-sm">
+              Track my progress with clarity and calm
+            </p>
+          </div>
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowOnboarding(true)}
+              className="rounded-full hover:bg-primary/20"
+              title="Show intro"
+            >
+              <HelpCircle className="h-5 w-5" />
+            </Button>
+            <Button variant="outline" onClick={handleExportJSON} className="gap-2">
+              <Download className="h-4 w-4" />
+              Export JSON
+            </Button>
+            <Button variant="outline" onClick={handleExportCSV} className="gap-2">
+              <Download className="h-4 w-4" />
+              Export CSV
+            </Button>
+            <ModeToggle mode={mode} onModeChange={handleModeChange} />
           </div>
         </div>
       </header>

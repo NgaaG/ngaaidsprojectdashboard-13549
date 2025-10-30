@@ -23,6 +23,7 @@ import { Plus, Trash2, Calendar } from "lucide-react";
 import { Competency, Mode } from "@/types";
 import { db } from "@/lib/supabaseHelpers";
 import { toast } from "sonner";
+import { ModeToggle } from "@/components/ModeToggle";
 
 const COMPETENCIES: Competency[] = ["Research", "Create", "Organize", "Communicate", "Learn", "Unsure/TBD"];
 
@@ -146,27 +147,11 @@ const MentorLogs = () => {
                 Document mentorship sessions and learning evidence
               </p>
             </div>
+            <ModeToggle mode={currentMode} onModeChange={setCurrentMode} />
           </div>
 
-          {/* Mode Toggle */}
-          <div className="flex items-center justify-between bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl p-6 border shadow-sm mb-6 animate-slide-in-right">
-            <div className="flex items-center gap-4">
-              <Button
-                variant={currentMode === "personal" ? "default" : "outline"}
-                onClick={() => setCurrentMode("personal")}
-                className="gap-2 rounded-full hover-scale"
-              >
-                🌱 Personal Mode
-              </Button>
-              <Button
-                variant={currentMode === "lecturer" ? "default" : "outline"}
-                onClick={() => setCurrentMode("lecturer")}
-                className="gap-2 rounded-full hover-scale"
-              >
-                🎓 Lecture Mode
-              </Button>
-            </div>
-            
+          {/* New Mentor Log Button */}
+          <div className="flex justify-end mb-6">
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="gap-2 rounded-full">
