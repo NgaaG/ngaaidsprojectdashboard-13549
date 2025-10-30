@@ -434,23 +434,35 @@ export const ProjectEditDialog = ({
                     </div>
 
                     {files.length > 0 && (
-                      <div className="mt-4 grid grid-cols-2 gap-2">
-                        {files.map((file, index) => (
-                          <div
-                            key={index}
-                            className="flex items-center justify-between p-3 bg-background rounded-lg border"
-                          >
-                            <span className="text-sm truncate flex-1">{file.name}</span>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => removeFile(index)}
+                      <div className="mt-4 space-y-2">
+                        <div className="grid grid-cols-2 gap-2">
+                          {files.map((file, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center justify-between p-3 bg-background rounded-lg border"
                             >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        ))}
+                              <span className="text-sm truncate flex-1">{file.name}</span>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => removeFile(index)}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="w-full"
+                          onClick={() => document.getElementById('files')?.click()}
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add More Files
+                        </Button>
                       </div>
                     )}
                   </div>
