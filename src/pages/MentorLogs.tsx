@@ -53,6 +53,7 @@ const MentorLogs = () => {
     competencies: ["Create"] as Competency[],
     projectIds: [] as string[],
     selectedTaskIds: [] as string[],
+    lecturer: "",
   });
 
   useEffect(() => {
@@ -132,6 +133,7 @@ const MentorLogs = () => {
       competencies: log.competencies || ["Create"],
       projectIds: log.project_ids || [],
       selectedTaskIds: log.selected_task_ids || [],
+      lecturer: log.lecturer || "",
     });
     setIsDialogOpen(true);
   };
@@ -163,6 +165,7 @@ const MentorLogs = () => {
           competencies: newLog.competencies,
           project_ids: newLog.projectIds.length > 0 ? newLog.projectIds : null,
           selected_task_ids: newLog.selectedTaskIds.length > 0 ? newLog.selectedTaskIds : null,
+          lecturer: newLog.lecturer || null,
         }).eq("id", editingLog.id);
 
         if (error) throw error;
@@ -178,6 +181,7 @@ const MentorLogs = () => {
           competencies: newLog.competencies,
           project_ids: newLog.projectIds.length > 0 ? newLog.projectIds : null,
           selected_task_ids: newLog.selectedTaskIds.length > 0 ? newLog.selectedTaskIds : null,
+          lecturer: newLog.lecturer || null,
           mode: currentMode,
         });
 
@@ -199,6 +203,7 @@ const MentorLogs = () => {
         competencies: ["Create"],
         projectIds: [],
         selectedTaskIds: [],
+        lecturer: "",
       });
     } catch (error: any) {
       toast.error(error.message || "Failed to save mentor log");
@@ -369,6 +374,22 @@ const MentorLogs = () => {
                     />
                   </div>
 
+                  <div>
+                    <Label htmlFor="lecturer">Lecturer/Mentor</Label>
+                    <Select value={newLog.lecturer} onValueChange={(value) => setNewLog({ ...newLog, lecturer: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select lecturer" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Marc (mentor)">Marc (mentor)</SelectItem>
+                        <SelectItem value="Thomas">Thomas</SelectItem>
+                        <SelectItem value="Tjerk">Tjerk</SelectItem>
+                        <SelectItem value="Raymond">Raymond</SelectItem>
+                        <SelectItem value="Jop">Jop</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
                   <div className="space-y-6 border rounded-lg p-5 bg-muted/20">
                     <div className="border-b pb-3">
                       <h3 className="font-semibold text-sm flex items-center gap-2">
@@ -436,6 +457,7 @@ const MentorLogs = () => {
                         competencies: ["Create"],
                         projectIds: [],
                         selectedTaskIds: [],
+                        lecturer: "",
                       });
                     }}
                   >
