@@ -186,7 +186,7 @@ const MentorLogs = () => {
         <header className="mb-8">
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h1 className="text-3xl font-bold mb-2">🧭 Mentor Logs</h1>
+              <h1 className="text-3xl font-bold mb-2">🧭 Mentor/Lecture Consult Log</h1>
               <p className="text-muted-foreground">
                 Document mentorship sessions and learning evidence
               </p>
@@ -456,8 +456,7 @@ const MentorLogs = () => {
                             e.stopPropagation();
                             handleOpenEdit(log);
                           }}
-                          disabled={currentMode === "lecturer"}
-                          title={currentMode === "lecturer" ? "Lecturers cannot edit pre-session" : "Edit pre-session"}
+                          title="Edit pre-session"
                         >
                           <Edit className="h-3 w-3" />
                           Edit Pre-Session
