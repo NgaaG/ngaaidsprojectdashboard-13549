@@ -51,7 +51,7 @@ const MentorLogs = () => {
     outcomes: "",
     mentorComments: "",
     competencies: ["Create"] as Competency[],
-    projectId: null as string | null,
+    projectIds: [] as string[],
     selectedTaskIds: [] as string[],
   });
 
@@ -94,7 +94,7 @@ const MentorLogs = () => {
       outcomes: log.outcomes || "",
       mentorComments: log.mentor_comments || "",
       competencies: log.competencies || ["Create"],
-      projectId: log.project_id,
+      projectIds: log.project_ids || [],
       selectedTaskIds: log.selected_task_ids || [],
     });
     setIsDialogOpen(true);
@@ -125,7 +125,7 @@ const MentorLogs = () => {
           outcomes: newLog.outcomes,
           mentor_comments: newLog.mentorComments || null,
           competencies: newLog.competencies,
-          project_id: newLog.projectId,
+          project_ids: newLog.projectIds.length > 0 ? newLog.projectIds : null,
           selected_task_ids: newLog.selectedTaskIds.length > 0 ? newLog.selectedTaskIds : null,
         }).eq("id", editingLog.id);
 
@@ -140,7 +140,7 @@ const MentorLogs = () => {
           outcomes: newLog.outcomes,
           mentor_comments: newLog.mentorComments || null,
           competencies: newLog.competencies,
-          project_id: newLog.projectId,
+          project_ids: newLog.projectIds.length > 0 ? newLog.projectIds : null,
           selected_task_ids: newLog.selectedTaskIds.length > 0 ? newLog.selectedTaskIds : null,
           mode: currentMode,
         });
@@ -161,7 +161,7 @@ const MentorLogs = () => {
         outcomes: "",
         mentorComments: "",
         competencies: ["Create"],
-        projectId: null,
+        projectIds: [],
         selectedTaskIds: [],
       });
     } catch (error: any) {
@@ -212,70 +212,82 @@ const MentorLogs = () => {
                 
                 <div className="space-y-4 py-4">
                   <div>
-                    <Label htmlFor="project">Project (optional)</Label>
-                    <Select
-                      value={newLog.projectId || ""}
-                      onValueChange={(value) => setNewLog({ ...newLog, projectId: value, selectedTaskIds: [] })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a project..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {projects.map((project) => (
-                          <SelectItem key={project.id} value={project.id}>
-                            {project.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                    <Label htmlFor="projects">Projects & Tasks (optional)</Label>
+                    <p className="text-xs text-muted-foreground mb-3">
+                      Select projects to reference and their tasks for consultation
+                    </p>
+                    <div className="space-y-3">
+                      {projects.map((project) => {
+                        const isProjectSelected = newLog.projectIds.includes(project.id);
+                        const projectTasks = project.key_tasks || [];
+                        
+                        return (
+                          <div key={project.id} className="border rounded-lg p-4 bg-muted/20">
+                            <div className="flex items-start space-x-3 mb-3">
+                              <Checkbox
+                                id={`project-${project.id}`}
+                                checked={isProjectSelected}
+                                onCheckedChange={(checked) => {
+                                  setNewLog(prev => ({
+                                    ...prev,
+                                    projectIds: checked
+                                      ? [...prev.projectIds, project.id]
+                                      : prev.projectIds.filter(id => id !== project.id),
+                                    // Remove tasks from deselected project
+                                    selectedTaskIds: checked
+                                      ? prev.selectedTaskIds
+                                      : prev.selectedTaskIds.filter(taskId => 
+                                          !projectTasks.some((t: any) => t.id === taskId)
+                                        )
+                                  }));
+                                }}
+                              />
+                              <label
+                                htmlFor={`project-${project.id}`}
+                                className="font-medium text-sm cursor-pointer flex-1"
+                              >
+                                {project.name}
+                              </label>
+                            </div>
 
-                  {/* Project Tasks Selection */}
-                  {newLog.projectId && (() => {
-                    const selectedProject = projects.find(p => p.id === newLog.projectId);
-                    const projectTasks = selectedProject?.key_tasks || [];
-                    
-                    if (projectTasks.length > 0) {
-                      return (
-                        <div className="p-4 bg-muted/30 rounded-lg">
-                          <Label className="mb-3 block">Reference Project Tasks (optional)</Label>
-                          <p className="text-xs text-muted-foreground mb-3">
-                            Select tasks to reference during this consultation
-                          </p>
-                          <div className="space-y-2 max-h-48 overflow-y-auto">
-                            {projectTasks.map((task: any) => (
-                              <div key={task.id} className="flex items-start space-x-2">
-                                <Checkbox
-                                  id={`task-${task.id}`}
-                                  checked={newLog.selectedTaskIds.includes(task.id)}
-                                  onCheckedChange={(checked) => {
-                                    setNewLog(prev => ({
-                                      ...prev,
-                                      selectedTaskIds: checked
-                                        ? [...prev.selectedTaskIds, task.id]
-                                        : prev.selectedTaskIds.filter(id => id !== task.id)
-                                    }));
-                                  }}
-                                />
-                                <label
-                                  htmlFor={`task-${task.id}`}
-                                  className="text-sm leading-tight cursor-pointer flex-1"
-                                >
-                                  <span className="font-medium">{task.name}</span>
-                                  {task.status && (
-                                    <span className="ml-2 text-xs text-muted-foreground">
-                                      ({task.status === "completed" ? "✅" : task.status === "not-completed" ? "🕓" : "🔮"})
-                                    </span>
-                                  )}
-                                </label>
+                            {/* Show tasks if project is selected */}
+                            {isProjectSelected && projectTasks.length > 0 && (
+                              <div className="ml-7 pl-4 border-l-2 space-y-2 max-h-40 overflow-y-auto">
+                                <p className="text-xs text-muted-foreground mb-2">Select tasks:</p>
+                                {projectTasks.map((task: any) => (
+                                  <div key={task.id} className="flex items-start space-x-2">
+                                    <Checkbox
+                                      id={`task-${task.id}`}
+                                      checked={newLog.selectedTaskIds.includes(task.id)}
+                                      onCheckedChange={(checked) => {
+                                        setNewLog(prev => ({
+                                          ...prev,
+                                          selectedTaskIds: checked
+                                            ? [...prev.selectedTaskIds, task.id]
+                                            : prev.selectedTaskIds.filter(id => id !== task.id)
+                                        }));
+                                      }}
+                                    />
+                                    <label
+                                      htmlFor={`task-${task.id}`}
+                                      className="text-sm leading-tight cursor-pointer flex-1"
+                                    >
+                                      <span className="font-medium">{task.name}</span>
+                                      {task.status && (
+                                        <span className="ml-2 text-xs text-muted-foreground">
+                                          ({task.status === "completed" ? "✅" : task.status === "not-completed" ? "🕓" : "🔮"})
+                                        </span>
+                                      )}
+                                    </label>
+                                  </div>
+                                ))}
                               </div>
-                            ))}
+                            )}
                           </div>
-                        </div>
-                      );
-                    }
-                    return null;
-                  })()}
+                        );
+                      })}
+                    </div>
+                  </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -386,7 +398,7 @@ const MentorLogs = () => {
                         outcomes: "",
                         mentorComments: "",
                         competencies: ["Create"],
-                        projectId: null,
+                        projectIds: [],
                         selectedTaskIds: [],
                       });
                     }}
