@@ -499,15 +499,18 @@ const MentorLogs = () => {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="gap-1 text-xs"
+                          className="gap-1 flex-col h-auto py-2 px-3"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleOpenEdit(log);
                           }}
-                          title="Edit pre-session"
+                          title="Edit pre-session agenda prep"
                         >
-                          <Edit className="h-3 w-3" />
-                          Edit Pre-Session
+                          <div className="flex items-center gap-1">
+                            <Edit className="h-3 w-3" />
+                            <span className="font-bold text-xs">Edit Pre-Session</span>
+                          </div>
+                          <span className="text-[10px] text-muted-foreground font-normal">Agenda prep for consult</span>
                         </Button>
                         <Button
                           variant="ghost"

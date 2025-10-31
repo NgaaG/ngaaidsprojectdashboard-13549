@@ -108,12 +108,14 @@ export const MentorLogDetailView = ({
               <Button
                 variant="default"
                 size="sm"
-                className="gap-2 shrink-0 font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg"
+                className="shrink-0 font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg flex-col h-auto py-3 px-4 gap-1"
                 onClick={() => setIsEditing(true)}
               >
-                <Edit className="h-4 w-4" />
-                <span className="hidden sm:inline font-bold">Edit Post-Session</span>
-                <span className="sm:hidden font-bold">Edit</span>
+                <div className="flex items-center gap-2">
+                  <Edit className="h-4 w-4" />
+                  <span className="font-bold">Edit Post-Session</span>
+                </div>
+                <span className="text-[10px] font-normal opacity-90">Consult outcome notes (mine & theirs)</span>
               </Button>
             )}
           </div>
