@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Edit, Calendar, ExternalLink } from "lucide-react";
 import { Competency } from "@/types";
 import { db } from "@/lib/supabaseHelpers";
@@ -38,6 +39,7 @@ export const MentorLogDetailView = ({
   const [outcomes, setOutcomes] = useState(log.outcomes || "");
   const [resourceLinks, setResourceLinks] = useState(log.resource_links || "");
   const [achievedGoals, setAchievedGoals] = useState<string[]>(log.achieved_goals || []);
+  const [lecturer, setLecturer] = useState(log.lecturer || "");
   const [loading, setLoading] = useState(false);
 
   // Parse key goals into individual goals
@@ -51,6 +53,7 @@ export const MentorLogDetailView = ({
         mentor_comments: mentorComments || null,
         resource_links: resourceLinks || null,
         achieved_goals: achievedGoals.length > 0 ? achievedGoals : null,
+        lecturer: lecturer || null,
       }).eq("id", log.id);
 
       if (error) throw error;
@@ -88,6 +91,29 @@ export const MentorLogDetailView = ({
                   <span className="text-sm">{new Date(log.date).toLocaleDateString()}</span>
                 </div>
               </div>
+              
+              {/* Lecturer Selection */}
+              <div className="mb-4">
+                <Label className="text-sm font-semibold mb-2 block">Lecturer/Mentor</Label>
+                {isEditing ? (
+                  <Select value={lecturer} onValueChange={setLecturer}>
+                    <SelectTrigger className="w-full sm:w-64">
+                      <SelectValue placeholder="Select lecturer" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Marc (mentor)">Marc (mentor)</SelectItem>
+                      <SelectItem value="Thomas">Thomas</SelectItem>
+                      <SelectItem value="Tjerk">Tjerk</SelectItem>
+                      <SelectItem value="Raymond">Raymond</SelectItem>
+                      <SelectItem value="Jop">Jop</SelectItem>
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    {lecturer || "No lecturer assigned"}
+                  </p>
+                )}
+              </div>
               <div className="flex flex-wrap gap-2">
                 {(log.competencies || ["Create"]).map((comp: Competency) => (
                   <span
@@ -115,7 +141,7 @@ export const MentorLogDetailView = ({
                   <Edit className="h-4 w-4" />
                   <span className="font-bold">Edit Post-Session</span>
                 </div>
-                <span className="text-[10px] font-normal opacity-90">Consult outcome notes (mine & theirs)</span>
+                <span className="text-[10px] font-normal opacity-90">Session outcomes notes & feedback: mine & lecturer</span>
               </Button>
             )}
           </div>
@@ -371,6 +397,7 @@ export const MentorLogDetailView = ({
                 setOutcomes(log.outcomes || "");
                 setResourceLinks(log.resource_links || "");
                 setAchievedGoals(log.achieved_goals || []);
+                setLecturer(log.lecturer || "");
               }}
             >
               Cancel

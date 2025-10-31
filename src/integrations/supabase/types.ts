@@ -57,6 +57,7 @@ export type Database = {
           id: string
           is_public: boolean | null
           key_goals: string | null
+          lecturer: string | null
           mentor_comments: string | null
           mode: string | null
           outcomes: string | null
@@ -77,6 +78,7 @@ export type Database = {
           id?: string
           is_public?: boolean | null
           key_goals?: string | null
+          lecturer?: string | null
           mentor_comments?: string | null
           mode?: string | null
           outcomes?: string | null
@@ -97,6 +99,7 @@ export type Database = {
           id?: string
           is_public?: boolean | null
           key_goals?: string | null
+          lecturer?: string | null
           mentor_comments?: string | null
           mode?: string | null
           outcomes?: string | null
