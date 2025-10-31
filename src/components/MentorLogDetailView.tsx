@@ -106,14 +106,14 @@ export const MentorLogDetailView = ({
             </div>
             {!isEditing && (
               <Button
-                variant="outline"
+                variant="default"
                 size="sm"
-                className="gap-2 shrink-0"
+                className="gap-2 shrink-0 font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg"
                 onClick={() => setIsEditing(true)}
               >
                 <Edit className="h-4 w-4" />
-                <span className="hidden sm:inline">Edit Post-Session</span>
-                <span className="sm:hidden">Edit</span>
+                <span className="hidden sm:inline font-bold">Edit Post-Session</span>
+                <span className="sm:hidden font-bold">Edit</span>
               </Button>
             )}
           </div>
@@ -251,9 +251,9 @@ export const MentorLogDetailView = ({
           {/* Pre-Session: Key Goals */}
           <div className="border-l-4 pl-5 py-3 rounded-r-lg bg-gradient-to-r from-transparent to-muted/10" style={{ borderColor: primaryColor }}>
             <div>
-              <p className="text-base font-semibold mb-4 text-primary flex items-center gap-2">
+              <p className="text-base font-bold mb-4 text-primary flex items-center gap-2">
                 <span>📝</span>
-                <span>Key Goals (Pre-Session)</span>
+                <span className="font-bold">Key Goals (Pre-Session)</span>
               </p>
               {keyGoalsList.length > 0 ? (
                 <div className="space-y-2">
