@@ -77,22 +77,25 @@ export const MentorLogDetailView = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl max-h-[92vh] overflow-y-auto">
         <DialogHeader>
-          <div className="flex justify-between items-start">
-            <div className="flex-1">
-              <DialogTitle className="text-2xl mb-2">{log.title}</DialogTitle>
-              <div className="flex items-center gap-2 text-muted-foreground mb-4">
-                <Calendar className="h-4 w-4" />
-                {new Date(log.date).toLocaleDateString()}
+          <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+            <div className="flex-1 w-full">
+              <DialogTitle className="text-2xl sm:text-3xl mb-3 leading-tight">{log.title}</DialogTitle>
+              <div className="flex flex-wrap items-center gap-3 text-muted-foreground mb-4">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  <span className="text-sm">{new Date(log.date).toLocaleDateString()}</span>
+                </div>
               </div>
               <div className="flex flex-wrap gap-2">
                 {(log.competencies || ["Create"]).map((comp: Competency) => (
                   <span
                     key={comp}
-                    className="text-xs font-medium px-3 py-1 rounded-full"
+                    className="text-xs font-medium px-3 py-1.5 rounded-full shadow-sm border"
                     style={{ 
-                      backgroundColor: `${COMPETENCY_COLORS[comp]}40`, 
+                      backgroundColor: `${COMPETENCY_COLORS[comp]}30`, 
+                      borderColor: `${COMPETENCY_COLORS[comp]}50`,
                       color: COMPETENCY_COLORS[comp]
                     }}
                   >
@@ -105,11 +108,12 @@ export const MentorLogDetailView = ({
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-2"
+                className="gap-2 shrink-0"
                 onClick={() => setIsEditing(true)}
               >
                 <Edit className="h-4 w-4" />
-                Edit Post-Session
+                <span className="hidden sm:inline">Edit Post-Session</span>
+                <span className="sm:hidden">Edit</span>
               </Button>
             )}
           </div>
@@ -118,11 +122,14 @@ export const MentorLogDetailView = ({
         <div className="space-y-6 py-4">
           {/* Projects Info */}
           {log.projects && log.projects.length > 0 && (
-            <div className="p-4 bg-muted/30 rounded-lg">
-              <p className="text-sm font-semibold mb-2">📁 Referenced Projects</p>
+            <div className="p-5 bg-gradient-to-br from-muted/20 to-muted/40 rounded-xl border border-border/50 shadow-sm">
+              <p className="text-sm font-semibold mb-3 flex items-center gap-2">
+                <span>📁</span>
+                <span>Referenced Projects</span>
+              </p>
               <div className="flex flex-wrap gap-2">
                 {log.projects.map((project: any) => (
-                  <span key={project.id} className="text-sm px-3 py-1 bg-background rounded-full border font-medium">
+                  <span key={project.id} className="text-sm px-4 py-2 bg-background rounded-full border border-border/50 font-medium shadow-sm hover:shadow-md transition-shadow">
                     {project.name}
                   </span>
                 ))}
@@ -132,19 +139,28 @@ export const MentorLogDetailView = ({
 
           {/* Selected Tasks Gallery */}
           {selectedTasks.length > 0 && (
-            <div className="border rounded-lg p-5 bg-accent/10">
-              <h3 className="font-semibold mb-4 flex items-center gap-2">
+            <div className="border rounded-xl p-6 bg-gradient-to-br from-accent/5 to-accent/10 shadow-sm">
+              <h3 className="font-semibold text-lg mb-5 flex items-center gap-2 text-foreground">
                 ✅ Referenced Project Tasks
               </h3>
-              <div className="space-y-5">
+              <div className="space-y-6">
                 {selectedTasks.map((task) => (
-                  <div key={task.id} className="p-5 bg-background rounded-lg border space-y-3">
-                    <div className="flex items-start justify-between">
-                      <h4 className="font-semibold text-base">{task.name}</h4>
-                      <span className={`text-xs px-2.5 py-1 rounded-full whitespace-nowrap ${
-                        task.status === "completed" ? "bg-green-500/20 text-green-700 dark:text-green-300" :
-                        task.status === "not-completed" ? "bg-amber-500/20 text-amber-700 dark:text-amber-300" :
-                        "bg-blue-500/20 text-blue-700 dark:text-blue-300"
+                  <div key={task.id} className="p-6 bg-background rounded-xl border border-border/50 shadow-sm space-y-4 hover:shadow-md transition-shadow">
+                    {/* Project Name Header */}
+                    {task.projectName && (
+                      <div className="flex items-center gap-2 pb-3 border-b border-border/30">
+                        <span className="text-xs font-semibold text-primary/80 uppercase tracking-wide">
+                          📁 {task.projectName}
+                        </span>
+                      </div>
+                    )}
+                    
+                    <div className="flex items-start justify-between gap-4">
+                      <h4 className="font-semibold text-base flex-1">{task.name}</h4>
+                      <span className={`text-xs px-3 py-1.5 rounded-full whitespace-nowrap font-medium shadow-sm ${
+                        task.status === "completed" ? "bg-green-500/20 text-green-700 dark:text-green-300 border border-green-500/30" :
+                        task.status === "not-completed" ? "bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30" :
+                        "bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-500/30"
                       }`}>
                         {task.status === "completed" ? "✅ Completed" :
                          task.status === "not-completed" ? "🕓 In Sprint" :
@@ -154,47 +170,47 @@ export const MentorLogDetailView = ({
 
                     {/* Competency & Learning Goal */}
                     {(task.competency || task.learningGoal) && (
-                      <div className="space-y-1 text-xs">
+                      <div className="space-y-2 p-3 bg-muted/30 rounded-lg border border-border/30">
                         {task.competency && (
-                          <p className="text-muted-foreground">
-                            <span className="font-semibold text-primary">Competency:</span> {task.competency}
+                          <p className="text-xs text-muted-foreground">
+                            <span className="font-semibold text-primary">🎯 Competency:</span> {task.competency}
                           </p>
                         )}
                         {task.learningGoal && (
-                          <p className="text-muted-foreground">
-                            <span className="font-semibold text-primary">Learning Goal:</span> {task.learningGoal}
+                          <p className="text-xs text-muted-foreground">
+                            <span className="font-semibold text-primary">🎓 Learning Goal:</span> {task.learningGoal}
                           </p>
                         )}
                       </div>
                     )}
                     
                     {task.description && (
-                      <p className="text-sm text-muted-foreground">{task.description}</p>
+                      <p className="text-sm text-muted-foreground leading-relaxed">{task.description}</p>
                     )}
 
                     {/* Media Gallery */}
                     {task.files && task.files.length > 0 && (
-                      <div className="pt-3 border-t">
-                        <p className="text-xs font-semibold mb-3">Files & Media</p>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      <div className="pt-4 border-t border-border/30">
+                        <p className="text-xs font-semibold mb-3 text-muted-foreground">📎 Files & Media</p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                           {task.files.map((file: any, idx: number) => (
                             <a
                               key={idx}
                               href={file.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="group relative aspect-video rounded-lg overflow-hidden border hover:border-primary transition-colors"
+                              className="group relative aspect-video rounded-lg overflow-hidden border border-border/50 hover:border-primary hover:shadow-md transition-all"
                             >
                               {file.url.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
                                 <img 
                                   src={file.url} 
                                   alt={file.name}
-                                  className="w-full h-full object-cover"
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                                 />
                               ) : (
-                                <div className="w-full h-full flex items-center justify-center bg-muted">
+                                <div className="w-full h-full flex items-center justify-center bg-muted/50">
                                   <div className="text-center p-3">
-                                    <p className="text-xs truncate">{file.name}</p>
+                                    <p className="text-xs truncate font-medium">{file.name}</p>
                                   </div>
                                 </div>
                               )}
@@ -206,8 +222,8 @@ export const MentorLogDetailView = ({
 
                     {/* Links */}
                     {task.links && task.links.length > 0 && (
-                      <div className="pt-3 border-t">
-                        <p className="text-xs font-semibold mb-2">Links</p>
+                      <div className="pt-4 border-t border-border/30">
+                        <p className="text-xs font-semibold mb-3 text-muted-foreground">🔗 Links</p>
                         <div className="space-y-2">
                           {task.links.map((link: any, idx: number) => (
                             <a
@@ -215,9 +231,10 @@ export const MentorLogDetailView = ({
                               href={link.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center gap-2 p-2.5 bg-muted/30 rounded border hover:border-primary transition-colors group text-sm"
+                              className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg border border-border/50 hover:border-primary hover:bg-muted/50 transition-all group text-sm"
                             >
-                              <span className="text-primary hover:underline truncate">
+                              <ExternalLink className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+                              <span className="text-foreground group-hover:text-primary truncate font-medium transition-colors">
                                 {link.title}
                               </span>
                             </a>
@@ -232,9 +249,12 @@ export const MentorLogDetailView = ({
           )}
 
           {/* Pre-Session: Key Goals */}
-          <div className="border-l-4 pl-4 py-2" style={{ borderColor: primaryColor }}>
+          <div className="border-l-4 pl-5 py-3 rounded-r-lg bg-gradient-to-r from-transparent to-muted/10" style={{ borderColor: primaryColor }}>
             <div>
-              <p className="text-sm font-semibold mb-3 text-primary">📝 Key Goals (Pre-Session)</p>
+              <p className="text-base font-semibold mb-4 text-primary flex items-center gap-2">
+                <span>📝</span>
+                <span>Key Goals (Pre-Session)</span>
+              </p>
               {keyGoalsList.length > 0 ? (
                 <div className="space-y-2">
                   {keyGoalsList.map((goal: string, idx: number) => {
@@ -268,9 +288,12 @@ export const MentorLogDetailView = ({
           </div>
 
           {/* Post-Session: Outcomes */}
-          <div className="border-l-4 border-accent/50 pl-4 py-2">
+          <div className="border-l-4 border-accent/50 pl-5 py-3 rounded-r-lg bg-gradient-to-r from-transparent to-accent/5">
             <div>
-              <p className="text-sm font-semibold mb-2 text-primary">✅ Key Outcomes (Ngaa) - Post-Session</p>
+              <p className="text-base font-semibold mb-3 text-primary flex items-center gap-2">
+                <span>✅</span>
+                <span>Key Outcomes (Ngaa) - Post-Session</span>
+              </p>
               {isEditing ? (
                 <Textarea
                   value={outcomes}
@@ -288,11 +311,14 @@ export const MentorLogDetailView = ({
           </div>
 
           {/* Lecturer Feedback */}
-          <div className="border rounded-lg p-5 bg-accent/5 space-y-4">
+          <div className="border rounded-xl p-6 bg-gradient-to-br from-accent/5 to-accent/10 shadow-sm space-y-5">
             <div>
-              <div className="flex items-center gap-2 mb-3">
-                <p className="text-sm font-semibold text-accent">🎓 Lecturer Feedback</p>
-                {isEditing && <span className="text-xs text-muted-foreground">(editable)</span>}
+              <div className="flex flex-wrap items-center gap-2 mb-4">
+                <p className="text-base font-semibold text-accent flex items-center gap-2">
+                  <span>🎓</span>
+                  <span>Lecturer Feedback</span>
+                </p>
+                {isEditing && <span className="text-xs text-muted-foreground px-2 py-1 bg-muted/50 rounded">(editable)</span>}
               </div>
               {isEditing ? (
                 <Textarea
@@ -310,7 +336,10 @@ export const MentorLogDetailView = ({
             </div>
 
             <div>
-              <Label className="text-sm font-semibold text-accent mb-2 block">📚 Resource Links</Label>
+              <Label className="text-base font-semibold text-accent mb-3 flex items-center gap-2">
+                <span>📚</span>
+                <span>Resource Links</span>
+              </Label>
               {isEditing ? (
                 <Textarea
                   value={resourceLinks}
@@ -330,9 +359,10 @@ export const MentorLogDetailView = ({
 
         {/* Footer Actions */}
         {isEditing && (
-          <div className="flex justify-end gap-2 pt-4 border-t">
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-6 border-t">
             <Button
               variant="outline"
+              className="w-full sm:w-auto"
               onClick={() => {
                 setIsEditing(false);
                 setMentorComments(log.mentor_comments || "");
@@ -343,7 +373,7 @@ export const MentorLogDetailView = ({
             >
               Cancel
             </Button>
-            <Button onClick={handleSave} disabled={loading}>
+            <Button onClick={handleSave} disabled={loading} className="w-full sm:w-auto">
               {loading ? "Saving..." : "Save Changes"}
             </Button>
           </div>

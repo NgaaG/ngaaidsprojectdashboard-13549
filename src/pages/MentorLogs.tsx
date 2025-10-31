@@ -57,6 +57,26 @@ const MentorLogs = () => {
 
   useEffect(() => {
     loadData();
+
+    // Real-time subscription for mentor logs
+    const channel = db
+      .channel('mentor-logs-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'mentor_logs'
+        },
+        () => {
+          loadData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      db.removeChannel(channel);
+    };
   }, [currentMode]);
 
   const loadData = async () => {
@@ -591,7 +611,7 @@ const MentorLogs = () => {
                 ? detailViewLog.projects.flatMap((proj: any) => 
                     proj.key_tasks?.filter((task: any) => 
                       detailViewLog.selected_task_ids.includes(task.id)
-                    ) || []
+                    ).map((task: any) => ({ ...task, projectName: proj.name })) || []
                   )
                 : []
             }
