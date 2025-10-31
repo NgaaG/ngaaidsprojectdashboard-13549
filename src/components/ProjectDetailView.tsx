@@ -128,7 +128,7 @@ export const ProjectDetailView = ({
             </Card>
 
             {/* Learning Goals Section */}
-            {project.learningGoals && Object.values(project.learningGoals).some(g => g) && (
+            {project.learningGoals && (
               <Card className="border-l-4 border-l-accent">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -136,20 +136,20 @@ export const ProjectDetailView = ({
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid gap-4">
-                    {Object.entries(project.learningGoals).map(([competency, goals]) => {
-                      if (!goals) return null;
-                      // Split goals by line breaks and filter out empty lines
-                      const goalsList = goals.split('\n').filter(g => g.trim());
+                  <div className="space-y-4">
+                    {(["Research", "Create", "Organize", "Communicate", "Learn"] as const).map((comp) => {
+                      const goals = project.learningGoals?.[comp];
+                      if (!Array.isArray(goals) || goals.length === 0) return null;
                       
                       return (
-                        <div key={competency} className="border-l-2 border-primary/30 pl-4 py-2">
-                          <p className="text-sm font-semibold text-primary mb-2">{competency}</p>
-                          <div className="space-y-1">
-                            {goalsList.map((goal, idx) => (
-                              <p key={idx} className="text-sm text-muted-foreground">
-                                <strong>• {goal.trim()}</strong>
-                              </p>
+                        <div key={comp} className="border rounded-lg p-3 bg-background">
+                          <h4 className="font-semibold text-sm mb-2">{comp}</h4>
+                          <div className="space-y-1 pl-2">
+                            {goals.map((goal, index) => (
+                              <div key={index} className="flex items-start gap-2">
+                                <span className="font-bold text-sm">•</span>
+                                <span className="text-sm font-medium">{goal}</span>
+                              </div>
                             ))}
                           </div>
                         </div>
@@ -160,60 +160,57 @@ export const ProjectDetailView = ({
               </Card>
             )}
 
-            {/* Achievement Tracking Section */}
-            {project.learningGoalsAchievements && Object.values(project.learningGoalsAchievements).some(achievements => Array.isArray(achievements) && achievements.length > 0) && (
+            {/* Goals Achievement Tracking Section */}
+            {project.learningGoalsAchievements && (
               <Card className="border-l-4 border-l-green-500">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    ✨ Goals Achievement Tracking
+                    📊 Goals Achievement
                   </CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Progress and satisfaction levels for each learning goal
+                  </p>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
-                    {Object.entries(project.learningGoalsAchievements).map(([competency, achievements]) => {
+                    {(["Research", "Create", "Organize", "Communicate", "Learn"] as const).map((comp) => {
+                      const achievements = project.learningGoalsAchievements?.[comp];
                       if (!Array.isArray(achievements) || achievements.length === 0) return null;
                       
                       return (
-                        <div key={competency} className="space-y-3">
-                          <h4 className="font-semibold text-primary">{competency}</h4>
-                          {achievements.map((achievement, idx) => (
-                            <div key={idx} className="p-4 bg-muted/30 rounded-lg border space-y-3">
-                              <div className="flex items-start justify-between">
-                                <p className="text-sm font-medium flex-1">{achievement.goal}</p>
-                                <span className={`text-xs px-2 py-1 rounded-full ${
-                                  achievement.achieved 
-                                    ? "bg-green-500/20 text-green-700 dark:text-green-300" 
-                                    : "bg-amber-500/20 text-amber-700 dark:text-amber-300"
-                                }`}>
-                                  {achievement.achieved ? "✅ Achieved" : "🕓 In Progress"}
-                                </span>
-                              </div>
-                              
-                              {achievement.achieved && (
-                                <>
-                                  <div>
-                                    <p className="text-xs text-muted-foreground mb-2">Satisfaction Level</p>
-                                    <div className="flex items-center gap-3">
-                                      <div className="flex-1 bg-muted rounded-full h-2 overflow-hidden">
-                                        <div 
-                                          className="bg-green-500 h-full transition-all"
-                                          style={{ width: `${achievement.satisfaction}%` }}
-                                        />
-                                      </div>
-                                      <span className="text-sm font-medium">{achievement.satisfaction}%</span>
-                                    </div>
+                        <div key={comp} className="border rounded-lg p-4 bg-background">
+                          <h4 className="font-semibold text-sm mb-3">{comp}</h4>
+                          <div className="space-y-4">
+                            {achievements.map((achievement, index) => (
+                              <div key={index} className="p-3 bg-muted/30 rounded-lg space-y-2">
+                                <div className="flex items-start gap-2">
+                                  <span className={`text-sm ${achievement.achieved ? 'text-green-600 font-semibold' : 'text-muted-foreground'}`}>
+                                    {achievement.achieved ? '✓' : '○'}
+                                  </span>
+                                  <span className={`text-sm flex-1 ${achievement.achieved ? 'font-medium' : ''}`}>
+                                    {achievement.goal}
+                                  </span>
+                                </div>
+                                
+                                <div className="pl-6">
+                                  <div className="text-xs text-muted-foreground mb-1">
+                                    Satisfaction: {achievement.satisfaction}%
                                   </div>
-                                  
+                                  <div className="w-full bg-secondary rounded-full h-2">
+                                     <div 
+                                      className="bg-primary h-2 rounded-full transition-all"
+                                      style={{ width: `${achievement.satisfaction}%` }}
+                                    />
+                                  </div>
                                   {achievement.explanation && (
-                                    <div>
-                                      <p className="text-xs text-muted-foreground mb-1">Explanation</p>
-                                      <p className="text-sm">{achievement.explanation}</p>
-                                    </div>
+                                    <p className="text-xs text-muted-foreground mt-2 italic">
+                                      "{achievement.explanation}"
+                                    </p>
                                   )}
-                                </>
-                              )}
-                            </div>
-                          ))}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       );
                     })}

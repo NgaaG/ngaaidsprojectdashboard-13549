@@ -57,6 +57,7 @@ const Home = () => {
         githubLink: p.github_link,
         mode: p.mode || "personal",
         learningGoals: p.learning_goals,
+        learningGoalsAchievements: p.learning_goals_achievements,
         keyTasks: p.key_tasks,
       }));
       
