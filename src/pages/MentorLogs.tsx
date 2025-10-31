@@ -67,11 +67,27 @@ const MentorLogs = () => {
       .order("name");
     if (projectsData) setProjects(projectsData);
 
+    // Fetch logs without the automatic join (since project_ids is an array now)
     const { data: logsData } = await db
       .from("mentor_logs")
-      .select("*, projects(name, key_tasks)")
+      .select("*")
       .order("created_at", { ascending: false });
-    if (logsData) setLogs(logsData);
+    
+    if (logsData && projectsData) {
+      // Manually attach project data to each log
+      const logsWithProjects = logsData.map(log => {
+        if (log.project_ids && log.project_ids.length > 0) {
+          const logProjects = projectsData.filter(p => 
+            log.project_ids.includes(p.id)
+          );
+          return { ...log, projects: logProjects };
+        }
+        return log;
+      });
+      setLogs(logsWithProjects);
+    } else if (logsData) {
+      setLogs(logsData);
+    }
   };
 
   const filteredLogs = logs.filter(log => (log.mode || "lecturer") === currentMode);
@@ -493,10 +509,15 @@ const MentorLogs = () => {
                     </div>
                     
                     <div className="space-y-4">
-                      {log.projects && (
-                        <p className="text-xs text-muted-foreground flex items-center gap-1">
-                          📁 Project: <span className="font-medium">{log.projects.name}</span>
-                        </p>
+                      {log.projects && log.projects.length > 0 && (
+                        <div className="text-xs text-muted-foreground">
+                          📁 Projects: 
+                          <div className="ml-4 mt-1 space-y-1">
+                            {log.projects.map((proj: any) => (
+                              <span key={proj.id} className="block font-medium">{proj.name}</span>
+                            ))}
+                          </div>
+                        </div>
                       )}
                       
                       <div className="text-sm text-muted-foreground line-clamp-3 mb-3">
@@ -566,9 +587,11 @@ const MentorLogs = () => {
             onOpenChange={(open) => !open && setDetailViewLog(null)}
             onUpdate={loadData}
             selectedTasks={
-              detailViewLog.selected_task_ids && detailViewLog.projects?.key_tasks
-                ? detailViewLog.projects.key_tasks.filter((task: any) => 
-                    detailViewLog.selected_task_ids.includes(task.id)
+              detailViewLog.selected_task_ids && detailViewLog.projects
+                ? detailViewLog.projects.flatMap((proj: any) => 
+                    proj.key_tasks?.filter((task: any) => 
+                      detailViewLog.selected_task_ids.includes(task.id)
+                    ) || []
                   )
                 : []
             }

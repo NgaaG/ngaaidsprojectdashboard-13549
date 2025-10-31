@@ -117,19 +117,15 @@ export const MentorLogDetailView = ({
 
         <div className="space-y-6 py-4">
           {/* Projects Info */}
-          {log.project_ids && log.project_ids.length > 0 && (
+          {log.projects && log.projects.length > 0 && (
             <div className="p-4 bg-muted/30 rounded-lg">
               <p className="text-sm font-semibold mb-2">📁 Referenced Projects</p>
               <div className="flex flex-wrap gap-2">
-                {log.project_ids.map((projectId: string) => {
-                  // This would need to be populated from the parent component
-                  // For now, just show project IDs
-                  return (
-                    <span key={projectId} className="text-sm px-3 py-1 bg-background rounded-full border">
-                      Project {projectId.slice(0, 8)}...
-                    </span>
-                  );
-                })}
+                {log.projects.map((project: any) => (
+                  <span key={project.id} className="text-sm px-3 py-1 bg-background rounded-full border font-medium">
+                    {project.name}
+                  </span>
+                ))}
               </div>
             </div>
           )}
