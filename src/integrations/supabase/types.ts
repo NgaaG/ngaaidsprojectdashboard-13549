@@ -204,6 +204,7 @@ export type Database = {
           mode: string | null
           mood: string
           progress: number | null
+          project_id: string | null
           sentiment: number | null
           thoughts_what_i_think: string | null
           thoughts_what_is_true: string | null
@@ -219,6 +220,7 @@ export type Database = {
           mode?: string | null
           mood: string
           progress?: number | null
+          project_id?: string | null
           sentiment?: number | null
           thoughts_what_i_think?: string | null
           thoughts_what_is_true?: string | null
@@ -234,13 +236,22 @@ export type Database = {
           mode?: string | null
           mood?: string
           progress?: number | null
+          project_id?: string | null
           sentiment?: number | null
           thoughts_what_i_think?: string | null
           thoughts_what_is_true?: string | null
           todo_list?: Json | null
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "reflections_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

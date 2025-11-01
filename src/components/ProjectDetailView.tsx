@@ -79,10 +79,28 @@ export const ProjectDetailView = ({
   };
 
   const handleDelete = async () => {
+    const projectToDelete = { ...project };
+    
     try {
       const { error } = await db.from("projects").delete().eq("id", project.id);
       if (error) throw error;
-      toast.success("Project deleted successfully");
+      
+      toast.success("Project deleted", {
+        action: {
+          label: "Undo",
+          onClick: async () => {
+            try {
+              const { error: insertError } = await db.from("projects").insert(projectToDelete);
+              if (insertError) throw insertError;
+              toast.success("Project restored");
+              onUpdate();
+            } catch (error: any) {
+              toast.error("Failed to restore project");
+            }
+          }
+        }
+      });
+      
       setDeleteDialogOpen(false);
       onOpenChange(false);
       onUpdate();
@@ -393,24 +411,51 @@ export const ProjectDetailView = ({
                   </Card>
                 ) : (
                   reflections.map((reflection) => (
-                    <Card key={reflection.id}>
+                    <Card key={reflection.id} className="hover:shadow-md transition-shadow">
                       <CardContent className="pt-6">
-                        <div className="flex items-start justify-between mb-3">
-                          <div>
-                            <p className="font-medium">Mood: {reflection.mood}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {new Date(reflection.created_at).toLocaleDateString()}
-                            </p>
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <span className="text-2xl">{reflection.mood === 'calm' ? '😌' : reflection.mood === 'anxious' ? '😰' : reflection.mood === 'focused' ? '🎯' : reflection.mood === 'overwhelmed' ? '😵' : '⚡'}</span>
+                              <div>
+                                <p className="font-medium capitalize">{reflection.mood}</p>
+                                <p className="text-sm text-muted-foreground">
+                                  {new Date(reflection.created_at).toLocaleDateString()} • {reflection.mode}
+                                </p>
+                              </div>
+                            </div>
+                            {reflection.emotional_dump && (
+                              <p className="text-sm text-muted-foreground line-clamp-2 mt-2">
+                                {reflection.emotional_dump}
+                              </p>
+                            )}
+                            {reflection.progress !== undefined && (
+                              <div className="mt-3">
+                                <div className="flex items-center gap-2">
+                                  <div className="flex-1 bg-muted rounded-full h-2">
+                                    <div 
+                                      className="bg-primary h-2 rounded-full transition-all"
+                                      style={{ width: `${reflection.progress}%` }}
+                                    />
+                                  </div>
+                                  <span className="text-xs text-muted-foreground">{reflection.progress}%</span>
+                                </div>
+                              </div>
+                            )}
                           </div>
-                          <span className="text-sm text-muted-foreground">
-                            Progress: {reflection.progress}%
-                          </span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              navigate(`/reflections?reflectionId=${reflection.id}`);
+                              onOpenChange(false);
+                            }}
+                            className="gap-2"
+                          >
+                            <Eye className="h-4 w-4" />
+                            View Full
+                          </Button>
                         </div>
-                        {reflection.emotional_dump && (
-                          <p className="text-sm text-muted-foreground line-clamp-3">
-                            {reflection.emotional_dump}
-                          </p>
-                        )}
                       </CardContent>
                     </Card>
                   ))

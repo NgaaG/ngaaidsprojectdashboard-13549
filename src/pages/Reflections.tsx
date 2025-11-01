@@ -17,6 +17,7 @@ import { MoodType, Mode } from "@/types";
 import { db } from "@/lib/supabaseHelpers";
 import { toast } from "sonner";
 import { ModeToggle } from "@/components/ModeToggle";
+import { useSearchParams } from "react-router-dom";
 
 const MOODS: { value: MoodType; emoji: string; label: string; color: string }[] = [
   { value: "calm", emoji: "😌", label: "Calm", color: "hsl(195 60% 76%)" },
@@ -31,6 +32,8 @@ const Reflections = () => {
   const [reflections, setReflections] = useState<any[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [highlightedReflectionId, setHighlightedReflectionId] = useState<string | null>(null);
   const [currentReflection, setCurrentReflection] = useState({
     mood: "calm",
     emotionalDump: "",
@@ -46,6 +49,27 @@ const Reflections = () => {
   useEffect(() => {
     loadData();
   }, [currentMode]);
+
+  // Handle reflectionId from query params (when navigating from project detail view)
+  useEffect(() => {
+    const reflectionId = searchParams.get('reflectionId');
+    if (reflectionId && reflections.length > 0) {
+      const reflection = reflections.find(r => r.id === reflectionId);
+      if (reflection) {
+        setHighlightedReflectionId(reflectionId);
+        // Scroll to the reflection
+        setTimeout(() => {
+          const element = document.getElementById(`reflection-${reflectionId}`);
+          element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+        // Clear the query param after 3 seconds
+        setTimeout(() => {
+          setSearchParams({});
+          setHighlightedReflectionId(null);
+        }, 3000);
+      }
+    }
+  }, [searchParams, reflections]);
 
   const loadData = async () => {
     const { data: projectsData } = await db
@@ -129,10 +153,29 @@ const Reflections = () => {
   };
 
   const handleDelete = async (id: string) => {
+    const reflectionToDelete = reflections.find(r => r.id === id);
+    
     try {
       const { error } = await db.from("reflections").delete().eq("id", id);
       if (error) throw error;
-      toast.success("Reflection deleted");
+      
+      // Show toast with undo action
+      toast.success("Reflection deleted", {
+        action: {
+          label: "Undo",
+          onClick: async () => {
+            try {
+              const { error: insertError } = await db.from("reflections").insert(reflectionToDelete);
+              if (insertError) throw insertError;
+              toast.success("Reflection restored");
+              loadData();
+            } catch (error: any) {
+              toast.error("Failed to restore reflection");
+            }
+          }
+        }
+      });
+      
       loadData();
     } catch (error: any) {
       toast.error(error.message || "Failed to delete reflection");
@@ -436,8 +479,13 @@ const Reflections = () => {
           <div className="space-y-4">
             {reflections.map((reflection) => {
               const mood = MOODS.find((m) => m.value === reflection.mood);
+              const isHighlighted = highlightedReflectionId === reflection.id;
               return (
-                <Card key={reflection.id} className="hover:shadow-md transition-shadow">
+                <Card 
+                  key={reflection.id} 
+                  id={`reflection-${reflection.id}`}
+                  className={`hover:shadow-md transition-all ${isHighlighted ? 'ring-2 ring-primary shadow-lg' : ''}`}
+                >
                   <CardContent className="p-4">
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
@@ -446,7 +494,7 @@ const Reflections = () => {
                           <div>
                             <p className="font-medium">{mood?.label}</p>
                             <p className="text-sm text-muted-foreground">
-                              {new Date(reflection.timestamp).toLocaleDateString()}
+                              {new Date(reflection.created_at).toLocaleDateString()}
                             </p>
                           </div>
                         </div>

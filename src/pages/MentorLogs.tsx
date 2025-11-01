@@ -226,10 +226,28 @@ const MentorLogs = () => {
   };
 
   const handleDelete = async (id: string) => {
+    const logToDelete = logs.find(l => l.id === id);
+    
     try {
       const { error } = await db.from("mentor_logs").delete().eq("id", id);
       if (error) throw error;
-      toast.success("Mentor log deleted");
+      
+      toast.success("Mentor log deleted", {
+        action: {
+          label: "Undo",
+          onClick: async () => {
+            try {
+              const { error: insertError } = await db.from("mentor_logs").insert(logToDelete);
+              if (insertError) throw insertError;
+              toast.success("Log restored");
+              loadData();
+            } catch (error: any) {
+              toast.error("Failed to restore log");
+            }
+          }
+        }
+      });
+      
       loadData();
     } catch (error: any) {
       toast.error(error.message || "Failed to delete mentor log");
