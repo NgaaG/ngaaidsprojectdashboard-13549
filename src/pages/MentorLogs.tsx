@@ -25,6 +25,7 @@ import { db } from "@/lib/supabaseHelpers";
 import { toast } from "sonner";
 import { ModeToggle } from "@/components/ModeToggle";
 import { MentorLogDetailView } from "@/components/MentorLogDetailView";
+import { useSearchParams } from "react-router-dom";
 
 const COMPETENCIES: Competency[] = ["Research", "Create", "Organize", "Communicate", "Learn", "Unsure/TBD"];
 
@@ -44,6 +45,7 @@ const MentorLogs = () => {
   const [currentMode, setCurrentMode] = useState<Mode>("lecturer");
   const [editingLog, setEditingLog] = useState<any | null>(null);
   const [detailViewLog, setDetailViewLog] = useState<any | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
   const [newLog, setNewLog] = useState({
     date: new Date().toISOString().split("T")[0],
     title: "",
@@ -79,6 +81,19 @@ const MentorLogs = () => {
       db.removeChannel(channel);
     };
   }, [currentMode]);
+
+  // Handle logId from query params (when navigating from project detail view)
+  useEffect(() => {
+    const logId = searchParams.get('logId');
+    if (logId && logs.length > 0) {
+      const log = logs.find(l => l.id === logId);
+      if (log) {
+        setDetailViewLog(log);
+        // Clear the query param
+        setSearchParams({});
+      }
+    }
+  }, [searchParams, logs]);
 
   const loadData = async () => {
     const { data: projectsData } = await db

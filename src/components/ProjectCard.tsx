@@ -1,6 +1,7 @@
 import { Project } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Eye } from "lucide-react";
 
 const COMPETENCY_COLORS: Record<string, string> = {
   Research: "hsl(265 45% 80%)",
@@ -30,10 +31,14 @@ export const ProjectCard = ({ project, onClick }: ProjectCardProps) => {
 
   return (
     <Card 
-      className="overflow-hidden hover:shadow-lg transition-all hover:scale-105 cursor-pointer"
+      className="overflow-hidden hover:shadow-lg transition-all hover:scale-105 cursor-pointer group relative"
       style={{ borderLeft: `4px solid ${borderColor}` }}
       onClick={onClick}
     >
+      <div className="absolute top-2 right-2 bg-primary/10 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1.5 text-xs font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+        <Eye className="h-3 w-3" />
+        Click to view
+      </div>
       <CardContent className="p-4">
         <div className="flex items-start justify-between mb-3">
           <div>

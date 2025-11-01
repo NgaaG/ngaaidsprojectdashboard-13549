@@ -8,10 +8,23 @@ import {
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Project, Mode } from "@/types";
 import { db } from "@/lib/supabaseHelpers";
-import { Edit, ExternalLink, Calendar } from "lucide-react";
+import { Edit, ExternalLink, Calendar, Trash2, Eye } from "lucide-react";
 import { ProjectEditDialog } from "./ProjectEditDialog";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface ProjectDetailViewProps {
   project: Project;
@@ -31,6 +44,8 @@ export const ProjectDetailView = ({
   const [reflections, setReflections] = useState<any[]>([]);
   const [mentorLogs, setMentorLogs] = useState<any[]>([]);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (open) {
@@ -48,11 +63,11 @@ export const ProjectDetailView = ({
 
     if (reflectionsData) setReflections(reflectionsData);
 
-    // Load mentor logs for this project
+    // Load mentor logs for this project - check if project.id is in the project_ids array
     const { data: logsData } = await db
       .from("mentor_logs")
       .select("*")
-      .eq("project_id", project.id)
+      .contains("project_ids", [project.id])
       .order("created_at", { ascending: false });
 
     if (logsData) setMentorLogs(logsData);
@@ -61,6 +76,25 @@ export const ProjectDetailView = ({
   const handleEditSuccess = () => {
     setEditDialogOpen(false);
     onUpdate();
+  };
+
+  const handleDelete = async () => {
+    try {
+      const { error } = await db.from("projects").delete().eq("id", project.id);
+      if (error) throw error;
+      toast.success("Project deleted successfully");
+      setDeleteDialogOpen(false);
+      onOpenChange(false);
+      onUpdate();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to delete project");
+    }
+  };
+
+  const handleViewMentorLog = (logId: string) => {
+    // Navigate to mentor logs page with the log ID as a query parameter
+    navigate(`/mentor-logs?logId=${logId}`);
+    onOpenChange(false);
   };
 
   return (
@@ -75,15 +109,25 @@ export const ProjectDetailView = ({
                   {project.competencies.join(", ")} • {project.completion}% Complete
                 </p>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setEditDialogOpen(true)}
-                className="gap-2"
-              >
-                <Edit className="h-4 w-4" />
-                Edit
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setEditDialogOpen(true)}
+                  className="gap-2"
+                >
+                  <Edit className="h-4 w-4" />
+                  Edit
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setDeleteDialogOpen(true)}
+                  className="gap-2 text-destructive hover:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </DialogHeader>
 
@@ -382,27 +426,45 @@ export const ProjectDetailView = ({
                   </Card>
                 ) : (
                   mentorLogs.map((log) => (
-                    <Card key={log.id}>
+                    <Card key={log.id} className="hover:border-primary/50 transition-colors">
                       <CardHeader>
-                        <div className="flex items-start justify-between">
-                          <CardTitle className="text-lg">{log.title}</CardTitle>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Calendar className="h-4 w-4" />
-                            {new Date(log.date).toLocaleDateString()}
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <CardTitle className="text-lg mb-2">{log.title}</CardTitle>
+                            <div className="flex items-center gap-3 flex-wrap">
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Calendar className="h-4 w-4" />
+                                {new Date(log.date).toLocaleDateString()}
+                              </div>
+                              {log.lecturer && (
+                                <Badge variant="secondary" className="text-xs">
+                                  {log.lecturer}
+                                </Badge>
+                              )}
+                            </div>
                           </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleViewMentorLog(log.id)}
+                            className="gap-2"
+                          >
+                            <Eye className="h-4 w-4" />
+                            View Full Log
+                          </Button>
                         </div>
                       </CardHeader>
                       <CardContent className="space-y-3">
                         {log.key_goals && (
                           <div>
                             <p className="text-sm font-medium mb-1">Key Goals:</p>
-                            <p className="text-sm text-muted-foreground">{log.key_goals}</p>
+                            <p className="text-sm text-muted-foreground line-clamp-2">{log.key_goals}</p>
                           </div>
                         )}
                         {log.outcomes && (
                           <div>
                             <p className="text-sm font-medium mb-1">Outcomes:</p>
-                            <p className="text-sm text-muted-foreground">{log.outcomes}</p>
+                            <p className="text-sm text-muted-foreground line-clamp-2">{log.outcomes}</p>
                           </div>
                         )}
                       </CardContent>
@@ -421,6 +483,23 @@ export const ProjectDetailView = ({
         onOpenChange={setEditDialogOpen}
         onSuccess={handleEditSuccess}
       />
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Project?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{project.name}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };
