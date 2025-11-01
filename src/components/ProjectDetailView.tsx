@@ -34,6 +34,24 @@ interface ProjectDetailViewProps {
   onUpdate: () => void;
 }
 
+// Emotion options for personal mode (how you're feeling)
+const MOODS: { value: string; emoji: string; label: string; color: string }[] = [
+  { value: "calm", emoji: "😌", label: "Calm", color: "hsl(195 60% 76%)" },
+  { value: "anxious", emoji: "😰", label: "Anxious", color: "hsl(0 70% 70%)" },
+  { value: "focused", emoji: "🎯", label: "Focused", color: "hsl(160 55% 80%)" },
+  { value: "overwhelmed", emoji: "😵", label: "Overwhelmed", color: "hsl(280 50% 75%)" },
+  { value: "energized", emoji: "⚡", label: "Energized", color: "hsl(45 100% 65%)" },
+];
+
+// Satisfaction levels for lecture mode (how satisfied you were)
+const SATISFACTION: { value: string; emoji: string; label: string; color: string }[] = [
+  { value: "energized", emoji: "🤩", label: "Very Satisfied", color: "hsl(160 55% 80%)" },
+  { value: "focused", emoji: "😊", label: "Satisfied", color: "hsl(195 60% 76%)" },
+  { value: "calm", emoji: "😐", label: "Neutral", color: "hsl(45 100% 75%)" },
+  { value: "anxious", emoji: "😔", label: "Dissatisfied", color: "hsl(35 90% 70%)" },
+  { value: "overwhelmed", emoji: "😞", label: "Very Dissatisfied", color: "hsl(0 70% 70%)" },
+];
+
 export const ProjectDetailView = ({
   project,
   mode,
@@ -112,6 +130,12 @@ export const ProjectDetailView = ({
   const handleViewMentorLog = (logId: string) => {
     // Navigate to mentor logs page with the log ID as a query parameter
     navigate(`/mentor-logs?logId=${logId}`);
+    onOpenChange(false);
+  };
+
+  const handleViewReflection = (reflectionId: string) => {
+    // Navigate to reflections page with the reflection ID as a query parameter
+    navigate(`/reflections?reflectionId=${reflectionId}`);
     onOpenChange(false);
   };
 
@@ -410,55 +434,70 @@ export const ProjectDetailView = ({
                     </CardContent>
                   </Card>
                 ) : (
-                  reflections.map((reflection) => (
-                    <Card key={reflection.id} className="hover:shadow-md transition-shadow">
-                      <CardContent className="pt-6">
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2">
-                              <span className="text-2xl">{reflection.mood === 'calm' ? '😌' : reflection.mood === 'anxious' ? '😰' : reflection.mood === 'focused' ? '🎯' : reflection.mood === 'overwhelmed' ? '😵' : '⚡'}</span>
-                              <div>
-                                <p className="font-medium capitalize">{reflection.mood}</p>
-                                <p className="text-sm text-muted-foreground">
-                                  {new Date(reflection.created_at).toLocaleDateString()} • {reflection.mode}
-                                </p>
-                              </div>
-                            </div>
-                            {reflection.emotional_dump && (
-                              <p className="text-sm text-muted-foreground line-clamp-2 mt-2">
-                                {reflection.emotional_dump}
-                              </p>
-                            )}
-                            {reflection.progress !== undefined && (
-                              <div className="mt-3">
-                                <div className="flex items-center gap-2">
-                                  <div className="flex-1 bg-muted rounded-full h-2">
-                                    <div 
-                                      className="bg-primary h-2 rounded-full transition-all"
-                                      style={{ width: `${reflection.progress}%` }}
-                                    />
+                  reflections.map((reflection) => {
+                    // Use the correct emotion set based on the reflection's mode
+                    const emotionSet = reflection.mode === "personal" ? MOODS : SATISFACTION;
+                    const moodData = emotionSet.find((m) => m.value === reflection.mood);
+                    
+                    return (
+                      <Card 
+                        key={reflection.id} 
+                        className="hover:shadow-lg transition-all border-l-4" 
+                        style={{ borderLeftColor: moodData?.color || 'hsl(195 60% 76%)' }}
+                      >
+                        <CardContent className="pt-6">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-3">
+                                <span className="text-3xl">{moodData?.emoji || '😐'}</span>
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <p className="font-semibold">{moodData?.label || reflection.mood}</p>
+                                    <Badge variant="outline" className="text-xs">
+                                      {reflection.mode === "personal" ? "Personal" : "Lecture"}
+                                    </Badge>
                                   </div>
-                                  <span className="text-xs text-muted-foreground">{reflection.progress}%</span>
+                                  <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                                    <Calendar className="h-3 w-3" />
+                                    {new Date(reflection.created_at).toLocaleDateString('en-US', { 
+                                      month: 'short', 
+                                      day: 'numeric',
+                                      year: 'numeric'
+                                    })}
+                                  </p>
                                 </div>
                               </div>
-                            )}
+                              {reflection.progress > 0 && (
+                                <div className="mb-3">
+                                  <div className="flex items-center gap-2">
+                                    <div className="flex-1 bg-muted rounded-full h-1.5">
+                                      <div 
+                                        className="bg-primary h-full rounded-full transition-all"
+                                        style={{ width: `${reflection.progress}%` }}
+                                      />
+                                    </div>
+                                    <span className="text-xs text-muted-foreground">{Math.round(reflection.progress)}%</span>
+                                  </div>
+                                </div>
+                              )}
+                              <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                                {reflection.emotional_dump}
+                              </p>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleViewReflection(reflection.id)}
+                                className="gap-2"
+                              >
+                                <Eye className="h-3 w-3" />
+                                View Full
+                              </Button>
+                            </div>
                           </div>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              navigate(`/reflections?reflectionId=${reflection.id}`);
-                              onOpenChange(false);
-                            }}
-                            className="gap-2"
-                          >
-                            <Eye className="h-4 w-4" />
-                            View Full
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))
+                        </CardContent>
+                      </Card>
+                    );
+                  })
                 )}
               </TabsContent>
 
