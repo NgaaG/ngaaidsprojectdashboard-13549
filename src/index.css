@@ -8,7 +8,7 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* ADHD Studio Pastel Palette */
+    /* Ngaa's ADHD Studio - Mode-Based Color Palette */
     --background: 45 100% 97%;  /* Cream #FFF6E0 */
     --foreground: 260 35% 25%;  /* Deep purple for text */
 
@@ -18,16 +18,18 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 260 35% 25%;
 
-    --primary: 265 45% 80%;  /* Lavender #C7B8EA */
-    --primary-foreground: 260 35% 25%;
+    /* Personal Mode - Purple Theme */
+    --primary: 270 60% 70%;  /* Rich Purple */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 160 55% 80%;  /* Mint #B5EAD7 */
-    --secondary-foreground: 260 35% 25%;
+    /* Lecture Mode - Turquoise Theme */
+    --secondary: 180 60% 65%;  /* Turquoise */
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 195 60% 88%;  /* Sky #A0DDE6 */
+    --muted: 260 20% 90%;
     --muted-foreground: 260 20% 45%;
 
-    --accent: 195 60% 76%;  /* Sky accent */
+    --accent: 180 60% 75%;  /* Light turquoise accent */
     --accent-foreground: 260 35% 25%;
 
     --destructive: 0 70% 70%;
@@ -39,15 +41,16 @@ All colors MUST be HSL.
 
     --radius: 1rem;
 
-    /* Custom ADHD Studio tokens */
-    --lavender: 265 45% 80%;
-    --mint: 160 55% 80%;
-    --sky: 195 60% 76%;
+    /* Custom mode tokens */
+    --personal-purple: 270 60% 70%;
+    --personal-purple-light: 270 60% 85%;
+    --lecture-turquoise: 180 60% 65%;
+    --lecture-turquoise-light: 180 60% 80%;
     --cream: 45 100% 97%;
     
     /* Gradients */
-    --gradient-calm: linear-gradient(135deg, hsl(265 45% 80%), hsl(160 55% 80%), hsl(45 100% 97%));
-    --gradient-focus: linear-gradient(180deg, hsl(195 60% 76% / 0.3), hsl(160 55% 80% / 0.3));
+    --gradient-personal: linear-gradient(135deg, hsl(270 60% 70%), hsl(270 60% 85%), hsl(270 50% 95%));
+    --gradient-lecture: linear-gradient(135deg, hsl(180 60% 65%), hsl(180 60% 80%), hsl(180 50% 92%));
     
     /* Animations */
     --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -110,7 +113,7 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground font-sans;
-    font-family: 'Nunito', 'Poppins', system-ui, sans-serif;
+    font-family: 'Inter', 'Outfit', system-ui, sans-serif;
   }
   
   /* Smooth transitions for ADHD-friendly UX */
@@ -148,6 +151,22 @@ All colors MUST be HSL.
   
   .pulse-glow {
     animation: pulse-glow 2s ease-in-out infinite;
+  }
+  
+  /* Highlight animation for lecture mode emphasis */
+  @keyframes highlight-pulse {
+    0%, 100% { 
+      box-shadow: 0 0 0 0 hsl(var(--lecture-turquoise) / 0.7);
+      border-color: hsl(var(--lecture-turquoise));
+    }
+    50% { 
+      box-shadow: 0 0 0 8px hsl(var(--lecture-turquoise) / 0);
+      border-color: hsl(var(--lecture-turquoise) / 0.5);
+    }
+  }
+  
+  .lecture-highlight {
+    animation: highlight-pulse 2s ease-in-out infinite;
   }
 }
 

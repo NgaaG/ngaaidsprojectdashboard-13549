@@ -101,7 +101,7 @@ export default {
         "pulse-glow": "pulse-glow 2s ease-in-out infinite",
       },
       fontFamily: {
-        sans: ["Nunito", "Poppins", "system-ui", "sans-serif"],
+        sans: ["Inter", "Outfit", "system-ui", "sans-serif"],
       },
     },
   },
