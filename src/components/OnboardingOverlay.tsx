@@ -13,9 +13,9 @@ export const OnboardingOverlay = ({ onSelectMode, onClose }: OnboardingOverlayPr
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm animate-fade-in">
-      <div className="min-h-screen flex items-center justify-center p-8">
-        <div className="max-w-4xl w-full space-y-12 animate-scale-in">
+    <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm animate-fade-in overflow-y-auto">
+      <div className="min-h-screen flex items-center justify-center p-4 sm:p-8 py-12">
+        <div className="max-w-4xl w-full space-y-8 sm:space-y-12 animate-scale-in my-8">
           {/* Header */}
           <div className="text-center space-y-4">
             <h1 className="text-5xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
@@ -27,9 +27,9 @@ export const OnboardingOverlay = ({ onSelectMode, onClose }: OnboardingOverlayPr
           </div>
 
           {/* Mode Cards */}
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 gap-6 sm:gap-8">
             {/* Personal Mode Card */}
-            <div className="bg-card rounded-3xl p-8 border-2 border-primary/40 hover:border-primary transition-all hover:scale-105 shadow-lg">
+            <div className="bg-card rounded-3xl p-6 sm:p-8 border-2 border-primary/40 hover:border-primary transition-all hover:scale-105 shadow-lg">
               <div className="space-y-6">
                 <div className="flex items-center justify-center">
                   <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-primary/60 breathe flex items-center justify-center shadow-lg">
@@ -54,7 +54,7 @@ export const OnboardingOverlay = ({ onSelectMode, onClose }: OnboardingOverlayPr
             </div>
 
             {/* Lecture Mode Card - EMPHASIZED FOR LECTURERS */}
-            <div className="bg-card rounded-3xl p-8 border-2 border-secondary hover:border-secondary transition-all hover:scale-105 shadow-xl lecture-highlight relative">
+            <div className="bg-card rounded-3xl p-6 sm:p-8 border-2 border-secondary hover:border-secondary transition-all hover:scale-105 shadow-xl lecture-highlight relative">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                 <span className="bg-secondary text-white px-4 py-1 rounded-full text-sm font-bold shadow-md">
                   👨‍🏫 FOR LECTURERS
