@@ -1,4 +1,6 @@
 
+-- Migration: 20251030221353
+
 -- Migration: 20251030164153
 
 -- Migration: 20251030160148
@@ -344,3 +346,51 @@ COMMENT ON COLUMN public.projects.learning_goals IS 'Learning goals organized by
 COMMENT ON COLUMN public.projects.key_tasks IS 'Array of task objects with name, status (completed/not-completed/to-be-completed), and description';
 
 
+
+
+-- Migration: 20251030225421
+-- Add learning_goals_achievements column to projects table
+ALTER TABLE public.projects 
+ADD COLUMN learning_goals_achievements jsonb DEFAULT '{"Research": [], "Create": [], "Organize": [], "Communicate": [], "Learn": []}'::jsonb;
+
+-- Add selected_task_ids column to mentor_logs table
+ALTER TABLE public.mentor_logs 
+ADD COLUMN selected_task_ids text[];
+
+-- Migration: 20251030234412
+-- Add resource_links column to mentor_logs table
+ALTER TABLE public.mentor_logs 
+ADD COLUMN resource_links text;
+
+COMMENT ON COLUMN public.mentor_logs.resource_links IS 'Links to resources provided by the lecturer';
+
+-- Migration: 20251030234442
+-- Add achieved_goals column to mentor_logs table to track which key goals were achieved
+ALTER TABLE public.mentor_logs 
+ADD COLUMN achieved_goals text[];
+
+COMMENT ON COLUMN public.mentor_logs.achieved_goals IS 'Array of goal text that was achieved during the session';
+
+-- Migration: 20251031012028
+-- Change project_id to project_ids array to support multiple projects per mentor log
+ALTER TABLE public.mentor_logs 
+  DROP COLUMN IF EXISTS project_id;
+
+ALTER TABLE public.mentor_logs 
+  ADD COLUMN project_ids uuid[] DEFAULT NULL;
+
+-- Migration: 20251031024508
+-- Add lecturer field to mentor_logs table
+ALTER TABLE public.mentor_logs 
+ADD COLUMN IF NOT EXISTS lecturer TEXT;
+
+-- Add a comment to describe the field
+COMMENT ON COLUMN public.mentor_logs.lecturer IS 'The lecturer/mentor for this consult log session';
+
+-- Migration: 20251101200017
+-- Add project_id column to reflections table
+ALTER TABLE public.reflections 
+ADD COLUMN project_id UUID REFERENCES public.projects(id) ON DELETE CASCADE;
+
+-- Add index for better query performance
+CREATE INDEX idx_reflections_project_id ON public.reflections(project_id);
