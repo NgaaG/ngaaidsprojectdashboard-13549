@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Progress } from "@/components/ui/progress";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Upload, X, Plus, Trash2, ExternalLink } from "lucide-react";
@@ -19,6 +20,7 @@ import { db } from "@/lib/supabaseHelpers";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { calculateProjectProgress } from "@/lib/projectProgress";
 
 const COMPETENCIES: Competency[] = [
   "Research",
@@ -45,7 +47,6 @@ export const ProjectEditDialog = ({
   const [name, setName] = useState(project.name);
   const [description, setDescription] = useState(project.description || "");
   const [competencies, setCompetencies] = useState<Competency[]>(project.competencies);
-  const [completion, setCompletion] = useState(project.completion);
   const [loading, setLoading] = useState(false);
   const [learningGoals, setLearningGoals] = useState<LearningGoals>(
     project.learningGoals || {
@@ -72,7 +73,6 @@ export const ProjectEditDialog = ({
       setName(project.name);
       setDescription(project.description || "");
       setCompetencies(project.competencies);
-      setCompletion(project.completion);
       setLearningGoals(
         project.learningGoals || {
           Research: [],
@@ -94,6 +94,9 @@ export const ProjectEditDialog = ({
       setKeyTasks(project.keyTasks || []);
     }
   }, [open, project]);
+
+  // Calculate progress dynamically
+  const calculatedProgress = calculateProjectProgress(learningGoalsAchievements, keyTasks);
 
   const toggleCompetency = (comp: Competency) => {
     setCompetencies(prev =>
@@ -218,13 +221,16 @@ export const ProjectEditDialog = ({
     setLoading(true);
 
     try {
+      // Calculate final progress before saving
+      const finalProgress = calculateProjectProgress(learningGoalsAchievements, keyTasks);
+      
       const { error } = await db
         .from("projects")
         .update({
           name,
           description,
           competencies,
-          completion,
+          completion: finalProgress,
           learning_goals: learningGoals,
           learning_goals_achievements: learningGoalsAchievements,
           key_tasks: keyTasks,
@@ -314,16 +320,11 @@ export const ProjectEditDialog = ({
                 </div>
 
                 <div>
-                  <Label htmlFor="completion">Completion: {completion}%</Label>
-                  <Slider
-                    id="completion"
-                    value={[completion]}
-                    onValueChange={(value) => setCompletion(value[0])}
-                    min={0}
-                    max={100}
-                    step={5}
-                    className="mt-3"
-                  />
+                  <Label htmlFor="completion">Overall Progress: {calculatedProgress}%</Label>
+                  <p className="text-xs text-muted-foreground mt-1 mb-2">
+                    Automatically calculated from learning goals satisfaction and key tasks completion
+                  </p>
+                  <Progress value={calculatedProgress} className="mt-2" />
                 </div>
               </div>
             </TabsContent>

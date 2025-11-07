@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { useViewMode } from "@/hooks/useViewMode";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const navItems = [
   { icon: Home, label: "Home", path: "/" },
@@ -28,7 +29,7 @@ export const Sidebar = () => {
         💜
       </div>
 
-      <nav className="flex flex-col gap-4 mt-8">
+      <nav className="flex flex-col gap-4 mt-8 flex-1">
         {navItems.map(({ icon: Icon, label, path }) => {
           const isActive = location.pathname === path;
           return (
@@ -55,6 +56,10 @@ export const Sidebar = () => {
           );
         })}
       </nav>
+
+      <div className="mt-auto">
+        <ThemeToggle />
+      </div>
     </aside>
   );
 };
