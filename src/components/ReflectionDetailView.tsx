@@ -1,6 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Calendar } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Calendar, Pencil } from "lucide-react";
 import { MoodType } from "@/types";
 
 const MOODS: { value: MoodType; emoji: string; label: string; color: string }[] = [
@@ -24,13 +25,15 @@ interface ReflectionDetailViewProps {
   projectName?: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onEdit?: () => void;
 }
 
 export const ReflectionDetailView = ({ 
   reflection,
   projectName,
   open, 
-  onOpenChange 
+  onOpenChange,
+  onEdit
 }: ReflectionDetailViewProps) => {
   const emotionSet = reflection.mode === "personal" ? MOODS : SATISFACTION;
   const mood = emotionSet.find((m) => m.value === reflection.mood);
@@ -40,8 +43,8 @@ export const ReflectionDetailView = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[92vh] overflow-y-auto">
         <DialogHeader>
-          <div className="flex flex-col gap-4">
-            <div className="flex-1 w-full">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1">
               <DialogTitle className="text-2xl sm:text-3xl mb-3 leading-tight flex items-center gap-3">
                 <span className="text-4xl">{mood?.emoji}</span>
                 <span>{mood?.label}</span>
@@ -81,6 +84,17 @@ export const ReflectionDetailView = ({
                 </div>
               )}
             </div>
+            {onEdit && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onEdit}
+                className="gap-2 shrink-0"
+              >
+                <Pencil className="h-4 w-4" />
+                Edit
+              </Button>
+            )}
           </div>
         </DialogHeader>
 

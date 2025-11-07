@@ -21,6 +21,7 @@ import { ModeToggle } from "@/components/ModeToggle";
 import { useSearchParams } from "react-router-dom";
 import { useViewMode } from "@/hooks/useViewMode";
 import { ReflectionDetailView } from "@/components/ReflectionDetailView";
+import { ReflectionEditDialog } from "@/components/ReflectionEditDialog";
 
 const MOODS: { value: MoodType; emoji: string; label: string; color: string }[] = [
   { value: "calm", emoji: "😌", label: "Calm", color: "hsl(195 60% 76%)" },
@@ -48,6 +49,7 @@ const Reflections = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [highlightedReflectionId, setHighlightedReflectionId] = useState<string | null>(null);
   const [selectedReflection, setSelectedReflection] = useState<any | null>(null);
+  const [editingReflection, setEditingReflection] = useState<any | null>(null);
   const [currentReflection, setCurrentReflection] = useState({
     mood: "calm",
     emotionalDump: "",
@@ -664,6 +666,24 @@ const Reflections = () => {
           projectName={projects.find(p => p.id === selectedReflection.project_id)?.name}
           open={!!selectedReflection}
           onOpenChange={(open) => !open && setSelectedReflection(null)}
+          onEdit={!isViewerMode ? () => {
+            setEditingReflection(selectedReflection);
+            setSelectedReflection(null);
+          } : undefined}
+        />
+      )}
+
+      {/* Reflection Edit Dialog */}
+      {editingReflection && (
+        <ReflectionEditDialog
+          reflection={editingReflection}
+          projects={projects}
+          open={!!editingReflection}
+          onOpenChange={(open) => !open && setEditingReflection(null)}
+          onSuccess={() => {
+            loadData();
+            setEditingReflection(null);
+          }}
         />
       )}
     </div>
