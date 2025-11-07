@@ -24,6 +24,7 @@ import { Competency, Mode } from "@/types";
 import { db } from "@/lib/supabaseHelpers";
 import { toast } from "sonner";
 import { ModeToggle } from "@/components/ModeToggle";
+import { useViewMode } from "@/hooks/useViewMode";
 import { MentorLogDetailView } from "@/components/MentorLogDetailView";
 import { useSearchParams } from "react-router-dom";
 
@@ -39,6 +40,7 @@ const COMPETENCY_COLORS: Record<Competency, string> = {
 };
 
 const MentorLogs = () => {
+  const { isViewerMode } = useViewMode();
   const [logs, setLogs] = useState<any[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -269,17 +271,18 @@ const MentorLogs = () => {
           </div>
 
           {/* New Mentor Log Button */}
-          <div className="flex justify-end mb-6">
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="gap-2 rounded-full">
-                  <Plus className="h-4 w-4" />
-                  New Mentor Log
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>
+          {!isViewerMode && (
+            <div className="flex justify-end mb-6">
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="gap-2 rounded-full">
+                    <Plus className="h-4 w-4" />
+                    New Mentor Log
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>
                     {editingLog ? "Edit Mentor Log" : `Add New Mentor Log (${currentMode === "personal" ? "Personal" : "Lecture"} Mode)`}
                   </DialogTitle>
                 </DialogHeader>
@@ -503,6 +506,7 @@ const MentorLogs = () => {
               </DialogContent>
             </Dialog>
           </div>
+          )}
         </header>
 
         {/* Mentor Log Cards */}
@@ -551,32 +555,36 @@ const MentorLogs = () => {
                         <CardTitle className="text-lg">{log.title}</CardTitle>
                       </div>
                       <div className="flex gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="gap-1 flex-col h-auto py-2 px-3"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleOpenEdit(log);
-                          }}
-                          title="Edit pre-session agenda prep"
-                        >
-                          <div className="flex items-center gap-1">
-                            <Edit className="h-3 w-3" />
-                            <span className="font-bold text-xs">Edit Pre-Session</span>
-                          </div>
-                          <span className="text-[10px] text-muted-foreground font-normal">Agenda prep for consult</span>
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(log.id);
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        {!isViewerMode && (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="gap-1 flex-col h-auto py-2 px-3"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenEdit(log);
+                              }}
+                              title="Edit pre-session agenda prep"
+                            >
+                              <div className="flex items-center gap-1">
+                                <Edit className="h-3 w-3" />
+                                <span className="font-bold text-xs">Edit Pre-Session</span>
+                              </div>
+                              <span className="text-[10px] text-muted-foreground font-normal">Agenda prep for consult</span>
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDelete(log.id);
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </>
+                        )}
                       </div>
                     </div>
                   </CardHeader>

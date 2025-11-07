@@ -19,6 +19,7 @@ import { db } from "@/lib/supabaseHelpers";
 import { toast } from "sonner";
 import { ModeToggle } from "@/components/ModeToggle";
 import { useSearchParams } from "react-router-dom";
+import { useViewMode } from "@/hooks/useViewMode";
 
 const MOODS: { value: MoodType; emoji: string; label: string; color: string }[] = [
   { value: "calm", emoji: "😌", label: "Calm", color: "hsl(195 60% 76%)" },
@@ -38,6 +39,7 @@ const SATISFACTION: { value: MoodType; emoji: string; label: string; color: stri
 ];
 
 const Reflections = () => {
+  const { isViewerMode } = useViewMode();
   const [currentMode, setCurrentMode] = useState<Mode>("personal");
   const [reflections, setReflections] = useState<any[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
@@ -223,14 +225,16 @@ const Reflections = () => {
               <p className="text-xs text-muted-foreground mt-1">Complete all sections to save</p>
             </div>
             <div className="flex gap-2">
-              <Button 
-                onClick={handleSave} 
-                className="gap-2 rounded-full shadow-md hover:shadow-lg transition-all hover:scale-105"
-                disabled={!selectedProjectId || currentReflection.progress < 100}
-              >
-                <Save className="h-4 w-4" />
-                Save Reflection
-              </Button>
+              {!isViewerMode && (
+                <Button 
+                  onClick={handleSave} 
+                  className="gap-2 rounded-full shadow-md hover:shadow-lg transition-all hover:scale-105"
+                  disabled={!selectedProjectId || currentReflection.progress < 100}
+                >
+                  <Save className="h-4 w-4" />
+                  Save Reflection
+                </Button>
+              )}
             </div>
           </div>
           <div className="space-y-2">
@@ -627,14 +631,16 @@ const Reflections = () => {
                             {reflection.emotional_dump}
                           </p>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDelete(reflection.id)}
-                          className="hover:text-destructive hover:bg-destructive/10"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        {!isViewerMode && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDelete(reflection.id)}
+                            className="hover:text-destructive hover:bg-destructive/10"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
                       </div>
                     </CardContent>
                   </Card>

@@ -32,6 +32,7 @@ interface ProjectDetailViewProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onUpdate: () => void;
+  isViewerMode?: boolean;
 }
 
 // Emotion options for personal mode (how you're feeling)
@@ -58,6 +59,7 @@ export const ProjectDetailView = ({
   open,
   onOpenChange,
   onUpdate,
+  isViewerMode = false,
 }: ProjectDetailViewProps) => {
   const [reflections, setReflections] = useState<any[]>([]);
   const [mentorLogs, setMentorLogs] = useState<any[]>([]);
@@ -152,23 +154,27 @@ export const ProjectDetailView = ({
                 </p>
               </div>
               <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setEditDialogOpen(true)}
-                  className="gap-2"
-                >
-                  <Edit className="h-4 w-4" />
-                  Edit
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setDeleteDialogOpen(true)}
-                  className="gap-2 text-destructive hover:text-destructive"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                {!isViewerMode && (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setEditDialogOpen(true)}
+                      className="gap-2"
+                    >
+                      <Edit className="h-4 w-4" />
+                      Edit
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setDeleteDialogOpen(true)}
+                      className="gap-2 text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           </DialogHeader>

@@ -12,8 +12,10 @@ import { Download, HelpCircle } from "lucide-react";
 import { db } from "@/lib/supabaseHelpers";
 import { exportToJSON, exportToCSV } from "@/lib/exportUtils";
 import { toast } from "sonner";
+import { useViewMode } from "@/hooks/useViewMode";
 
 const Home = () => {
+  const { isViewerMode } = useViewMode();
   const [mode, setModeState] = useState<Mode>(getMode());
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -243,23 +245,27 @@ const Home = () => {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowOnboarding(true)}
-              className="rounded-full hover:bg-primary/20 h-8 w-8 sm:h-10 sm:w-10 p-0"
-              title="Show intro"
-            >
-              <HelpCircle className="h-4 w-4 sm:h-5 sm:w-5" />
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleExportJSON} className="gap-1 sm:gap-2 text-xs sm:text-sm h-8 sm:h-10">
-              <Download className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Export</span> JSON
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleExportCSV} className="gap-1 sm:gap-2 text-xs sm:text-sm h-8 sm:h-10">
-              <Download className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Export</span> CSV
-            </Button>
+            {!isViewerMode && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowOnboarding(true)}
+                  className="rounded-full hover:bg-primary/20 h-8 w-8 sm:h-10 sm:w-10 p-0"
+                  title="Show intro"
+                >
+                  <HelpCircle className="h-4 w-4 sm:h-5 sm:w-5" />
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleExportJSON} className="gap-1 sm:gap-2 text-xs sm:text-sm h-8 sm:h-10">
+                  <Download className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Export</span> JSON
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleExportCSV} className="gap-1 sm:gap-2 text-xs sm:text-sm h-8 sm:h-10">
+                  <Download className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Export</span> CSV
+                </Button>
+              </>
+            )}
             <ModeToggle mode={mode} onModeChange={handleModeChange} />
           </div>
         </div>
@@ -282,15 +288,15 @@ const Home = () => {
             <h2 className="text-xl sm:text-2xl font-semibold">
               {mode === "personal" ? "My Projects" : "Project Portfolio"}
             </h2>
-            <ProjectDialog onProjectCreated={loadData} currentMode={mode} />
+            {!isViewerMode && <ProjectDialog onProjectCreated={loadData} currentMode={mode} />}
           </div>
 
           {projects.length === 0 ? (
             <div className="text-center py-16 bg-card rounded-2xl border-2 border-dashed">
               <p className="text-muted-foreground text-lg mb-4">
-                No projects yet. Create my first one!
+                {isViewerMode ? "No projects available" : "No projects yet. Create my first one!"}
               </p>
-              <ProjectDialog onProjectCreated={loadData} currentMode={mode} />
+              {!isViewerMode && <ProjectDialog onProjectCreated={loadData} currentMode={mode} />}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -330,6 +336,7 @@ const Home = () => {
           open={detailViewOpen}
           onOpenChange={setDetailViewOpen}
           onUpdate={loadData}
+          isViewerMode={isViewerMode}
         />
       )}
     </div>

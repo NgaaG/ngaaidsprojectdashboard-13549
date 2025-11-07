@@ -1,6 +1,8 @@
-import { Home, MessageCircle, Compass, TrendingUp, Moon } from "lucide-react";
+import { Home, MessageCircle, Compass, TrendingUp, Moon, Eye } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { useViewMode } from "@/hooks/useViewMode";
 
 const navItems = [
   { icon: Home, label: "Home", path: "/" },
@@ -12,9 +14,16 @@ const navItems = [
 
 export const Sidebar = () => {
   const location = useLocation();
+  const { isViewerMode } = useViewMode();
 
   return (
     <aside className="fixed left-0 top-0 h-screen w-20 bg-sidebar border-r border-sidebar-border flex flex-col items-center py-8 gap-6 z-50">
+      {isViewerMode && (
+        <Badge variant="secondary" className="absolute top-2 left-1/2 -translate-x-1/2 text-xs flex items-center gap-1">
+          <Eye className="h-3 w-3" />
+          Viewer
+        </Badge>
+      )}
       <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-2xl font-bold text-primary-foreground shadow-lg">
         💜
       </div>
