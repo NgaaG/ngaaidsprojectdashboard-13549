@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { ModeToggle } from "@/components/ModeToggle";
 import { useSearchParams } from "react-router-dom";
 import { useViewMode } from "@/hooks/useViewMode";
+import { ReflectionDetailView } from "@/components/ReflectionDetailView";
 
 const MOODS: { value: MoodType; emoji: string; label: string; color: string }[] = [
   { value: "calm", emoji: "😌", label: "Calm", color: "hsl(195 60% 76%)" },
@@ -46,6 +47,7 @@ const Reflections = () => {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const [highlightedReflectionId, setHighlightedReflectionId] = useState<string | null>(null);
+  const [selectedReflection, setSelectedReflection] = useState<any | null>(null);
   const [currentReflection, setCurrentReflection] = useState({
     mood: "calm",
     emotionalDump: "",
@@ -583,13 +585,14 @@ const Reflections = () => {
                 // Get the correct emotion set based on reflection mode
                 const emotionSet = reflection.mode === "personal" ? MOODS : SATISFACTION;
                 const mood = emotionSet.find((m) => m.value === reflection.mood);
-                const isHighlighted = highlightedReflectionId === reflection.id;
+                 const isHighlighted = highlightedReflectionId === reflection.id;
                 return (
                   <Card 
                     key={reflection.id} 
                     id={`reflection-${reflection.id}`}
-                    className={`hover:shadow-lg transition-all border-l-4 ${isHighlighted ? 'ring-2 ring-primary shadow-xl animate-pulse' : ''}`}
+                    className={`hover:shadow-lg transition-all border-l-4 cursor-pointer ${isHighlighted ? 'ring-2 ring-primary shadow-xl animate-pulse' : ''}`}
                     style={{ borderLeftColor: mood?.color || 'hsl(195 60% 76%)' }}
+                    onClick={() => setSelectedReflection(reflection)}
                   >
                     <CardContent className="p-5">
                       <div className="flex justify-between items-start gap-4">
@@ -635,7 +638,10 @@ const Reflections = () => {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => handleDelete(reflection.id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(reflection.id);
+                            }}
                             className="hover:text-destructive hover:bg-destructive/10"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -650,6 +656,15 @@ const Reflections = () => {
           </div>
         </section>
       </div>
+
+      {/* Reflection Detail View Dialog */}
+      {selectedReflection && (
+        <ReflectionDetailView
+          reflection={selectedReflection}
+          open={!!selectedReflection}
+          onOpenChange={(open) => !open && setSelectedReflection(null)}
+        />
+      )}
     </div>
   );
 };
