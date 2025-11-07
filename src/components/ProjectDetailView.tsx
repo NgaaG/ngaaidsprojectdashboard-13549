@@ -226,6 +226,9 @@ export const ProjectDetailView = ({
                   <CardTitle className="flex items-center gap-2">
                     🎯 Learning Goals
                   </CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Specific learning objectives for each competency
+                  </p>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
@@ -266,14 +269,19 @@ export const ProjectDetailView = ({
                 <CardContent>
                   <div className="space-y-6">
                     {(["Research", "Create", "Organize", "Communicate", "Learn"] as const).map((comp) => {
-                      const achievements = project.learningGoalsAchievements?.[comp];
-                      if (!Array.isArray(achievements) || achievements.length === 0) return null;
+                      const goals = project.learningGoals?.[comp] || [];
+                      const achievements = project.learningGoalsAchievements?.[comp] || [];
+                      // Only show achievements that have corresponding goals
+                      const validAchievements = achievements.filter(ach => 
+                        goals.some(goal => goal === ach.goal)
+                      );
+                      if (validAchievements.length === 0) return null;
                       
                       return (
                         <div key={comp} className="border rounded-lg p-4 bg-background">
                           <h4 className="font-semibold text-sm mb-3">{comp}</h4>
                           <div className="space-y-4">
-                            {achievements.map((achievement, index) => (
+                            {validAchievements.map((achievement, index) => (
                               <div key={index} className="p-3 bg-muted/30 rounded-lg space-y-2">
                                 <div className="flex items-start gap-2">
                                   <span className={`text-sm ${achievement.achieved ? 'text-green-600 font-semibold' : 'text-muted-foreground'}`}>
@@ -318,6 +326,9 @@ export const ProjectDetailView = ({
                   <CardTitle className="flex items-center gap-2">
                     ✅ Key Tasks & Resources
                   </CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Breakdown of project deliverables and evidence
+                  </p>
                 </CardHeader>
                 <CardContent>
                    <div className="space-y-5">

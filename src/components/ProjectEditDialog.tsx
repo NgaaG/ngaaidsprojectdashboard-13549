@@ -126,12 +126,16 @@ export const ProjectEditDialog = ({
   };
 
   const updateAchievement = (comp: keyof LearningGoalsAchievements, index: number, field: keyof LearningGoalAchievement, value: any) => {
-    setLearningGoalsAchievements(prev => ({
-      ...prev,
-      [comp]: prev[comp].map((achievement, i) => 
-        i === index ? { ...achievement, [field]: value } : achievement
-      ),
-    }));
+    setLearningGoalsAchievements(prev => {
+      const updatedAchievements = [...prev[comp]];
+      if (updatedAchievements[index]) {
+        updatedAchievements[index] = { ...updatedAchievements[index], [field]: value };
+      }
+      return {
+        ...prev,
+        [comp]: updatedAchievements,
+      };
+    });
   };
 
   const addTask = () => {

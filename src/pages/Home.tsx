@@ -66,9 +66,15 @@ const Home = () => {
       // Filter projects by current mode
       const filteredProjects = mappedProjects.filter(p => p.mode === mode);
       setProjects(filteredProjects);
+      
+      // Update selectedProject if it exists
+      if (selectedProject) {
+        const updatedSelectedProject = mappedProjects.find(p => p.id === selectedProject.id);
+        if (updatedSelectedProject) {
+          setSelectedProject(updatedSelectedProject);
+        }
+      }
     }
-
-    const filteredProjects = projects.filter(p => p.mode === mode);
 
     // Load competency progress
     const { data: progressData } = await db
