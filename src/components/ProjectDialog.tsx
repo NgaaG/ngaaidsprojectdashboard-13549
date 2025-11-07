@@ -115,8 +115,15 @@ export const ProjectDialog = ({ onProjectCreated, currentMode }: ProjectDialogPr
 
   const addTaskLink = (taskId: string, url: string, title: string) => {
     const task = keyTasks.find(t => t.id === taskId);
-    if (!task || !url) return;
-    updateTask(taskId, "links", [...(task.links || []), { url, title: title || url }]);
+    if (!task || !url.trim()) return;
+    
+    // Ensure URL has protocol
+    let formattedUrl = url.trim();
+    if (!formattedUrl.match(/^https?:\/\//i)) {
+      formattedUrl = 'https://' + formattedUrl;
+    }
+    
+    updateTask(taskId, "links", [...(task.links || []), { url: formattedUrl, title: title.trim() || formattedUrl }]);
   };
 
   const removeTaskLink = (taskId: string, linkIndex: number) => {
