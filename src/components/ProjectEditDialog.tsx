@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Upload, X, Plus, Trash2 } from "lucide-react";
+import { Upload, X, Plus, Trash2, ExternalLink } from "lucide-react";
 import { Competency, Project, LearningGoals, LearningGoalsAchievements, KeyTask, LearningGoalAchievement } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 import { db } from "@/lib/supabaseHelpers";
@@ -609,19 +609,56 @@ export const ProjectEditDialog = ({
 
                             {task.files && task.files.length > 0 && (
                               <div className="mt-2 space-y-2">
-                                {task.files.map((file, fileIndex) => (
-                                  <div key={fileIndex} className="flex items-center justify-between p-2 bg-muted/30 rounded border text-xs">
-                                    <span className="truncate flex-1">{file.name}</span>
-                                    <Button
-                                      type="button"
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => removeTaskFile(task.id, fileIndex)}
-                                    >
-                                      <X className="h-3 w-3" />
-                                    </Button>
-                                  </div>
-                                ))}
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                  {task.files.map((file, fileIndex) => (
+                                    <div key={fileIndex} className="group relative aspect-square rounded-lg overflow-hidden border border-border/50 hover:border-primary/50 bg-muted/30 transition-all">
+                                      {file.url.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i) ? (
+                                        <img 
+                                          src={file.url} 
+                                          alt={file.name}
+                                          className="w-full h-full object-cover"
+                                          loading="lazy"
+                                        />
+                                      ) : file.url.match(/\.(mp4|webm|mov|avi)$/i) ? (
+                                        <>
+                                          <video 
+                                            src={file.url}
+                                            className="w-full h-full object-cover"
+                                            muted
+                                          />
+                                          <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                                            <div className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center">
+                                              <div className="w-0 h-0 border-t-[6px] border-t-transparent border-l-[10px] border-l-primary border-b-[6px] border-b-transparent ml-0.5" />
+                                            </div>
+                                          </div>
+                                        </>
+                                      ) : file.url.match(/\.(pdf)$/i) ? (
+                                        <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950/30 dark:to-red-900/30 p-3">
+                                          <div className="w-10 h-10 mb-1.5 text-red-600 dark:text-red-400">
+                                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                              <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13zm-2 4h-1v1h1v1h-1v2H9v-2H8v-1h1v-1H8v-1h1v-1h1v1h1v1zm5 4h-1v-1h-1v-1h1v-1h1v3z"/>
+                                            </svg>
+                                          </div>
+                                          <p className="text-[9px] text-center font-medium text-red-700 dark:text-red-300 truncate w-full px-1">{file.name}</p>
+                                        </div>
+                                      ) : (
+                                        <div className="w-full h-full flex flex-col items-center justify-center p-3">
+                                          <ExternalLink className="h-6 w-6 mb-1 text-muted-foreground/70" />
+                                          <p className="text-[9px] text-center text-muted-foreground truncate w-full">{file.name}</p>
+                                        </div>
+                                      )}
+                                      <Button
+                                        type="button"
+                                        variant="destructive"
+                                        size="sm"
+                                        className="absolute top-1 right-1 w-6 h-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                                        onClick={() => removeTaskFile(task.id, fileIndex)}
+                                      >
+                                        <X className="h-3 w-3" />
+                                      </Button>
+                                    </div>
+                                  ))}
+                                </div>
                                 <Button
                                   type="button"
                                   variant="outline"

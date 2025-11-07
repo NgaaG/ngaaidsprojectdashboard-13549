@@ -370,32 +370,63 @@ export const ProjectDetailView = ({
                         {/* Media Gallery */}
                         {task.files && task.files.length > 0 && (
                           <div className="pt-3 border-t">
-                            <p className="text-xs font-semibold mb-3">Files & Media</p>
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            <p className="text-xs font-semibold mb-3 text-foreground/80">Files & Media</p>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
                               {task.files.map((file, idx) => (
                                 <a
                                   key={idx}
                                   href={file.url}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="group relative aspect-video rounded-lg overflow-hidden border hover:border-primary transition-colors"
+                                  className="group relative aspect-square rounded-xl overflow-hidden border border-border/50 hover:border-primary/70 transition-all hover:shadow-lg hover:scale-[1.02] bg-muted/30"
                                 >
-                                  {file.url.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
-                                    <img 
-                                      src={file.url} 
-                                      alt={file.name}
-                                      className="w-full h-full object-cover"
-                                    />
-                                  ) : (
-                                    <div className="w-full h-full flex items-center justify-center bg-muted">
-                                      <div className="text-center p-3">
-                                        <ExternalLink className="h-5 w-5 mx-auto mb-1 text-muted-foreground" />
-                                        <p className="text-xs truncate">{file.name}</p>
+                                  {file.url.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i) ? (
+                                    <>
+                                      <img 
+                                        src={file.url} 
+                                        alt={file.name}
+                                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                                        loading="lazy"
+                                      />
+                                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                      <div className="absolute bottom-0 left-0 right-0 p-2 translate-y-full group-hover:translate-y-0 transition-transform">
+                                        <p className="text-[10px] text-white font-medium truncate drop-shadow-lg">{file.name}</p>
                                       </div>
+                                    </>
+                                  ) : file.url.match(/\.(mp4|webm|mov|avi)$/i) ? (
+                                    <>
+                                      <video 
+                                        src={file.url}
+                                        className="w-full h-full object-cover"
+                                        muted
+                                        playsInline
+                                      />
+                                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                        <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center backdrop-blur-sm">
+                                          <div className="w-0 h-0 border-t-[8px] border-t-transparent border-l-[14px] border-l-primary border-b-[8px] border-b-transparent ml-1" />
+                                        </div>
+                                      </div>
+                                      <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 to-transparent">
+                                        <p className="text-[10px] text-white font-medium truncate">{file.name}</p>
+                                      </div>
+                                    </>
+                                  ) : file.url.match(/\.(pdf)$/i) ? (
+                                    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950/30 dark:to-red-900/30 p-4">
+                                      <div className="w-14 h-14 mb-2 text-red-600 dark:text-red-400">
+                                        <svg viewBox="0 0 24 24" fill="currentColor">
+                                          <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13zm-2 4h-1v1h1v1h-1v2H9v-2H8v-1h1v-1H8v-1h1v-1h1v1h1v1zm5 4h-1v-1h-1v-1h1v-1h1v3z"/>
+                                        </svg>
+                                      </div>
+                                      <p className="text-[10px] text-center font-medium text-red-700 dark:text-red-300 truncate w-full px-1">{file.name}</p>
+                                    </div>
+                                  ) : (
+                                    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-muted to-muted/50 p-4">
+                                      <ExternalLink className="h-8 w-8 mb-2 text-muted-foreground/70" />
+                                      <p className="text-[10px] text-center font-medium text-muted-foreground truncate w-full px-1">{file.name}</p>
                                     </div>
                                   )}
-                                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <ExternalLink className="h-5 w-5 text-white" />
+                                  <div className="absolute top-2 right-2 w-7 h-7 rounded-full bg-background/90 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
+                                    <ExternalLink className="h-3.5 w-3.5 text-foreground" />
                                   </div>
                                 </a>
                               ))}
@@ -406,20 +437,20 @@ export const ProjectDetailView = ({
                         {/* Links */}
                         {task.links && task.links.length > 0 && (
                           <div className="pt-3 border-t">
-                            <p className="text-xs font-semibold mb-2">Links</p>
-                            <div className="space-y-2">
+                            <p className="text-xs font-semibold mb-2.5 text-foreground/80">Related Links</p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                               {task.links.map((link, idx) => (
                                 <a
                                   key={idx}
                                   href={link.url}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="flex items-center gap-2 p-2.5 bg-background rounded border hover:border-primary transition-colors group"
+                                  className="group flex items-center gap-2.5 p-2.5 rounded-lg border border-border/50 hover:border-primary/70 bg-muted/20 hover:bg-muted/40 transition-all hover:shadow-md text-sm"
                                 >
-                                  <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
-                                  <span className="text-sm text-primary hover:underline truncate">
-                                    {link.title}
-                                  </span>
+                                  <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/20 transition-colors">
+                                    <ExternalLink className="h-4 w-4 text-primary" />
+                                  </div>
+                                  <span className="text-foreground/90 group-hover:text-primary truncate font-medium transition-colors">{link.title}</span>
                                 </a>
                               ))}
                             </div>
