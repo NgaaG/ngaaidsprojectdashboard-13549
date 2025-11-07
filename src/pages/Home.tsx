@@ -30,12 +30,12 @@ const Home = () => {
     "Unsure/TBD": 0,
   });
 
-  // Check if first visit
+  // Check if first visit (persist across tabs)
   useEffect(() => {
-    const hasSeenOnboarding = sessionStorage.getItem("hasSeenOnboarding");
+    const hasSeenOnboarding = localStorage.getItem("hasSeenOnboarding");
     if (!hasSeenOnboarding) {
       setShowOnboarding(true);
-      sessionStorage.setItem("hasSeenOnboarding", "true");
+      localStorage.setItem("hasSeenOnboarding", "true");
     }
   }, []);
 
