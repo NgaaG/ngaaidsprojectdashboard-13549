@@ -661,6 +661,7 @@ const Reflections = () => {
       {selectedReflection && (
         <ReflectionDetailView
           reflection={selectedReflection}
+          projectName={projects.find(p => p.id === selectedReflection.project_id)?.name}
           open={!!selectedReflection}
           onOpenChange={(open) => !open && setSelectedReflection(null)}
         />

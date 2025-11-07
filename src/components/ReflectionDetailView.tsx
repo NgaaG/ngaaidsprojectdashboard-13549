@@ -21,12 +21,14 @@ const SATISFACTION: { value: MoodType; emoji: string; label: string; color: stri
 
 interface ReflectionDetailViewProps {
   reflection: any;
+  projectName?: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
 export const ReflectionDetailView = ({ 
-  reflection, 
+  reflection,
+  projectName,
   open, 
   onOpenChange 
 }: ReflectionDetailViewProps) => {
@@ -59,6 +61,11 @@ export const ReflectionDetailView = ({
                 <Badge variant="outline" className="text-xs">
                   {reflection.mode === "personal" ? "Personal Reflection" : "Sprint Reflection"}
                 </Badge>
+                {projectName && (
+                  <Badge variant="secondary" className="text-xs">
+                    📁 {projectName}
+                  </Badge>
+                )}
               </div>
               {reflection.progress > 0 && (
                 <div className="mb-4">
