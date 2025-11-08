@@ -83,9 +83,9 @@ export const CompetencyWheel = ({ progress, size = 300 }: CompetencyWheelProps) 
         <polygon
           points={points}
           fill="url(#competency-gradient)"
-          stroke="hsl(var(--primary))"
-          strokeWidth="2"
-          className="animate-pulse-glow"
+          stroke="hsl(280 60% 70%)"
+          strokeWidth="3"
+          filter="url(#neon-glow)"
         />
 
         {/* Gradient definitions */}
@@ -107,9 +107,23 @@ export const CompetencyWheel = ({ progress, size = 300 }: CompetencyWheelProps) 
                 dur="8s" repeatCount="indefinite" />
             </stop>
           </radialGradient>
+          
+          {/* Neon purple glow filter */}
+          <filter id="neon-glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur1"/>
+            <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur2"/>
+            <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur3"/>
+            <feMerge>
+              <feMergeNode in="blur3"/>
+              <feMergeNode in="blur2"/>
+              <feMergeNode in="blur1"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+          
           {COLORS.map((color, i) => (
             <filter key={`glow-${i}`} id={`glow-${i}`}>
-              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+              <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
               <feMerge>
                 <feMergeNode in="coloredBlur"/>
                 <feMergeNode in="SourceGraphic"/>
@@ -137,38 +151,18 @@ export const CompetencyWheel = ({ progress, size = 300 }: CompetencyWheelProps) 
                 opacity="0.5"
               />
               
-              {/* Value dot with glow */}
-              <circle
-                cx={getCoordinates(i, value).x}
-                cy={getCoordinates(i, value).y}
-                r="8"
-                fill={GLOW_COLORS[i]}
-                filter={`url(#glow-${i})`}
-                opacity="0.7"
-              >
-                <animate
-                  attributeName="r"
-                  values="8;12;8"
-                  dur="2s"
-                  repeatCount="indefinite"
-                />
-              </circle>
+              {/* Value dot */}
               <circle
                 cx={getCoordinates(i, value).x}
                 cy={getCoordinates(i, value).y}
                 r="6"
                 fill={COLORS[i]}
-                stroke="white"
-                strokeWidth="2"
+                filter={`url(#glow-${i})`}
                 className="transition-all duration-500 cursor-pointer"
-                style={{
-                  filter: `drop-shadow(0 0 6px ${GLOW_COLORS[i]})`,
-                  transition: 'all 0.3s ease'
-                }}
               >
                 <animate
                   attributeName="r"
-                  values="6;7.5;6"
+                  values="6;7;6"
                   dur="2s"
                   repeatCount="indefinite"
                 />
