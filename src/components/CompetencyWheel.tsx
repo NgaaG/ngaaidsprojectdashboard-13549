@@ -7,11 +7,18 @@ interface CompetencyWheelProps {
 
 const COMPETENCIES = ["Research", "Create", "Organize", "Communicate", "Learn"];
 const COLORS = [
-  "hsl(265 45% 80%)", // Lavender
-  "hsl(160 55% 80%)", // Mint
-  "hsl(195 60% 76%)", // Sky
-  "hsl(280 50% 75%)", // Purple
-  "hsl(150 60% 75%)", // Green
+  "hsl(265 55% 75%)", // Vibrant Lavender
+  "hsl(160 65% 70%)", // Bright Mint
+  "hsl(195 70% 72%)", // Vivid Sky
+  "hsl(280 60% 70%)", // Rich Purple
+  "hsl(150 70% 68%)", // Lush Green
+];
+const GLOW_COLORS = [
+  "hsl(265 55% 75% / 0.6)",
+  "hsl(160 65% 70% / 0.6)",
+  "hsl(195 70% 72% / 0.6)",
+  "hsl(280 60% 70% / 0.6)",
+  "hsl(150 70% 68% / 0.6)",
 ];
 
 export const CompetencyWheel = ({ progress, size = 300 }: CompetencyWheelProps) => {
@@ -49,7 +56,7 @@ export const CompetencyWheel = ({ progress, size = 300 }: CompetencyWheelProps) 
 
   return (
     <div className="relative flex items-center justify-center wheel-float">
-      <svg width={size} height={size} className="transform rotate-0 transition-all duration-500 wheel-glow">
+      <svg width={size} height={size} className="transform transition-all duration-500 wheel-glow" style={{ transformOrigin: 'center' }}>
         {/* Background circles */}
         {[25, 50, 75, 100].map((percent) => (
           <circle
@@ -81,12 +88,34 @@ export const CompetencyWheel = ({ progress, size = 300 }: CompetencyWheelProps) 
           className="animate-pulse-glow"
         />
 
-        {/* Gradient definition */}
+        {/* Gradient definitions */}
         <defs>
           <radialGradient id="competency-gradient">
-            <stop offset="0%" stopColor="hsl(265 45% 80% / 0.6)" />
-            <stop offset="100%" stopColor="hsl(160 55% 80% / 0.4)" />
+            <stop offset="0%" stopColor="hsl(265 55% 75% / 0.7)">
+              <animate attributeName="stop-color" 
+                values="hsl(265 55% 75% / 0.7);hsl(195 70% 72% / 0.7);hsl(280 60% 70% / 0.7);hsl(265 55% 75% / 0.7)" 
+                dur="8s" repeatCount="indefinite" />
+            </stop>
+            <stop offset="50%" stopColor="hsl(160 65% 70% / 0.5)">
+              <animate attributeName="stop-color" 
+                values="hsl(160 65% 70% / 0.5);hsl(280 60% 70% / 0.5);hsl(150 70% 68% / 0.5);hsl(160 65% 70% / 0.5)" 
+                dur="8s" repeatCount="indefinite" />
+            </stop>
+            <stop offset="100%" stopColor="hsl(195 70% 72% / 0.3)">
+              <animate attributeName="stop-color" 
+                values="hsl(195 70% 72% / 0.3);hsl(150 70% 68% / 0.3);hsl(265 55% 75% / 0.3);hsl(195 70% 72% / 0.3)" 
+                dur="8s" repeatCount="indefinite" />
+            </stop>
           </radialGradient>
+          {COLORS.map((color, i) => (
+            <filter key={`glow-${i}`} id={`glow-${i}`}>
+              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+              <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          ))}
         </defs>
 
         {/* Axis lines and labels */}
@@ -108,7 +137,22 @@ export const CompetencyWheel = ({ progress, size = 300 }: CompetencyWheelProps) 
                 opacity="0.5"
               />
               
-              {/* Value dot */}
+              {/* Value dot with glow */}
+              <circle
+                cx={getCoordinates(i, value).x}
+                cy={getCoordinates(i, value).y}
+                r="8"
+                fill={GLOW_COLORS[i]}
+                filter={`url(#glow-${i})`}
+                opacity="0.7"
+              >
+                <animate
+                  attributeName="r"
+                  values="8;12;8"
+                  dur="2s"
+                  repeatCount="indefinite"
+                />
+              </circle>
               <circle
                 cx={getCoordinates(i, value).x}
                 cy={getCoordinates(i, value).y}
@@ -116,15 +160,15 @@ export const CompetencyWheel = ({ progress, size = 300 }: CompetencyWheelProps) 
                 fill={COLORS[i]}
                 stroke="white"
                 strokeWidth="2"
-                className="transition-all duration-500 cursor-pointer hover:r-8"
+                className="transition-all duration-500 cursor-pointer"
                 style={{
-                  filter: 'drop-shadow(0 0 4px rgba(255,255,255,0.6))',
+                  filter: `drop-shadow(0 0 6px ${GLOW_COLORS[i]})`,
                   transition: 'all 0.3s ease'
                 }}
               >
                 <animate
                   attributeName="r"
-                  values="6;7;6"
+                  values="6;7.5;6"
                   dur="2s"
                   repeatCount="indefinite"
                 />
