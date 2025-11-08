@@ -57,8 +57,8 @@ export const CompetencyWheel = ({ progress, size = 300 }: CompetencyWheelProps) 
   return (
     <div className="relative flex items-center justify-center wheel-float">
       <svg width={size} height={size} className="transform transition-all duration-500 wheel-glow" style={{ transformOrigin: 'center' }}>
-        {/* Background circles */}
-        {[25, 50, 75, 100].map((percent) => (
+        {/* Background circles - minimal */}
+        {[50, 100].map((percent) => (
           <circle
             key={percent}
             cx={center}
@@ -66,20 +66,21 @@ export const CompetencyWheel = ({ progress, size = 300 }: CompetencyWheelProps) 
             r={(radius * percent) / 100}
             fill="none"
             stroke="hsl(var(--border))"
-            strokeWidth="1"
-            opacity="0.3"
+            strokeWidth="0.5"
+            opacity="0.2"
           />
         ))}
 
-        {/* Maximum area (reference) */}
+        {/* Maximum area - minimal */}
         <polygon
           points={maxPoints}
-          fill="hsl(var(--muted) / 0.1)"
+          fill="hsl(var(--muted) / 0.05)"
           stroke="hsl(var(--border))"
-          strokeWidth="1"
+          strokeWidth="0.5"
+          opacity="0.5"
         />
 
-        {/* Progress area with neon trace */}
+        {/* Progress area */}
         <polygon
           points={points}
           fill="url(#competency-gradient)"
@@ -91,58 +92,40 @@ export const CompetencyWheel = ({ progress, size = 300 }: CompetencyWheelProps) 
           stroke="hsl(280 70% 65%)"
           strokeWidth="2"
           filter="url(#neon-trace)"
-          opacity="0.9"
         >
           <animate
             attributeName="opacity"
-            values="0.7;1;0.7"
+            values="0.6;1;0.6"
             dur="3s"
             repeatCount="indefinite"
           />
         </polygon>
 
-        {/* Gradient definitions */}
+        {/* Gradient definitions - simplified */}
         <defs>
           <radialGradient id="competency-gradient">
-            <stop offset="0%" stopColor="hsl(265 55% 75% / 0.7)">
-              <animate attributeName="stop-color" 
-                values="hsl(265 55% 75% / 0.7);hsl(195 70% 72% / 0.7);hsl(280 60% 70% / 0.7);hsl(265 55% 75% / 0.7)" 
-                dur="8s" repeatCount="indefinite" />
-            </stop>
-            <stop offset="50%" stopColor="hsl(160 65% 70% / 0.5)">
-              <animate attributeName="stop-color" 
-                values="hsl(160 65% 70% / 0.5);hsl(280 60% 70% / 0.5);hsl(150 70% 68% / 0.5);hsl(160 65% 70% / 0.5)" 
-                dur="8s" repeatCount="indefinite" />
-            </stop>
-            <stop offset="100%" stopColor="hsl(195 70% 72% / 0.3)">
-              <animate attributeName="stop-color" 
-                values="hsl(195 70% 72% / 0.3);hsl(150 70% 68% / 0.3);hsl(265 55% 75% / 0.3);hsl(195 70% 72% / 0.3)" 
-                dur="8s" repeatCount="indefinite" />
-            </stop>
+            <stop offset="0%" stopColor="hsl(265 55% 75% / 0.5)" />
+            <stop offset="100%" stopColor="hsl(280 60% 70% / 0.2)" />
           </radialGradient>
           
-          {/* Neon trace glow filter - subtle but glowing */}
+          {/* Neon trace glow */}
           <filter id="neon-trace" x="-100%" y="-100%" width="300%" height="300%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur1"/>
-            <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur2"/>
-            <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur3"/>
+            <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur1"/>
+            <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur2"/>
             <feMerge>
-              <feMergeNode in="blur3"/>
               <feMergeNode in="blur2"/>
               <feMergeNode in="blur1"/>
               <feMergeNode in="SourceGraphic"/>
             </feMerge>
           </filter>
           
-          {COLORS.map((color, i) => (
-            <filter key={`glow-${i}`} id={`glow-${i}`}>
-              <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-              <feMerge>
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
-          ))}
+          <filter id="dot-glow">
+            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
         </defs>
 
         {/* Axis lines and labels */}
@@ -153,33 +136,26 @@ export const CompetencyWheel = ({ progress, size = 300 }: CompetencyWheelProps) 
 
           return (
             <g key={comp}>
-              {/* Axis line */}
+              {/* Axis line - minimal */}
               <line
                 x1={center}
                 y1={center}
                 x2={endCoords.x}
                 y2={endCoords.y}
                 stroke="hsl(var(--border))"
-                strokeWidth="1"
-                opacity="0.5"
+                strokeWidth="0.5"
+                opacity="0.3"
               />
               
-              {/* Value dot */}
+              {/* Value dot - clean */}
               <circle
                 cx={getCoordinates(i, value).x}
                 cy={getCoordinates(i, value).y}
-                r="6"
+                r="5"
                 fill={COLORS[i]}
-                filter={`url(#glow-${i})`}
-                className="transition-all duration-500 cursor-pointer"
-              >
-                <animate
-                  attributeName="r"
-                  values="6;7;6"
-                  dur="2s"
-                  repeatCount="indefinite"
-                />
-              </circle>
+                filter="url(#dot-glow)"
+                className="transition-all duration-300"
+              />
 
               {/* Label */}
               <text
@@ -187,7 +163,7 @@ export const CompetencyWheel = ({ progress, size = 300 }: CompetencyWheelProps) 
                 y={labelCoords.y}
                 textAnchor="middle"
                 dominantBaseline="middle"
-                className="fill-foreground text-xs font-semibold"
+                className="fill-foreground text-xs font-medium"
               >
                 {comp}
               </text>
@@ -198,7 +174,7 @@ export const CompetencyWheel = ({ progress, size = 300 }: CompetencyWheelProps) 
                 y={labelCoords.y + 14}
                 textAnchor="middle"
                 dominantBaseline="middle"
-                className="fill-muted-foreground text-xs"
+                className="fill-muted-foreground text-[10px]"
               >
                 {value}%
               </text>
@@ -206,8 +182,8 @@ export const CompetencyWheel = ({ progress, size = 300 }: CompetencyWheelProps) 
           );
         })}
 
-        {/* Center circle - no background square */}
-        <circle cx={center} cy={center} r="6" fill="hsl(280 70% 65%)" opacity="0.8" />
+        {/* Center dot - clean minimal */}
+        <circle cx={center} cy={center} r="4" fill="hsl(280 70% 65%)" />
       </svg>
     </div>
   );
