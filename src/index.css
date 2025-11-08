@@ -48,14 +48,6 @@ All colors MUST be HSL.
     --lecture-turquoise-light: 180 60% 80%;
     --cream: 45 100% 97%;
     
-    /* Competency Wheel Colors - Light Mode */
-    --wheel-primary: 265 55% 55%;
-    --wheel-secondary: 160 65% 50%;
-    --wheel-tertiary: 195 70% 52%;
-    --wheel-quaternary: 280 60% 50%;
-    --wheel-quinary: 150 70% 48%;
-    --wheel-glow: 280 70% 65%;
-    
     /* Gradients */
     --gradient-personal: linear-gradient(135deg, hsl(270 60% 70%), hsl(270 60% 85%), hsl(270 50% 95%));
     --gradient-lecture: linear-gradient(135deg, hsl(180 60% 65%), hsl(180 60% 80%), hsl(180 50% 92%));
@@ -102,14 +94,6 @@ All colors MUST be HSL.
     --border: 260 30% 20%;
     --input: 260 30% 20%;
     --ring: 265 45% 70%;
-    
-    /* Competency Wheel Colors - Dark Mode */
-    --wheel-primary: 265 55% 75%;
-    --wheel-secondary: 160 65% 70%;
-    --wheel-tertiary: 195 70% 72%;
-    --wheel-quaternary: 280 60% 70%;
-    --wheel-quinary: 150 70% 68%;
-    --wheel-glow: 280 70% 65%;
     
     --sidebar-background: 260 40% 10%;
     --sidebar-foreground: 45 100% 97%;
@@ -212,10 +196,6 @@ All colors MUST be HSL.
   
   .wheel-glow {
     animation: glow-pulse 4s ease-in-out infinite;
-  }
-  
-  .wheel-rotate {
-    animation: rotate-slow 120s linear infinite;
   }
   
   /* Emoji animations */
