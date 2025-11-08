@@ -7,18 +7,11 @@ interface CompetencyWheelProps {
 
 const COMPETENCIES = ["Research", "Create", "Organize", "Communicate", "Learn"];
 const COLORS = [
-  "hsl(265 55% 75%)", // Vibrant Lavender
-  "hsl(160 65% 70%)", // Bright Mint
-  "hsl(195 70% 72%)", // Vivid Sky
-  "hsl(280 60% 70%)", // Rich Purple
-  "hsl(150 70% 68%)", // Lush Green
-];
-const GLOW_COLORS = [
-  "hsl(265 55% 75% / 0.6)",
-  "hsl(160 65% 70% / 0.6)",
-  "hsl(195 70% 72% / 0.6)",
-  "hsl(280 60% 70% / 0.6)",
-  "hsl(150 70% 68% / 0.6)",
+  "hsl(var(--wheel-primary))",
+  "hsl(var(--wheel-secondary))",
+  "hsl(var(--wheel-tertiary))",
+  "hsl(var(--wheel-quaternary))",
+  "hsl(var(--wheel-quinary))",
 ];
 
 export const CompetencyWheel = ({ progress, size = 300 }: CompetencyWheelProps) => {
@@ -56,7 +49,7 @@ export const CompetencyWheel = ({ progress, size = 300 }: CompetencyWheelProps) 
 
   return (
     <div className="relative flex items-center justify-center wheel-float">
-      <svg width={size} height={size} className="transform transition-all duration-500 wheel-glow" style={{ transformOrigin: 'center' }}>
+      <svg width={size} height={size} className="transform transition-all duration-500 wheel-glow wheel-rotate" style={{ transformOrigin: 'center' }}>
         {/* Background circles - minimal */}
         {[50, 100].map((percent) => (
           <circle
@@ -89,7 +82,7 @@ export const CompetencyWheel = ({ progress, size = 300 }: CompetencyWheelProps) 
         <polygon
           points={points}
           fill="none"
-          stroke="hsl(280 70% 65%)"
+          stroke="hsl(var(--wheel-glow))"
           strokeWidth="2"
           filter="url(#neon-trace)"
         >
@@ -104,8 +97,8 @@ export const CompetencyWheel = ({ progress, size = 300 }: CompetencyWheelProps) 
         {/* Gradient definitions - simplified */}
         <defs>
           <radialGradient id="competency-gradient">
-            <stop offset="0%" stopColor="hsl(265 55% 75% / 0.5)" />
-            <stop offset="100%" stopColor="hsl(280 60% 70% / 0.2)" />
+            <stop offset="0%" stopColor="hsl(var(--wheel-primary) / 0.5)" />
+            <stop offset="100%" stopColor="hsl(var(--wheel-quaternary) / 0.2)" />
           </radialGradient>
           
           {/* Neon trace glow */}
@@ -183,7 +176,7 @@ export const CompetencyWheel = ({ progress, size = 300 }: CompetencyWheelProps) 
         })}
 
         {/* Center dot - clean minimal */}
-        <circle cx={center} cy={center} r="4" fill="hsl(280 70% 65%)" />
+        <circle cx={center} cy={center} r="4" fill="hsl(var(--wheel-glow))" />
       </svg>
     </div>
   );

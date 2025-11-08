@@ -57,6 +57,14 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        wheel: {
+          primary: "hsl(var(--wheel-primary))",
+          secondary: "hsl(var(--wheel-secondary))",
+          tertiary: "hsl(var(--wheel-tertiary))",
+          quaternary: "hsl(var(--wheel-quaternary))",
+          quinary: "hsl(var(--wheel-quinary))",
+          glow: "hsl(var(--wheel-glow))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
