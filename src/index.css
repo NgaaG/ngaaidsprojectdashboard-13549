@@ -215,7 +215,7 @@ All colors MUST be HSL.
   }
   
   .wheel-rotate {
-    animation: rotate-slow 60s linear infinite;
+    animation: rotate-slow 120s linear infinite;
   }
   
   /* Emoji animations */
