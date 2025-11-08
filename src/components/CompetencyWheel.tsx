@@ -79,14 +79,27 @@ export const CompetencyWheel = ({ progress, size = 300 }: CompetencyWheelProps) 
           strokeWidth="1"
         />
 
-        {/* Progress area */}
+        {/* Progress area with neon trace */}
         <polygon
           points={points}
           fill="url(#competency-gradient)"
-          stroke="hsl(280 60% 70%)"
-          strokeWidth="3"
-          filter="url(#neon-glow)"
+          stroke="none"
         />
+        <polygon
+          points={points}
+          fill="none"
+          stroke="hsl(280 70% 65%)"
+          strokeWidth="2"
+          filter="url(#neon-trace)"
+          opacity="0.9"
+        >
+          <animate
+            attributeName="opacity"
+            values="0.7;1;0.7"
+            dur="3s"
+            repeatCount="indefinite"
+          />
+        </polygon>
 
         {/* Gradient definitions */}
         <defs>
@@ -108,11 +121,11 @@ export const CompetencyWheel = ({ progress, size = 300 }: CompetencyWheelProps) 
             </stop>
           </radialGradient>
           
-          {/* Neon purple glow filter */}
-          <filter id="neon-glow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur1"/>
-            <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur2"/>
-            <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur3"/>
+          {/* Neon trace glow filter - subtle but glowing */}
+          <filter id="neon-trace" x="-100%" y="-100%" width="300%" height="300%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur1"/>
+            <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur2"/>
+            <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur3"/>
             <feMerge>
               <feMergeNode in="blur3"/>
               <feMergeNode in="blur2"/>
@@ -193,8 +206,8 @@ export const CompetencyWheel = ({ progress, size = 300 }: CompetencyWheelProps) 
           );
         })}
 
-        {/* Center circle */}
-        <circle cx={center} cy={center} r="8" fill="hsl(var(--primary))" />
+        {/* Center circle - no background square */}
+        <circle cx={center} cy={center} r="6" fill="hsl(280 70% 65%)" opacity="0.8" />
       </svg>
     </div>
   );
