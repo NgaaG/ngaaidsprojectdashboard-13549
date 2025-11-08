@@ -10,8 +10,10 @@ import {
   getReflections,
 } from "@/lib/storage";
 import { CompetencyProgress, Competency } from "@/types";
-import { TrendingUp, Award } from "lucide-react";
+import { TrendingUp, Award, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import { db } from "@/lib/supabaseHelpers";
+import { calculateCompetencyProgressFromProjects } from "@/lib/growthCalculations";
 
 const COMPETENCIES: Competency[] = ["Research", "Create", "Organize", "Communicate", "Learn"];
 
@@ -31,8 +33,13 @@ const Growth = () => {
     totalMentorLogs: 0,
     averageProgress: 0,
   });
+  const [isAutoCalculating, setIsAutoCalculating] = useState(false);
 
   useEffect(() => {
+    loadStats();
+  }, [progress]);
+
+  const loadStats = async () => {
     const reflections = getReflections();
     const mentorLogs = getMentorLogs();
     const totalProgress = Object.values(progress).reduce((sum, val) => sum + val, 0);
@@ -43,7 +50,39 @@ const Growth = () => {
       totalMentorLogs: mentorLogs.length,
       averageProgress: Math.round(avgProgress),
     });
-  }, [progress]);
+  };
+
+  const autoCalculateProgress = async () => {
+    setIsAutoCalculating(true);
+    try {
+      // Fetch all projects from database
+      const { data: projects, error } = await db
+        .from("projects")
+        .select("*");
+
+      if (error) throw error;
+
+      if (projects && projects.length > 0) {
+        // Calculate progress from projects
+        const calculatedProgress = calculateCompetencyProgressFromProjects(projects);
+        
+        // Update state and storage
+        setProgress(calculatedProgress);
+        COMPETENCIES.forEach((comp) => {
+          updateCompetencyProgress(comp, calculatedProgress[comp] || 0);
+        });
+
+        toast.success("Progress auto-calculated from all projects!");
+      } else {
+        toast.info("No projects found to calculate from");
+      }
+    } catch (error: any) {
+      toast.error("Failed to auto-calculate progress");
+      console.error(error);
+    } finally {
+      setIsAutoCalculating(false);
+    }
+  };
 
   const handleProgressChange = (competency: Competency, value: number) => {
     const newProgress = { ...progress, [competency]: value };
@@ -111,10 +150,25 @@ const Growth = () => {
         <section className="mb-12">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Award className="h-5 w-5" />
-                CMD Competency Wheel
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Award className="h-5 w-5" />
+                  CMD Competency Wheel
+                </CardTitle>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={autoCalculateProgress}
+                  disabled={isAutoCalculating}
+                  className="gap-2"
+                >
+                  <RefreshCw className={`h-4 w-4 ${isAutoCalculating ? 'animate-spin' : ''}`} />
+                  Auto-Calculate
+                </Button>
+              </div>
+              <p className="text-sm text-muted-foreground mt-2">
+                Progress automatically reflects learning goals satisfaction from all projects
+              </p>
             </CardHeader>
             <CardContent className="flex justify-center py-8">
               <CompetencyWheel progress={progress} size={400} />

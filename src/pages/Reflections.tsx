@@ -315,7 +315,7 @@ const Reflections = () => {
                           : {}
                       }
                     >
-                      <span className="text-xl">{mood.emoji}</span>
+                      <span className="text-xl emoji-hover">{mood.emoji}</span>
                       {mood.label}
                     </Button>
                   ))}
@@ -477,7 +477,7 @@ const Reflections = () => {
                               : {}
                           }
                         >
-                          <span className="text-xl">{mood.emoji}</span>
+                          <span className="text-xl emoji-hover">{mood.emoji}</span>
                           {mood.label}
                         </Button>
                       ))}
@@ -600,7 +600,7 @@ const Reflections = () => {
                       <div className="flex justify-between items-start gap-4">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-3">
-                            <span className="text-3xl">{mood?.emoji}</span>
+                            <span className="text-3xl emoji-animate">{mood?.emoji}</span>
                             <div className="flex-1">
                               <div className="flex items-center gap-2 flex-wrap">
                                 <p className="font-semibold text-base">{mood?.label}</p>

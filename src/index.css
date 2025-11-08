@@ -168,6 +168,57 @@ All colors MUST be HSL.
   .lecture-highlight {
     animation: highlight-pulse 2s ease-in-out infinite;
   }
+  
+  /* Competency wheel animations */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    33% { transform: translateY(-8px) rotate(1deg); }
+    66% { transform: translateY(4px) rotate(-1deg); }
+  }
+  
+  @keyframes glow-pulse {
+    0%, 100% { filter: drop-shadow(0 0 8px hsl(var(--primary) / 0.4)); }
+    50% { filter: drop-shadow(0 0 16px hsl(var(--primary) / 0.7)); }
+  }
+  
+  @keyframes rotate-slow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  
+  .wheel-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  .wheel-glow {
+    animation: glow-pulse 3s ease-in-out infinite;
+  }
+  
+  /* Emoji animations */
+  @keyframes emoji-bounce {
+    0%, 100% { transform: scale(1) rotate(0deg); }
+    25% { transform: scale(1.15) rotate(-5deg); }
+    75% { transform: scale(1.15) rotate(5deg); }
+  }
+  
+  @keyframes emoji-wiggle {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-8deg); }
+    75% { transform: rotate(8deg); }
+  }
+  
+  .emoji-hover:hover {
+    animation: emoji-bounce 0.6s ease-in-out;
+  }
+  
+  .emoji-animate {
+    display: inline-block;
+    transition: transform 0.2s ease;
+  }
+  
+  .emoji-animate:hover {
+    animation: emoji-wiggle 0.5s ease-in-out;
+  }
 }
 
 @layer base {

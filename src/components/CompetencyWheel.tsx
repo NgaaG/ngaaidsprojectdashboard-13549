@@ -48,8 +48,8 @@ export const CompetencyWheel = ({ progress, size = 300 }: CompetencyWheelProps) 
   }).join(" ");
 
   return (
-    <div className="relative flex items-center justify-center">
-      <svg width={size} height={size} className="transform rotate-0 transition-all duration-500">
+    <div className="relative flex items-center justify-center wheel-float">
+      <svg width={size} height={size} className="transform rotate-0 transition-all duration-500 wheel-glow">
         {/* Background circles */}
         {[25, 50, 75, 100].map((percent) => (
           <circle
@@ -116,8 +116,19 @@ export const CompetencyWheel = ({ progress, size = 300 }: CompetencyWheelProps) 
                 fill={COLORS[i]}
                 stroke="white"
                 strokeWidth="2"
-                className="transition-all duration-500"
-              />
+                className="transition-all duration-500 cursor-pointer hover:r-8"
+                style={{
+                  filter: 'drop-shadow(0 0 4px rgba(255,255,255,0.6))',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                <animate
+                  attributeName="r"
+                  values="6;7;6"
+                  dur="2s"
+                  repeatCount="indefinite"
+                />
+              </circle>
 
               {/* Label */}
               <text

@@ -9,10 +9,11 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Project, Mode } from "@/types";
+import { Project, Mode, LearningGoals } from "@/types";
 import { db } from "@/lib/supabaseHelpers";
-import { Edit, ExternalLink, Calendar, Trash2, Eye } from "lucide-react";
+import { Edit, ExternalLink, Calendar, Trash2, Eye, Edit2 } from "lucide-react";
 import { ProjectEditDialog } from "./ProjectEditDialog";
+import { LearningGoalsEditDialog } from "./LearningGoalsEditDialog";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import {
@@ -65,6 +66,7 @@ export const ProjectDetailView = ({
   const [mentorLogs, setMentorLogs] = useState<any[]>([]);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [goalsEditDialogOpen, setGoalsEditDialogOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -139,6 +141,22 @@ export const ProjectDetailView = ({
     // Navigate to reflections page with the reflection ID as a query parameter
     navigate(`/reflections?reflectionId=${reflectionId}`);
     onOpenChange(false);
+  };
+
+  const handleSaveLearningGoals = async (goals: LearningGoals) => {
+    try {
+      const { error } = await db
+        .from("projects")
+        .update({ learning_goals: goals })
+        .eq("id", project.id);
+
+      if (error) throw error;
+
+      onUpdate();
+    } catch (error: any) {
+      toast.error("Failed to update learning goals");
+      console.error(error);
+    }
   };
 
   return (
@@ -223,12 +241,27 @@ export const ProjectDetailView = ({
             {project.learningGoals && (
               <Card className="border-l-4 border-l-accent">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    🎯 Learning Goals
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Specific learning objectives for each competency
-                  </p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        🎯 Learning Goals
+                      </CardTitle>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Specific learning objectives for each competency
+                      </p>
+                    </div>
+                    {!isViewerMode && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setGoalsEditDialogOpen(true)}
+                        className="gap-2"
+                      >
+                        <Edit2 className="h-4 w-4" />
+                        Edit
+                      </Button>
+                    )}
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
@@ -632,6 +665,13 @@ export const ProjectDetailView = ({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <LearningGoalsEditDialog
+        open={goalsEditDialogOpen}
+        onOpenChange={setGoalsEditDialogOpen}
+        learningGoals={project.learningGoals || { Research: [], Create: [], Organize: [], Communicate: [], Learn: [] }}
+        onSave={handleSaveLearningGoals}
+      />
     </>
   );
 };
