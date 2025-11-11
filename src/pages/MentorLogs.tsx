@@ -762,7 +762,9 @@ const MentorLogs = () => {
                       )}
                       
                       <div className="text-sm text-muted-foreground line-clamp-3 mb-3">
-                        {log.key_goals && <p>📝 {log.key_goals.substring(0, 80)}...</p>}
+                        {log.key_goals && Array.isArray(log.key_goals) && log.key_goals.length > 0 && (
+                          <p>📝 {log.key_goals.slice(0, 2).join(' • ')}{log.key_goals.length > 2 ? '...' : ''}</p>
+                        )}
                       </div>
                       
                       <Button
