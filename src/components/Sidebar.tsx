@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { useViewMode } from "@/hooks/useViewMode";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { PresenceIndicator } from "@/components/PresenceIndicator";
 
 const navItems = [
   { icon: Home, label: "Home", path: "/" },
@@ -25,7 +26,12 @@ export const Sidebar = () => {
           Viewer
         </Badge>
       )}
-      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-2xl font-bold text-primary-foreground shadow-lg">
+      {!isViewerMode && (
+        <div className="absolute top-2 left-1/2 -translate-x-1/2 w-16">
+          <PresenceIndicator className="text-[10px] flex-col items-center" />
+        </div>
+      )}
+      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-2xl font-bold text-primary-foreground shadow-lg mt-6">
         💜
       </div>
 

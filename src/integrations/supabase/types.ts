@@ -14,7 +14,271 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      competency_progress: {
+        Row: {
+          communicate: number | null
+          create_score: number | null
+          id: string
+          learn: number | null
+          organize: number | null
+          research: number | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          communicate?: number | null
+          create_score?: number | null
+          id?: string
+          learn?: number | null
+          organize?: number | null
+          research?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          communicate?: number | null
+          create_score?: number | null
+          id?: string
+          learn?: number | null
+          organize?: number | null
+          research?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      mentor_log_views: {
+        Row: {
+          id: string
+          last_viewed_at: string | null
+          mentor_log_id: string | null
+        }
+        Insert: {
+          id?: string
+          last_viewed_at?: string | null
+          mentor_log_id?: string | null
+        }
+        Update: {
+          id?: string
+          last_viewed_at?: string | null
+          mentor_log_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentor_log_views_mentor_log_id_fkey"
+            columns: ["mentor_log_id"]
+            isOneToOne: true
+            referencedRelation: "mentor_logs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mentor_logs: {
+        Row: {
+          achieved_goals: string[] | null
+          competencies: string[] | null
+          created_at: string | null
+          date: string
+          evidence_images: Json | null
+          id: string
+          is_public: boolean | null
+          key_goals: string | null
+          lecturer: string | null
+          mentor_comments: string | null
+          mode: string | null
+          outcomes: string | null
+          project_ids: string[] | null
+          resource_links: string | null
+          selected_task_ids: string[] | null
+          share_token: string | null
+          title: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          achieved_goals?: string[] | null
+          competencies?: string[] | null
+          created_at?: string | null
+          date: string
+          evidence_images?: Json | null
+          id?: string
+          is_public?: boolean | null
+          key_goals?: string | null
+          lecturer?: string | null
+          mentor_comments?: string | null
+          mode?: string | null
+          outcomes?: string | null
+          project_ids?: string[] | null
+          resource_links?: string | null
+          selected_task_ids?: string[] | null
+          share_token?: string | null
+          title: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          achieved_goals?: string[] | null
+          competencies?: string[] | null
+          created_at?: string | null
+          date?: string
+          evidence_images?: Json | null
+          id?: string
+          is_public?: boolean | null
+          key_goals?: string | null
+          lecturer?: string | null
+          mentor_comments?: string | null
+          mode?: string | null
+          outcomes?: string | null
+          project_ids?: string[] | null
+          resource_links?: string | null
+          selected_task_ids?: string[] | null
+          share_token?: string | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          display_name: string | null
+          id: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          display_name?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          display_name?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      projects: {
+        Row: {
+          competencies: string[] | null
+          completion: number | null
+          created_at: string | null
+          description: string | null
+          figma_link: string | null
+          github_link: string | null
+          id: string
+          key_tasks: Json | null
+          last_reflection_mood: string | null
+          learning_goals: Json | null
+          learning_goals_achievements: Json | null
+          mode: string | null
+          name: string
+          updated_at: string | null
+          user_id: string | null
+          visual_url: string | null
+        }
+        Insert: {
+          competencies?: string[] | null
+          completion?: number | null
+          created_at?: string | null
+          description?: string | null
+          figma_link?: string | null
+          github_link?: string | null
+          id?: string
+          key_tasks?: Json | null
+          last_reflection_mood?: string | null
+          learning_goals?: Json | null
+          learning_goals_achievements?: Json | null
+          mode?: string | null
+          name: string
+          updated_at?: string | null
+          user_id?: string | null
+          visual_url?: string | null
+        }
+        Update: {
+          competencies?: string[] | null
+          completion?: number | null
+          created_at?: string | null
+          description?: string | null
+          figma_link?: string | null
+          github_link?: string | null
+          id?: string
+          key_tasks?: Json | null
+          last_reflection_mood?: string | null
+          learning_goals?: Json | null
+          learning_goals_achievements?: Json | null
+          mode?: string | null
+          name?: string
+          updated_at?: string | null
+          user_id?: string | null
+          visual_url?: string | null
+        }
+        Relationships: []
+      }
+      reflections: {
+        Row: {
+          category: string | null
+          contingency_plan: string | null
+          created_at: string | null
+          emotional_dump: string | null
+          id: string
+          mode: string | null
+          mood: string
+          progress: number | null
+          project_id: string | null
+          sentiment: number | null
+          thoughts_what_i_think: string | null
+          thoughts_what_is_true: string | null
+          todo_list: Json | null
+          user_id: string | null
+        }
+        Insert: {
+          category?: string | null
+          contingency_plan?: string | null
+          created_at?: string | null
+          emotional_dump?: string | null
+          id?: string
+          mode?: string | null
+          mood: string
+          progress?: number | null
+          project_id?: string | null
+          sentiment?: number | null
+          thoughts_what_i_think?: string | null
+          thoughts_what_is_true?: string | null
+          todo_list?: Json | null
+          user_id?: string | null
+        }
+        Update: {
+          category?: string | null
+          contingency_plan?: string | null
+          created_at?: string | null
+          emotional_dump?: string | null
+          id?: string
+          mode?: string | null
+          mood?: string
+          progress?: number | null
+          project_id?: string | null
+          sentiment?: number | null
+          thoughts_what_i_think?: string | null
+          thoughts_what_is_true?: string | null
+          todo_list?: Json | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reflections_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

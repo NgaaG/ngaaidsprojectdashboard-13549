@@ -48,6 +48,8 @@ const MentorLogs = () => {
   const [editingLog, setEditingLog] = useState<any | null>(null);
   const [detailViewLog, setDetailViewLog] = useState<any | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
+  const [unreadLogIds, setUnreadLogIds] = useState<Set<string>>(new Set());
+  const [logViews, setLogViews] = useState<Record<string, string>>({});
   const [newLog, setNewLog] = useState({
     date: new Date().toISOString().split("T")[0],
     title: "",
@@ -111,8 +113,21 @@ const MentorLogs = () => {
       .select("*")
       .order("created_at", { ascending: false });
     
+    // Fetch log views to check for unread updates
+    const { data: viewsData } = await db
+      .from("mentor_log_views")
+      .select("*");
+    
+    const viewsMap: Record<string, string> = {};
+    if (viewsData) {
+      viewsData.forEach(view => {
+        viewsMap[view.mentor_log_id] = view.last_viewed_at;
+      });
+    }
+    setLogViews(viewsMap);
+    
     if (logsData && projectsData) {
-      // Manually attach project data to each log
+      // Manually attach project data to each log and check for unread status
       const logsWithProjects = logsData.map(log => {
         if (log.project_ids && log.project_ids.length > 0) {
           const logProjects = projectsData.filter(p => 
@@ -123,6 +138,16 @@ const MentorLogs = () => {
         return log;
       });
       setLogs(logsWithProjects);
+      
+      // Check for unread logs (updated after last view)
+      const unread = new Set<string>();
+      logsData.forEach(log => {
+        const lastViewed = viewsMap[log.id];
+        if (lastViewed && new Date(log.updated_at) > new Date(lastViewed)) {
+          unread.add(log.id);
+        }
+      });
+      setUnreadLogIds(unread);
     } else if (logsData) {
       setLogs(logsData);
     }
@@ -155,8 +180,27 @@ const MentorLogs = () => {
     setIsDialogOpen(true);
   };
 
-  const handleCardClick = (log: any) => {
+  const handleCardClick = async (log: any) => {
     setDetailViewLog(log);
+    
+    // Mark log as viewed
+    const { error } = await db
+      .from("mentor_log_views")
+      .upsert({
+        mentor_log_id: log.id,
+        last_viewed_at: new Date().toISOString(),
+      }, {
+        onConflict: 'mentor_log_id'
+      });
+    
+    if (!error) {
+      // Remove from unread list
+      setUnreadLogIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(log.id);
+        return newSet;
+      });
+    }
   };
 
   const handleSave = async () => {
@@ -552,7 +596,15 @@ const MentorLogs = () => {
                             </span>
                           ))}
                         </div>
-                        <CardTitle className="text-lg">{log.title}</CardTitle>
+                        <div className="flex items-center gap-2">
+                          <CardTitle className="text-lg">{log.title}</CardTitle>
+                          {unreadLogIds.has(log.id) && (
+                            <span className="relative flex h-3 w-3">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                              <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <div className="flex gap-1">
                         {!isViewerMode && (
