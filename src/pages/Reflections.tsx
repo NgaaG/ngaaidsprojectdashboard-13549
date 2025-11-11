@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { PresenceIndicator } from "@/components/PresenceIndicator";
 import {
   Select,
   SelectContent,
@@ -202,8 +203,16 @@ const Reflections = () => {
   const moodColor = emotionOptions.find((m) => m.value === currentReflection.mood)?.color || "hsl(195 60% 76%)";
 
   return (
-    <div className="min-h-screen py-8 px-4 bg-gradient-to-br from-background via-muted/10 to-background">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen">
+      {/* Live Presence Indicator - Top of Page */}
+      <div className="bg-gradient-to-r from-primary/5 via-secondary/5 to-primary/5 border-b border-border py-3 px-4 sm:px-8 sticky top-0 z-40 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto">
+          <PresenceIndicator />
+        </div>
+      </div>
+      
+      <div className="py-8 px-4 bg-gradient-to-br from-background via-muted/10 to-background">
+        <div className="max-w-4xl mx-auto">
         <header className="mb-8 space-y-3">
           <div className="flex items-center justify-between">
             <div className="space-y-2">
@@ -686,6 +695,7 @@ const Reflections = () => {
           }}
         />
       )}
+      </div>
     </div>
   );
 };

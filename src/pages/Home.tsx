@@ -4,11 +4,11 @@ import { ProjectCard } from "@/components/ProjectCard";
 import { ProjectDialog } from "@/components/ProjectDialog";
 import { ProjectDetailView } from "@/components/ProjectDetailView";
 import { ModeToggle } from "@/components/ModeToggle";
-import { OnboardingOverlay } from "@/components/OnboardingOverlay";
+import { PresenceIndicator } from "@/components/PresenceIndicator";
 import { getMode, setMode } from "@/lib/storage";
 import { Mode, Project, CompetencyProgress } from "@/types";
 import { Button } from "@/components/ui/button";
-import { Download, HelpCircle } from "lucide-react";
+import { Download } from "lucide-react";
 import { db } from "@/lib/supabaseHelpers";
 import { exportToJSON, exportToCSV } from "@/lib/exportUtils";
 import { toast } from "sonner";
@@ -20,7 +20,6 @@ const Home = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [detailViewOpen, setDetailViewOpen] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(false);
   const [competencyProgress, setCompetencyProgress] = useState<CompetencyProgress>({
     Research: 0,
     Create: 0,
@@ -29,15 +28,6 @@ const Home = () => {
     Learn: 0,
     "Unsure/TBD": 0,
   });
-
-  // Check if first visit (persist across tabs)
-  useEffect(() => {
-    const hasSeenOnboarding = localStorage.getItem("hasSeenOnboarding");
-    if (!hasSeenOnboarding) {
-      setShowOnboarding(true);
-      localStorage.setItem("hasSeenOnboarding", "true");
-    }
-  }, []);
 
   const loadData = async () => {
     // Load projects
@@ -164,15 +154,12 @@ const Home = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Onboarding Overlay */}
-      {showOnboarding && (
-        <OnboardingOverlay
-          onSelectMode={(selectedMode) => {
-            handleModeChange(selectedMode);
-          }}
-          onClose={() => setShowOnboarding(false)}
-        />
-      )}
+      {/* Live Presence Indicator - Top of Page */}
+      <div className="bg-gradient-to-r from-primary/5 via-secondary/5 to-primary/5 border-b border-border py-3 px-4 sm:px-8 sticky top-0 z-40 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <PresenceIndicator />
+        </div>
+      </div>
 
       {/* Dashboard Intro Panel */}
       <section className="bg-gradient-to-br from-primary/10 via-secondary/10 to-background py-6 sm:py-8 px-4 sm:px-8 border-b-2 border-border animate-fade-in">
@@ -253,15 +240,6 @@ const Home = () => {
           <div className="flex flex-wrap items-center gap-2 sm:gap-4">
             {!isViewerMode && (
               <>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowOnboarding(true)}
-                  className="rounded-full hover:bg-primary/20 h-8 w-8 sm:h-10 sm:w-10 p-0"
-                  title="Show intro"
-                >
-                  <HelpCircle className="h-4 w-4 sm:h-5 sm:w-5" />
-                </Button>
                 <Button variant="outline" size="sm" onClick={handleExportJSON} className="gap-1 sm:gap-2 text-xs sm:text-sm h-8 sm:h-10">
                   <Download className="h-3 w-3 sm:h-4 sm:w-4" />
                   <span className="hidden sm:inline">Export</span> JSON

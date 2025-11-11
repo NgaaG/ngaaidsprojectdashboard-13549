@@ -3,6 +3,7 @@ import { CompetencyWheel } from "@/components/CompetencyWheel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { PresenceIndicator } from "@/components/PresenceIndicator";
 import {
   getCompetencyProgress,
   updateCompetencyProgress,
@@ -92,8 +93,16 @@ const Growth = () => {
   };
 
   return (
-    <div className="min-h-screen py-8 px-4">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen">
+      {/* Live Presence Indicator - Top of Page */}
+      <div className="bg-gradient-to-r from-primary/5 via-secondary/5 to-primary/5 border-b border-border py-3 px-4 sm:px-8 sticky top-0 z-40 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto">
+          <PresenceIndicator />
+        </div>
+      </div>
+      
+      <div className="py-8 px-4">
+        <div className="max-w-6xl mx-auto">
         <header className="mb-8">
           <h1 className="text-3xl font-bold mb-2">📊 Growth Visualization</h1>
           <p className="text-muted-foreground">
@@ -248,6 +257,7 @@ const Growth = () => {
             </CardContent>
           </Card>
         </section>
+        </div>
       </div>
     </div>
   );

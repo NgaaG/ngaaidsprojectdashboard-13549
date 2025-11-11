@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { PresenceIndicator } from "@/components/PresenceIndicator";
 import {
   Dialog,
   DialogContent,
@@ -301,8 +302,16 @@ const MentorLogs = () => {
   };
 
   return (
-    <div className="min-h-screen py-8 px-4 animate-fade-in">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen">
+      {/* Live Presence Indicator - Top of Page */}
+      <div className="bg-gradient-to-r from-primary/5 via-secondary/5 to-primary/5 border-b border-border py-3 px-4 sm:px-8 sticky top-0 z-40 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto">
+          <PresenceIndicator />
+        </div>
+      </div>
+      
+      <div className="py-8 px-4 animate-fade-in">
+        <div className="max-w-6xl mx-auto">
         <header className="mb-8">
           <div className="flex justify-between items-center mb-6">
             <div>
@@ -735,6 +744,7 @@ const MentorLogs = () => {
             }
           />
         )}
+        </div>
       </div>
     </div>
   );

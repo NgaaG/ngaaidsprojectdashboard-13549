@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Play, Pause, RotateCcw, Volume2, VolumeX } from "lucide-react";
 import { toast } from "sonner";
+import { PresenceIndicator } from "@/components/PresenceIndicator";
 
 const TIMER_PRESETS = [
   { label: "20 min", minutes: 20 },
@@ -80,8 +81,16 @@ const Focus = () => {
   const progress = ((selectedPreset * 60 - timeLeft) / (selectedPreset * 60)) * 100;
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="max-w-2xl w-full">
+    <div className="min-h-screen">
+      {/* Live Presence Indicator - Top of Page */}
+      <div className="bg-gradient-to-r from-primary/5 via-secondary/5 to-primary/5 border-b border-border py-3 px-4 sm:px-8 sticky top-0 z-40 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto">
+          <PresenceIndicator />
+        </div>
+      </div>
+      
+      <div className="flex items-center justify-center px-4" style={{ minHeight: 'calc(100vh - 60px)' }}>
+        <div className="max-w-2xl w-full">
         <header className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-3">🌙 Focus Mode</h1>
           <p className="text-muted-foreground">
@@ -208,6 +217,7 @@ const Focus = () => {
             💡 Tip: Use this space for deep work, journaling, or completing reflections without
             distractions
           </p>
+        </div>
         </div>
       </div>
     </div>

@@ -4,7 +4,10 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { useViewMode } from "@/hooks/useViewMode";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { PresenceIndicator } from "@/components/PresenceIndicator";
+
+interface SidebarProps {
+  onHeartClick?: () => void;
+}
 
 const navItems = [
   { icon: Home, label: "Home", path: "/" },
@@ -14,7 +17,7 @@ const navItems = [
   { icon: Moon, label: "Focus", path: "/focus" },
 ];
 
-export const Sidebar = () => {
+export const Sidebar = ({ onHeartClick }: SidebarProps) => {
   const location = useLocation();
   const { isViewerMode } = useViewMode();
 
@@ -26,14 +29,13 @@ export const Sidebar = () => {
           Viewer
         </Badge>
       )}
-      {!isViewerMode && (
-        <div className="absolute top-2 left-1/2 -translate-x-1/2 w-16">
-          <PresenceIndicator className="text-[10px] flex-col items-center" />
-        </div>
-      )}
-      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-2xl font-bold text-primary-foreground shadow-lg mt-6">
+      <button
+        onClick={onHeartClick}
+        className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-2xl font-bold text-primary-foreground shadow-lg mt-6 hover:scale-110 transition-transform cursor-pointer"
+        title="View intro"
+      >
         💜
-      </div>
+      </button>
 
       <nav className="flex flex-col gap-4 mt-8 flex-1">
         {navItems.map(({ icon: Icon, label, path }) => {
