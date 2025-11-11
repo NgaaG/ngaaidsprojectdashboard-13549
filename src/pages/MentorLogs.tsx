@@ -54,14 +54,16 @@ const MentorLogs = () => {
   const [newLog, setNewLog] = useState({
     date: new Date().toISOString().split("T")[0],
     title: "",
-    keyGoals: "",
-    outcomes: "",
+    keyGoals: [] as string[],
+    outcomes: [] as string[],
     mentorComments: "",
     competencies: ["Create"] as Competency[],
     projectIds: [] as string[],
     selectedTaskIds: [] as string[],
     lecturer: "",
   });
+  const [newGoalInput, setNewGoalInput] = useState("");
+  const [newOutcomeInput, setNewOutcomeInput] = useState("");
 
   useEffect(() => {
     loadData();
@@ -170,8 +172,8 @@ const MentorLogs = () => {
     setNewLog({
       date: log.date,
       title: log.title,
-      keyGoals: log.key_goals || "",
-      outcomes: log.outcomes || "",
+      keyGoals: log.key_goals || [],
+      outcomes: log.outcomes || [],
       mentorComments: log.mentor_comments || "",
       competencies: log.competencies || ["Create"],
       projectIds: log.project_ids || [],
@@ -259,14 +261,16 @@ const MentorLogs = () => {
       setNewLog({
         date: new Date().toISOString().split("T")[0],
         title: "",
-        keyGoals: "",
-        outcomes: "",
+        keyGoals: [],
+        outcomes: [],
         mentorComments: "",
         competencies: ["Create"],
         projectIds: [],
         selectedTaskIds: [],
         lecturer: "",
       });
+      setNewGoalInput("");
+      setNewOutcomeInput("");
     } catch (error: any) {
       toast.error(error.message || "Failed to save mentor log");
     }
@@ -490,23 +494,111 @@ const MentorLogs = () => {
                     <div>
                       <Label htmlFor="goals" className="text-sm font-medium">Key Goals (Pre-Session)</Label>
                       <p className="text-xs text-muted-foreground mb-2">What do you hope to achieve in this session?</p>
-                      <Textarea
-                        placeholder="• Goal 1&#10;• Goal 2&#10;• Goal 3"
-                        value={newLog.keyGoals}
-                        onChange={(e) => setNewLog({ ...newLog, keyGoals: e.target.value })}
-                        className="min-h-28 font-mono text-sm"
-                      />
+                      <div className="space-y-2">
+                        {newLog.keyGoals.map((goal, index) => (
+                          <div key={index} className="flex items-center gap-2 p-2 bg-muted/30 rounded border">
+                            <span className="flex-1 text-sm">{goal}</span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setNewLog({
+                                  ...newLog,
+                                  keyGoals: newLog.keyGoals.filter((_, i) => i !== index)
+                                });
+                              }}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ))}
+                        <div className="flex gap-2">
+                          <Input
+                            placeholder="Add a goal..."
+                            value={newGoalInput}
+                            onChange={(e) => setNewGoalInput(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" && newGoalInput.trim()) {
+                                setNewLog({
+                                  ...newLog,
+                                  keyGoals: [...newLog.keyGoals, newGoalInput.trim()]
+                                });
+                                setNewGoalInput("");
+                              }
+                            }}
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                              if (newGoalInput.trim()) {
+                                setNewLog({
+                                  ...newLog,
+                                  keyGoals: [...newLog.keyGoals, newGoalInput.trim()]
+                                });
+                                setNewGoalInput("");
+                              }
+                            }}
+                          >
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
                     </div>
 
                     <div>
                       <Label htmlFor="outcomes" className="text-sm font-medium">Outcomes / Notes (Post-Session)</Label>
                       <p className="text-xs text-muted-foreground mb-2">What did you learn, achieve, or discover?</p>
-                      <Textarea
-                        placeholder="• Outcome 1&#10;• Outcome 2&#10;• Next steps..."
-                        value={newLog.outcomes}
-                        onChange={(e) => setNewLog({ ...newLog, outcomes: e.target.value })}
-                        className="min-h-28 font-mono text-sm"
-                      />
+                      <div className="space-y-2">
+                        {newLog.outcomes.map((outcome, index) => (
+                          <div key={index} className="flex items-center gap-2 p-2 bg-muted/30 rounded border">
+                            <span className="flex-1 text-sm">{outcome}</span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setNewLog({
+                                  ...newLog,
+                                  outcomes: newLog.outcomes.filter((_, i) => i !== index)
+                                });
+                              }}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ))}
+                        <div className="flex gap-2">
+                          <Input
+                            placeholder="Add an outcome..."
+                            value={newOutcomeInput}
+                            onChange={(e) => setNewOutcomeInput(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" && newOutcomeInput.trim()) {
+                                setNewLog({
+                                  ...newLog,
+                                  outcomes: [...newLog.outcomes, newOutcomeInput.trim()]
+                                });
+                                setNewOutcomeInput("");
+                              }
+                            }}
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                              if (newOutcomeInput.trim()) {
+                                setNewLog({
+                                  ...newLog,
+                                  outcomes: [...newLog.outcomes, newOutcomeInput.trim()]
+                                });
+                                setNewOutcomeInput("");
+                              }
+                            }}
+                          >
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
@@ -540,14 +632,16 @@ const MentorLogs = () => {
                       setNewLog({
                         date: new Date().toISOString().split("T")[0],
                         title: "",
-                        keyGoals: "",
-                        outcomes: "",
+                        keyGoals: [],
+                        outcomes: [],
                         mentorComments: "",
                         competencies: ["Create"],
                         projectIds: [],
                         selectedTaskIds: [],
                         lecturer: "",
                       });
+                      setNewGoalInput("");
+                      setNewOutcomeInput("");
                     }}
                   >
                     Cancel

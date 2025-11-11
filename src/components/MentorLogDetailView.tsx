@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Edit, Calendar, ExternalLink } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Edit, Calendar, ExternalLink, Trash2, Plus } from "lucide-react";
 import { Competency } from "@/types";
 import { db } from "@/lib/supabaseHelpers";
 import { toast } from "sonner";
@@ -35,13 +36,14 @@ export const MentorLogDetailView = ({
 }: MentorLogDetailViewProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [mentorComments, setMentorComments] = useState(log.mentor_comments || "");
-  const [outcomes, setOutcomes] = useState(log.outcomes || "");
+  const [outcomes, setOutcomes] = useState<string[]>(log.outcomes || []);
   const [resourceLinks, setResourceLinks] = useState(log.resource_links || "");
   const [achievedGoals, setAchievedGoals] = useState<string[]>(log.achieved_goals || []);
   const [loading, setLoading] = useState(false);
+  const [newOutcomeInput, setNewOutcomeInput] = useState("");
 
-  // Parse key goals into individual goals
-  const keyGoalsList = (log.key_goals || "").split('\n').filter((g: string) => g.trim());
+  // Key goals are now stored as an array
+  const keyGoalsList = log.key_goals || [];
 
   const handleSave = async () => {
     setLoading(true);
@@ -301,20 +303,63 @@ export const MentorLogDetailView = ({
             <div>
               <p className="text-base font-semibold mb-3 text-primary flex items-center gap-2">
                 <span>✅</span>
-                <span>Key Outcomes (Ngaa) - Post-Session</span>
+                <span>Key Outcomes (Post-Session)</span>
               </p>
               {isEditing ? (
-                <Textarea
-                  value={outcomes}
-                  onChange={(e) => setOutcomes(e.target.value)}
-                  placeholder="What did you learn, achieve, or discover?"
-                  rows={4}
-                  className="text-sm"
-                />
+                <div className="space-y-2">
+                  {outcomes.map((outcome, idx) => (
+                    <div key={idx} className="flex items-center gap-2 p-2 bg-background rounded border">
+                      <span className="flex-1 text-sm">{outcome}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setOutcomes(outcomes.filter((_, i) => i !== idx));
+                        }}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Add an outcome..."
+                      value={newOutcomeInput}
+                      onChange={(e) => setNewOutcomeInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && newOutcomeInput.trim()) {
+                          setOutcomes([...outcomes, newOutcomeInput.trim()]);
+                          setNewOutcomeInput("");
+                        }
+                      }}
+                      className="text-sm"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        if (newOutcomeInput.trim()) {
+                          setOutcomes([...outcomes, newOutcomeInput.trim()]);
+                          setNewOutcomeInput("");
+                        }
+                      }}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
               ) : (
-                <p className="text-sm text-muted-foreground whitespace-pre-line">
-                  {outcomes || "No outcomes recorded"}
-                </p>
+                <div className="space-y-2">
+                  {outcomes.length > 0 ? (
+                    outcomes.map((outcome, idx) => (
+                      <p key={idx} className="text-sm text-muted-foreground">
+                        • {outcome}
+                      </p>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No outcomes recorded</p>
+                  )}
+                </div>
               )}
             </div>
           </div>
@@ -375,9 +420,10 @@ export const MentorLogDetailView = ({
               onClick={() => {
                 setIsEditing(false);
                 setMentorComments(log.mentor_comments || "");
-                setOutcomes(log.outcomes || "");
+                setOutcomes(log.outcomes || []);
                 setResourceLinks(log.resource_links || "");
                 setAchievedGoals(log.achieved_goals || []);
+                setNewOutcomeInput("");
               }}
             >
               Cancel

@@ -82,11 +82,11 @@ export type Database = {
           evidence_images: Json | null
           id: string
           is_public: boolean | null
-          key_goals: string | null
+          key_goals: Json | null
           lecturer: string | null
           mentor_comments: string | null
           mode: string | null
-          outcomes: string | null
+          outcomes: Json | null
           project_ids: string[] | null
           resource_links: string | null
           selected_task_ids: string[] | null
@@ -103,11 +103,11 @@ export type Database = {
           evidence_images?: Json | null
           id?: string
           is_public?: boolean | null
-          key_goals?: string | null
+          key_goals?: Json | null
           lecturer?: string | null
           mentor_comments?: string | null
           mode?: string | null
-          outcomes?: string | null
+          outcomes?: Json | null
           project_ids?: string[] | null
           resource_links?: string | null
           selected_task_ids?: string[] | null
@@ -124,11 +124,11 @@ export type Database = {
           evidence_images?: Json | null
           id?: string
           is_public?: boolean | null
-          key_goals?: string | null
+          key_goals?: Json | null
           lecturer?: string | null
           mentor_comments?: string | null
           mode?: string | null
-          outcomes?: string | null
+          outcomes?: Json | null
           project_ids?: string[] | null
           resource_links?: string | null
           selected_task_ids?: string[] | null
