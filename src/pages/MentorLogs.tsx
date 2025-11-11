@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Progress } from "@/components/ui/progress";
 import { PresenceIndicator } from "@/components/PresenceIndicator";
 import {
   Dialog,
@@ -766,6 +767,22 @@ const MentorLogs = () => {
                           <p>📝 {log.key_goals.slice(0, 2).join(' • ')}{log.key_goals.length > 2 ? '...' : ''}</p>
                         )}
                       </div>
+                      
+                      {/* Satisfaction Score Progress Bar */}
+                      {log.key_goals && Array.isArray(log.key_goals) && log.key_goals.length > 0 && (
+                        <div className="space-y-2 mb-3">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Goals Covered</span>
+                            <span className="font-semibold">
+                              {Math.round(((log.achieved_goals?.length || 0) / log.key_goals.length) * 100)}%
+                            </span>
+                          </div>
+                          <Progress 
+                            value={((log.achieved_goals?.length || 0) / log.key_goals.length) * 100} 
+                            className="h-2" 
+                          />
+                        </div>
+                      )}
                       
                       <Button
                         variant="outline"

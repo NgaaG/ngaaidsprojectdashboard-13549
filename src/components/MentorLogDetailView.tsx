@@ -280,7 +280,7 @@ export const MentorLogDetailView = ({
                             className="mt-1 h-4 w-4 rounded border-gray-300"
                           />
                         )}
-                        <p className={`text-sm flex-1 ${isAchieved ? 'text-green-600 dark:text-green-400 line-through' : 'text-muted-foreground'}`}>
+                        <p className={`text-sm flex-1 rounded px-2 py-1 ${isAchieved ? 'text-green-600 dark:text-green-400 border-2 border-green-500/50 bg-green-500/10' : 'text-muted-foreground'}`}>
                           {isAchieved && '✅ '}{goal.trim()}
                         </p>
                       </div>
