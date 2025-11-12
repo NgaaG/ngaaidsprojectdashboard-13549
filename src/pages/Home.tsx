@@ -228,6 +228,19 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Portfolio Poster Section */}
+      <section className="py-8 sm:py-12 px-4 sm:px-8 bg-gradient-to-br from-primary/5 via-accent/5 to-secondary/5">
+        <div className="max-w-5xl mx-auto">
+          <div className="relative rounded-3xl overflow-hidden shadow-2xl border-2 border-primary/20">
+            <img 
+              src={new URL('../assets/portfolio-poster.png', import.meta.url).href}
+              alt="Ngaa Gjonaj Portfolio Poster"
+              className="w-full h-auto object-cover"
+            />
+          </div>
+        </div>
+      </section>
+
       {/* Header with controls */}
       <header className="bg-background py-4 sm:py-8 px-4 sm:px-8">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
