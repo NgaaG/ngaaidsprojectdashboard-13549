@@ -112,42 +112,42 @@ const Growth = () => {
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <Card>
+          <Card className="glass-card hover-lift stagger-item">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Total Reflections</p>
-                  <p className="text-3xl font-bold">{stats.totalReflections}</p>
+                  <p className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">{stats.totalReflections}</p>
                 </div>
-                <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
+                <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center pulse-ring">
                   💭
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="glass-card hover-lift stagger-item" style={{ animationDelay: '0.1s' }}>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Mentor Sessions</p>
-                  <p className="text-3xl font-bold">{stats.totalMentorLogs}</p>
+                  <p className="text-3xl font-bold bg-gradient-to-r from-secondary to-accent bg-clip-text text-transparent">{stats.totalMentorLogs}</p>
                 </div>
-                <div className="h-12 w-12 rounded-full bg-secondary/20 flex items-center justify-center">
+                <div className="h-12 w-12 rounded-full bg-secondary/20 flex items-center justify-center pulse-ring">
                   🧭
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="glass-card hover-lift stagger-item" style={{ animationDelay: '0.2s' }}>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Average Progress</p>
-                  <p className="text-3xl font-bold">{stats.averageProgress}%</p>
+                  <p className="text-3xl font-bold bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent">{stats.averageProgress}%</p>
                 </div>
-                <div className="h-12 w-12 rounded-full bg-accent/20 flex items-center justify-center">
+                <div className="h-12 w-12 rounded-full bg-accent/20 flex items-center justify-center pulse-ring">
                   <TrendingUp className="h-6 w-6 text-accent-foreground" />
                 </div>
               </div>
@@ -156,16 +156,16 @@ const Growth = () => {
         </div>
 
         {/* Competency Wheel */}
-        <section className="mb-12">
-          <Card>
+        <section className="mb-12 animate-fade-in">
+          <Card className="glass-card">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
-                  <Award className="h-5 w-5" />
+                  <Award className="h-5 w-5 text-primary" />
                   CMD Competency Wheel
                 </CardTitle>
                 <Button
-                  variant="outline"
+                  variant="glass"
                   size="sm"
                   onClick={autoCalculateProgress}
                   disabled={isAutoCalculating}
@@ -194,18 +194,18 @@ const Growth = () => {
               const value = progress[comp] || 0;
               
               return (
-                <Card key={comp}>
+                <Card key={comp} className="glass-card hover-lift stagger-item" style={{ animationDelay: `${COMPETENCIES.indexOf(comp) * 0.05}s` }}>
                   <CardContent className="pt-6">
                     <div className="space-y-4">
                       <div className="flex justify-between items-center">
                         <div className="flex items-center gap-3">
                           <div
-                            className="w-4 h-4 rounded-full"
-                            style={{ backgroundColor: color }}
+                            className="w-4 h-4 rounded-full shadow-lg transition-transform hover:scale-150"
+                            style={{ backgroundColor: color, boxShadow: `0 0 12px ${color}` }}
                           />
                           <h3 className="font-semibold">{comp}</h3>
                         </div>
-                        <span className="text-2xl font-bold">{value}%</span>
+                        <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">{value}%</span>
                       </div>
                       
                       <Slider

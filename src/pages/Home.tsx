@@ -229,13 +229,14 @@ const Home = () => {
       </section>
 
       {/* Portfolio Poster Section */}
-      <section className="py-8 sm:py-12 px-4 sm:px-8 bg-gradient-to-br from-primary/5 via-accent/5 to-secondary/5">
+      <section className="py-8 sm:py-12 px-4 sm:px-8 bg-gradient-to-br from-primary/5 via-accent/5 to-secondary/5 animate-fade-in">
         <div className="max-w-5xl mx-auto">
-          <div className="relative rounded-3xl overflow-hidden shadow-2xl border-2 border-primary/20">
+          <div className="relative rounded-3xl overflow-hidden shadow-2xl border-2 border-primary/20 hover:border-primary/40 transition-all duration-500 hover:shadow-3xl group">
+            <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <img 
               src={new URL('../assets/portfolio-poster.png', import.meta.url).href}
               alt="Ngaa Gjonaj Portfolio Poster"
-              className="w-full h-auto object-cover"
+              className="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-700"
             />
           </div>
         </div>
@@ -297,15 +298,16 @@ const Home = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {projects.map((project) => (
-                <ProjectCard
-                  key={project.id}
-                  project={project}
-                  onClick={() => {
-                    setSelectedProject(project);
-                    setDetailViewOpen(true);
-                  }}
-                />
+              {projects.map((project, idx) => (
+                <div key={project.id} className="stagger-item" style={{ animationDelay: `${idx * 0.05}s` }}>
+                  <ProjectCard
+                    project={project}
+                    onClick={() => {
+                      setSelectedProject(project);
+                      setDetailViewOpen(true);
+                    }}
+                  />
+                </div>
               ))}
             </div>
           )}

@@ -674,13 +674,16 @@ const MentorLogs = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredLogs.map((log) => {
+            {filteredLogs.map((log, idx) => {
               const primaryColor = COMPETENCY_COLORS[log.competencies?.[0] || "Create"];
               return (
                 <Card
                   key={log.id}
-                  className="overflow-hidden hover:shadow-lg transition-all hover-scale animate-fade-in cursor-pointer"
-                  style={{ borderTop: `4px solid ${primaryColor}` }}
+                  className="overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 cursor-pointer group glass-card stagger-item"
+                  style={{ 
+                    borderTop: `4px solid ${primaryColor}`,
+                    animationDelay: `${idx * 0.05}s`
+                  }}
                   onClick={() => handleCardClick(log)}
                 >
                   <CardHeader>

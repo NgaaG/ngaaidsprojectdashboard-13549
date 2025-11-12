@@ -31,12 +31,12 @@ export const ProjectCard = ({ project, onClick }: ProjectCardProps) => {
 
   return (
     <Card 
-      className="overflow-hidden hover:shadow-lg transition-all hover:scale-105 cursor-pointer group relative"
+      className="overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 cursor-pointer group relative glass-card hover:border-primary/30"
       style={{ borderLeft: `4px solid ${borderColor}` }}
       onClick={onClick}
     >
-      <div className="absolute top-2 right-2 bg-primary/10 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1.5 text-xs font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-        <Eye className="h-3 w-3" />
+      <div className="absolute top-2 right-2 bg-primary/10 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1.5 text-xs font-medium text-primary opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-105">
+        <Eye className="h-3 w-3 animate-pulse" />
         Click to view
       </div>
       <CardContent className="p-4">
@@ -75,9 +75,9 @@ export const ProjectCard = ({ project, onClick }: ProjectCardProps) => {
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Progress</span>
-            <span className="font-semibold">{project.completion}%</span>
+            <span className="font-semibold text-lg transition-all duration-300 group-hover:text-primary">{project.completion}%</span>
           </div>
-          <Progress value={project.completion} className="h-2" />
+          <Progress value={project.completion} className="h-2.5 shadow-inner" />
         </div>
       </CardContent>
     </Card>
