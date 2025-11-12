@@ -148,6 +148,111 @@ export const MentorLogDetailView = ({
             </div>
           )}
 
+          {/* Pre-Session: Key Goals */}
+          <div className="border-l-4 pl-5 py-3 rounded-r-lg bg-gradient-to-r from-transparent to-muted/10" style={{ borderColor: primaryColor }}>
+            <div>
+              <p className="text-lg font-bold mb-4 text-primary flex items-center gap-2">
+                <span>📝</span>
+                <span>Key Goals (Pre-Session)</span>
+              </p>
+              {keyGoalsList.length > 0 ? (
+                <div className="space-y-2">
+                  {keyGoalsList.map((goal: string, idx: number) => {
+                    const isAchieved = achievedGoals.includes(goal.trim());
+                    return (
+                      <div key={idx} className="flex items-start gap-3 group">
+                        {isEditing && (
+                          <input
+                            type="checkbox"
+                            checked={isAchieved}
+                            onChange={() => toggleGoalAchievement(goal.trim())}
+                            className="mt-1 h-4 w-4 rounded border-gray-300"
+                          />
+                        )}
+                        <p className={`text-sm flex-1 rounded px-2 py-1 ${isAchieved ? 'text-green-600 dark:text-green-400 border-2 border-green-500/50 bg-green-500/10' : 'text-muted-foreground'}`}>
+                          {isAchieved && '✅ '}{goal.trim()}
+                        </p>
+                      </div>
+                    );
+                  })}
+                  {isEditing && (
+                    <p className="text-xs text-muted-foreground mt-3 italic">
+                      Check the goals that were achieved during the session
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">No goals set</p>
+              )}
+            </div>
+          </div>
+
+          {/* Post-Session: Outcomes */}
+          <div className="border-l-4 border-accent/50 pl-5 py-3 rounded-r-lg bg-gradient-to-r from-transparent to-accent/5">
+            <div>
+              <p className="text-lg font-bold mb-3 text-primary flex items-center gap-2">
+                <span>✅</span>
+                <span>Key Outcomes (Post-Session)</span>
+              </p>
+              {isEditing ? (
+                <div className="space-y-2">
+                  {outcomes.map((outcome, idx) => (
+                    <div key={idx} className="flex items-center gap-2 p-2 bg-background rounded border">
+                      <span className="flex-1 text-sm">{outcome}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setOutcomes(outcomes.filter((_, i) => i !== idx));
+                        }}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Add an outcome..."
+                      value={newOutcomeInput}
+                      onChange={(e) => setNewOutcomeInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && newOutcomeInput.trim()) {
+                          setOutcomes([...outcomes, newOutcomeInput.trim()]);
+                          setNewOutcomeInput("");
+                        }
+                      }}
+                      className="text-sm"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        if (newOutcomeInput.trim()) {
+                          setOutcomes([...outcomes, newOutcomeInput.trim()]);
+                          setNewOutcomeInput("");
+                        }
+                      }}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {outcomes.length > 0 ? (
+                    outcomes.map((outcome, idx) => (
+                      <p key={idx} className="text-sm text-muted-foreground">
+                        • {outcome}
+                      </p>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No outcomes recorded</p>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Selected Tasks Gallery */}
           {selectedTasks.length > 0 && (
             <div className="border rounded-xl p-6 bg-gradient-to-br from-accent/5 to-accent/10 shadow-sm">
@@ -258,111 +363,6 @@ export const MentorLogDetailView = ({
               </div>
             </div>
           )}
-
-          {/* Pre-Session: Key Goals */}
-          <div className="border-l-4 pl-5 py-3 rounded-r-lg bg-gradient-to-r from-transparent to-muted/10" style={{ borderColor: primaryColor }}>
-            <div>
-              <p className="text-base font-bold mb-4 text-primary flex items-center gap-2">
-                <span>📝</span>
-                <span className="font-bold">Key Goals (Pre-Session)</span>
-              </p>
-              {keyGoalsList.length > 0 ? (
-                <div className="space-y-2">
-                  {keyGoalsList.map((goal: string, idx: number) => {
-                    const isAchieved = achievedGoals.includes(goal.trim());
-                    return (
-                      <div key={idx} className="flex items-start gap-3 group">
-                        {isEditing && (
-                          <input
-                            type="checkbox"
-                            checked={isAchieved}
-                            onChange={() => toggleGoalAchievement(goal.trim())}
-                            className="mt-1 h-4 w-4 rounded border-gray-300"
-                          />
-                        )}
-                        <p className={`text-sm flex-1 rounded px-2 py-1 ${isAchieved ? 'text-green-600 dark:text-green-400 border-2 border-green-500/50 bg-green-500/10' : 'text-muted-foreground'}`}>
-                          {isAchieved && '✅ '}{goal.trim()}
-                        </p>
-                      </div>
-                    );
-                  })}
-                  {isEditing && (
-                    <p className="text-xs text-muted-foreground mt-3 italic">
-                      Check the goals that were achieved during the session
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">No goals set</p>
-              )}
-            </div>
-          </div>
-
-          {/* Post-Session: Outcomes */}
-          <div className="border-l-4 border-accent/50 pl-5 py-3 rounded-r-lg bg-gradient-to-r from-transparent to-accent/5">
-            <div>
-              <p className="text-base font-semibold mb-3 text-primary flex items-center gap-2">
-                <span>✅</span>
-                <span>Key Outcomes (Post-Session)</span>
-              </p>
-              {isEditing ? (
-                <div className="space-y-2">
-                  {outcomes.map((outcome, idx) => (
-                    <div key={idx} className="flex items-center gap-2 p-2 bg-background rounded border">
-                      <span className="flex-1 text-sm">{outcome}</span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setOutcomes(outcomes.filter((_, i) => i !== idx));
-                        }}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  ))}
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Add an outcome..."
-                      value={newOutcomeInput}
-                      onChange={(e) => setNewOutcomeInput(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && newOutcomeInput.trim()) {
-                          setOutcomes([...outcomes, newOutcomeInput.trim()]);
-                          setNewOutcomeInput("");
-                        }
-                      }}
-                      className="text-sm"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        if (newOutcomeInput.trim()) {
-                          setOutcomes([...outcomes, newOutcomeInput.trim()]);
-                          setNewOutcomeInput("");
-                        }
-                      }}
-                    >
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {outcomes.length > 0 ? (
-                    outcomes.map((outcome, idx) => (
-                      <p key={idx} className="text-sm text-muted-foreground">
-                        • {outcome}
-                      </p>
-                    ))
-                  ) : (
-                    <p className="text-sm text-muted-foreground">No outcomes recorded</p>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
 
           {/* Lecturer Feedback */}
           <div className="border rounded-xl p-6 bg-gradient-to-br from-accent/5 to-accent/10 shadow-sm space-y-5">
