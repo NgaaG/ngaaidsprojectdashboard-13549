@@ -39,6 +39,7 @@ export const MentorLogDetailView = ({
   const [outcomes, setOutcomes] = useState<string[]>(log.outcomes || []);
   const [resourceLinks, setResourceLinks] = useState(log.resource_links || "");
   const [achievedGoals, setAchievedGoals] = useState<string[]>(log.achieved_goals || []);
+  const [notCoveredGoals, setNotCoveredGoals] = useState<string[]>(log.not_covered_goals || []);
   const [loading, setLoading] = useState(false);
   const [newOutcomeInput, setNewOutcomeInput] = useState("");
 
@@ -53,6 +54,7 @@ export const MentorLogDetailView = ({
         mentor_comments: mentorComments || null,
         resource_links: resourceLinks || null,
         achieved_goals: achievedGoals.length > 0 ? achievedGoals : null,
+        not_covered_goals: notCoveredGoals.length > 0 ? notCoveredGoals : null,
       }).eq("id", log.id);
 
       if (error) throw error;
@@ -68,11 +70,29 @@ export const MentorLogDetailView = ({
   };
 
   const toggleGoalAchievement = (goal: string) => {
-    setAchievedGoals(prev => 
-      prev.includes(goal) 
-        ? prev.filter(g => g !== goal)
-        : [...prev, goal]
-    );
+    setAchievedGoals(prev => {
+      const isCurrentlyAchieved = prev.includes(goal);
+      if (isCurrentlyAchieved) {
+        return prev.filter(g => g !== goal);
+      } else {
+        // Remove from not covered if adding to achieved
+        setNotCoveredGoals(prevNotCovered => prevNotCovered.filter(g => g !== goal));
+        return [...prev, goal];
+      }
+    });
+  };
+
+  const toggleGoalNotCovered = (goal: string) => {
+    setNotCoveredGoals(prev => {
+      const isCurrentlyNotCovered = prev.includes(goal);
+      if (isCurrentlyNotCovered) {
+        return prev.filter(g => g !== goal);
+      } else {
+        // Remove from achieved if adding to not covered
+        setAchievedGoals(prevAchieved => prevAchieved.filter(g => g !== goal));
+        return [...prev, goal];
+      }
+    });
   };
 
   const primaryColor = COMPETENCY_COLORS[log.competencies?.[0] || "Create"];
@@ -159,25 +179,42 @@ export const MentorLogDetailView = ({
                 <div className="space-y-2">
                   {keyGoalsList.map((goal: string, idx: number) => {
                     const isAchieved = achievedGoals.includes(goal.trim());
+                    const isNotCovered = notCoveredGoals.includes(goal.trim());
                     return (
                       <div key={idx} className="flex items-start gap-3 group">
                         {isEditing && (
-                          <input
-                            type="checkbox"
-                            checked={isAchieved}
-                            onChange={() => toggleGoalAchievement(goal.trim())}
-                            className="mt-1 h-4 w-4 rounded border-gray-300"
-                          />
+                          <div className="flex gap-2 mt-1">
+                            <input
+                              type="checkbox"
+                              checked={isAchieved}
+                              onChange={() => toggleGoalAchievement(goal.trim())}
+                              className="h-4 w-4 rounded border-gray-300 accent-green-500"
+                              title="Mark as achieved"
+                            />
+                            <input
+                              type="checkbox"
+                              checked={isNotCovered}
+                              onChange={() => toggleGoalNotCovered(goal.trim())}
+                              className="h-4 w-4 rounded border-gray-300 accent-red-500"
+                              title="Mark as not covered"
+                            />
+                          </div>
                         )}
-                        <p className={`text-sm flex-1 rounded px-2 py-1 ${isAchieved ? 'text-green-600 dark:text-green-400 border-2 border-green-500/50 bg-green-500/10' : 'text-muted-foreground'}`}>
-                          {isAchieved && '✅ '}{goal.trim()}
+                        <p className={`text-sm flex-1 rounded px-2 py-1 ${
+                          isAchieved ? 'text-green-600 dark:text-green-400 border-2 border-green-500/50 bg-green-500/10' : 
+                          isNotCovered ? 'text-red-600 dark:text-red-400 border-2 border-red-500/50 bg-red-500/10' : 
+                          'text-muted-foreground'
+                        }`}>
+                          {isAchieved && '✅ '}
+                          {isNotCovered && '❌ '}
+                          {goal.trim()}
                         </p>
                       </div>
                     );
                   })}
                   {isEditing && (
                     <p className="text-xs text-muted-foreground mt-3 italic">
-                      Check the goals that were achieved during the session
+                      First checkbox (green): mark as achieved • Second checkbox (red): mark as not covered
                     </p>
                   )}
                 </div>
@@ -423,6 +460,7 @@ export const MentorLogDetailView = ({
                 setOutcomes(log.outcomes || []);
                 setResourceLinks(log.resource_links || "");
                 setAchievedGoals(log.achieved_goals || []);
+                setNotCoveredGoals(log.not_covered_goals || []);
                 setNewOutcomeInput("");
               }}
             >

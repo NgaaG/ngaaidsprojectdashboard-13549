@@ -86,6 +86,7 @@ export type Database = {
           lecturer: string | null
           mentor_comments: string | null
           mode: string | null
+          not_covered_goals: Json | null
           outcomes: Json | null
           project_ids: string[] | null
           resource_links: string | null
@@ -107,6 +108,7 @@ export type Database = {
           lecturer?: string | null
           mentor_comments?: string | null
           mode?: string | null
+          not_covered_goals?: Json | null
           outcomes?: Json | null
           project_ids?: string[] | null
           resource_links?: string | null
@@ -128,6 +130,7 @@ export type Database = {
           lecturer?: string | null
           mentor_comments?: string | null
           mode?: string | null
+          not_covered_goals?: Json | null
           outcomes?: Json | null
           project_ids?: string[] | null
           resource_links?: string | null
