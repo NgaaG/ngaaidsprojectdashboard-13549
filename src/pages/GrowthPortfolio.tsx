@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { generatePortfolio, PortfolioData } from "@/lib/portfolioGenerator";
 import { GrowthPortfolioContent } from "@/components/GrowthPortfolioContent";
+import { GrowthPortfolioPrintView } from "@/components/GrowthPortfolioPrintView";
 import { ExportDialog } from "@/components/ExportDialog";
 import { Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
@@ -81,38 +82,28 @@ const GrowthPortfolio = () => {
   }
 
   return (
-    <div className="min-h-screen p-8">
-      <div className="max-w-5xl mx-auto space-y-6">
-        {/* Header with Export Button */}
-        <div className="flex items-center justify-between print:hidden">
-          <div>
-            <h1 className="text-3xl font-bold">Growth Portfolio</h1>
-            <p className="text-muted-foreground">
-              Auto-generated from your Lecture Mode learning journey
-            </p>
+    <>
+      <div className="min-h-screen p-8">
+        <div className="max-w-5xl mx-auto space-y-6">
+          {/* Header with Export Button */}
+          <div className="flex items-center justify-between print:hidden">
+            <div>
+              <h1 className="text-3xl font-bold">Growth Portfolio</h1>
+              <p className="text-muted-foreground">
+                Auto-generated from your Lecture Mode learning journey
+              </p>
+            </div>
+            <ExportDialog portfolioData={portfolioData} />
           </div>
-          <ExportDialog portfolioData={portfolioData} />
-        </div>
 
-        {/* Portfolio Content */}
-        <GrowthPortfolioContent data={portfolioData} />
+          {/* Portfolio Content */}
+          <GrowthPortfolioContent data={portfolioData} />
+        </div>
       </div>
 
-      {/* Print Styles */}
-      <style>{`
-        @media print {
-          .print\\:hidden {
-            display: none !important;
-          }
-          .page-break {
-            page-break-before: always;
-          }
-          .portfolio-content {
-            max-width: 100%;
-          }
-        }
-      `}</style>
-    </div>
+      {/* Print View (hidden, only for PDF export) */}
+      <GrowthPortfolioPrintView data={portfolioData} />
+    </>
   );
 };
 
