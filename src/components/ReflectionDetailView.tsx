@@ -64,9 +64,13 @@ export const ReflectionDetailView = ({
                 <Badge variant="outline" className="text-xs">
                   {reflection.mode === "personal" ? "Personal Reflection" : "Sprint Reflection"}
                 </Badge>
-                {projectName && (
+                {projectName ? (
                   <Badge variant="secondary" className="text-xs">
                     📁 {projectName}
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="text-xs">
+                    📅 Daily Reflection
                   </Badge>
                 )}
               </div>
