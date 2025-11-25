@@ -305,12 +305,12 @@ const Reflections = () => {
           <CardContent className="pt-6 space-y-2">
             <Label htmlFor="project" className="text-sm font-semibold">Select Project (Optional)</Label>
             <p className="text-xs text-muted-foreground mb-2">Choose a project, or leave empty for a daily reflection</p>
-            <Select value={selectedProjectId || ""} onValueChange={(value) => setSelectedProjectId(value || null)}>
+            <Select value={selectedProjectId || "none"} onValueChange={(value) => setSelectedProjectId(value === "none" ? null : value)}>
               <SelectTrigger className="h-11">
                 <SelectValue placeholder="📅 Daily Reflection (No Project)" />
               </SelectTrigger>
               <SelectContent className="bg-popover">
-                <SelectItem value="">📅 Daily Reflection (No Project)</SelectItem>
+                <SelectItem value="none">📅 Daily Reflection (No Project)</SelectItem>
                 {projects.length === 0 ? (
                   <div className="p-3 text-sm text-muted-foreground text-center">
                     No projects available. Create a project first!
