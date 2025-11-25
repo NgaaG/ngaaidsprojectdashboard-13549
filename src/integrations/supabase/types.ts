@@ -225,6 +225,7 @@ export type Database = {
       }
       reflections: {
         Row: {
+          audio_url: string | null
           category: string | null
           contingency_plan: string | null
           created_at: string | null
@@ -241,6 +242,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          audio_url?: string | null
           category?: string | null
           contingency_plan?: string | null
           created_at?: string | null
@@ -257,6 +259,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          audio_url?: string | null
           category?: string | null
           contingency_plan?: string | null
           created_at?: string | null

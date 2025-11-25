@@ -1,4 +1,4 @@
-import { Home, MessageCircle, Compass, TrendingUp, Moon, Eye } from "lucide-react";
+import { Home, MessageCircle, Compass, TrendingUp, Moon, Eye, BookOpen } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,7 @@ const navItems = [
   { icon: Compass, label: "Mentor/Lecturer Log", path: "/mentor-logs" },
   { icon: MessageCircle, label: "Reflections", path: "/reflections" },
   { icon: TrendingUp, label: "Growth", path: "/growth" },
+  { icon: BookOpen, label: "Portfolio", path: "/growth-portfolio" },
   { icon: Moon, label: "Focus", path: "/focus" },
 ];
 
@@ -38,7 +39,9 @@ export const Sidebar = ({ onHeartClick }: SidebarProps) => {
       </button>
 
       <nav className="flex flex-col gap-4 mt-8 flex-1">
-        {navItems.map(({ icon: Icon, label, path }) => {
+        {navItems
+          .filter(item => !(isViewerMode && item.path === '/growth-portfolio'))
+          .map(({ icon: Icon, label, path }) => {
           const isActive = location.pathname === path;
           return (
             <Link

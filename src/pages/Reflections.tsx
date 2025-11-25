@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { PresenceIndicator } from "@/components/PresenceIndicator";
+import { AudioRecorder } from "@/components/AudioRecorder";
 import {
   Select,
   SelectContent,
@@ -17,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Plus, Save, Trash2, Calendar } from "lucide-react";
 import { MoodType, Mode } from "@/types";
 import { db } from "@/lib/supabaseHelpers";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ModeToggle } from "@/components/ModeToggle";
 import { useSearchParams } from "react-router-dom";
@@ -61,7 +63,44 @@ const Reflections = () => {
     progress: 0,
     sentiment: 50,
     category: "time-out",
+    audioUrl: "",
   });
+
+  const handleTranscriptionComplete = async (transcription: string, audioUrl: string) => {
+    // Update the brain dump with transcription
+    setCurrentReflection(prev => ({
+      ...prev,
+      emotionalDump: transcription,
+      audioUrl
+    }));
+
+    toast.success("Audio transcribed! Auto-filling reflection...");
+
+    // Call AI to structure the reflection
+    try {
+      const { data, error } = await supabase.functions.invoke('structure-reflection', {
+        body: { brainDumpText: transcription, currentMode }
+      });
+
+      if (error) throw error;
+
+      if (data) {
+        setCurrentReflection(prev => ({
+          ...prev,
+          mood: data.mood || prev.mood,
+          thoughtsWhatIThink: data.thoughtsWhatIThink || prev.thoughtsWhatIThink,
+          thoughtsWhatIsTrue: data.thoughtsWhatIsTrue || prev.thoughtsWhatIsTrue,
+          contingencyPlan: data.contingencyPlan || prev.contingencyPlan,
+          todoList: data.todoList || prev.todoList,
+        }));
+
+        toast.success("Reflection auto-filled!");
+      }
+    } catch (error) {
+      console.error('Error structuring reflection:', error);
+      toast.error("Failed to auto-structure reflection. You can fill it manually.");
+    }
+  };
 
   useEffect(() => {
     loadData();
@@ -126,14 +165,10 @@ const Reflections = () => {
   ]);
 
   const handleSave = async () => {
-    if (!selectedProjectId) {
-      toast.error("Please select a project");
-      return;
-    }
-
+    // Project is now optional - allow daily reflections
     try {
       const { error } = await db.from("reflections").insert({
-        project_id: selectedProjectId,
+        project_id: selectedProjectId || null,
         mood: currentReflection.mood,
         emotional_dump: currentReflection.emotionalDump,
         thoughts_what_i_think: currentReflection.thoughtsWhatIThink,
@@ -144,6 +179,7 @@ const Reflections = () => {
         sentiment: currentReflection.sentiment,
         category: currentReflection.category,
         mode: currentMode,
+        audio_url: currentReflection.audioUrl || null,
       });
 
       if (error) throw error;
@@ -162,6 +198,7 @@ const Reflections = () => {
         progress: 0,
         sentiment: 50,
         category: currentMode === "personal" ? "time-out" : "sprint",
+        audioUrl: "",
       });
       setSelectedProjectId(null);
     } catch (error: any) {
@@ -239,11 +276,11 @@ const Reflections = () => {
             </div>
             <div className="flex gap-2">
               {!isViewerMode && (
-                <Button 
-                  onClick={handleSave} 
-                  className="gap-2 rounded-full shadow-md hover:shadow-lg transition-all hover:scale-105"
-                  disabled={!selectedProjectId || currentReflection.progress < 100}
-                >
+              <Button 
+                onClick={handleSave} 
+                className="gap-2 rounded-full shadow-md hover:shadow-lg transition-all hover:scale-105"
+                disabled={currentReflection.progress < 100}
+              >
                   <Save className="h-4 w-4" />
                   Save Reflection
                 </Button>
@@ -263,16 +300,17 @@ const Reflections = () => {
           </div>
         </div>
 
-        {/* Project Selection */}
+        {/* Project Selection - Now Optional */}
         <Card className="shadow-md border-l-4 border-l-primary">
           <CardContent className="pt-6 space-y-2">
-            <Label htmlFor="project" className="text-sm font-semibold">Select Project *</Label>
-            <p className="text-xs text-muted-foreground mb-2">Choose which project this reflection is for</p>
-            <Select value={selectedProjectId || ""} onValueChange={setSelectedProjectId}>
+            <Label htmlFor="project" className="text-sm font-semibold">Select Project (Optional)</Label>
+            <p className="text-xs text-muted-foreground mb-2">Choose a project, or leave empty for a daily reflection</p>
+            <Select value={selectedProjectId || ""} onValueChange={(value) => setSelectedProjectId(value || null)}>
               <SelectTrigger className="h-11">
-                <SelectValue placeholder="Choose a project..." />
+                <SelectValue placeholder="📅 Daily Reflection (No Project)" />
               </SelectTrigger>
               <SelectContent className="bg-popover">
+                <SelectItem value="">📅 Daily Reflection (No Project)</SelectItem>
                 {projects.length === 0 ? (
                   <div className="p-3 text-sm text-muted-foreground text-center">
                     No projects available. Create a project first!
@@ -330,6 +368,14 @@ const Reflections = () => {
                   ))}
                 </div>
               </div>
+              
+              {/* Audio Recorder */}
+              {!isViewerMode && (
+                <div className="mb-3">
+                  <AudioRecorder onTranscriptionComplete={handleTranscriptionComplete} />
+                </div>
+              )}
+              
               <Textarea
                 placeholder="Let it all out... what's on your mind right now?"
                 value={currentReflection.emotionalDump}

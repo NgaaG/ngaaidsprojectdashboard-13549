@@ -13,6 +13,7 @@ import Home from "./pages/Home";
 import Reflections from "./pages/Reflections";
 import MentorLogs from "./pages/MentorLogs";
 import Growth from "./pages/Growth";
+import GrowthPortfolio from "./pages/GrowthPortfolio";
 import Focus from "./pages/Focus";
 import NotFound from "./pages/NotFound";
 
@@ -48,6 +49,7 @@ const App = () => {
                   <Route path="/reflections" element={<Reflections />} />
                   <Route path="/mentor-logs" element={<MentorLogs />} />
                   <Route path="/growth" element={<Growth />} />
+                  <Route path="/growth-portfolio" element={<GrowthPortfolio />} />
                   <Route path="/focus" element={<Focus />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
