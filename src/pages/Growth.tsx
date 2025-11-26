@@ -220,6 +220,18 @@ const Growth = () => {
                 <Save className="h-4 w-4" />
                 Save Learning Goals
               </Button>
+
+              {/* Overview Display */}
+              {generalLearningGoals && (
+                <div className="mt-6 pt-6 border-t">
+                  <h4 className="font-semibold mb-3 flex items-center gap-2">
+                    📋 Saved Overview
+                  </h4>
+                  <div className="bg-muted/30 rounded-lg p-4 whitespace-pre-wrap text-sm">
+                    {generalLearningGoals}
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </section>
