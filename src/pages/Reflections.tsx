@@ -53,6 +53,7 @@ const Reflections = () => {
   const [highlightedReflectionId, setHighlightedReflectionId] = useState<string | null>(null);
   const [selectedReflection, setSelectedReflection] = useState<any | null>(null);
   const [editingReflection, setEditingReflection] = useState<any | null>(null);
+  const [generalLearningGoals, setGeneralLearningGoals] = useState("");
   const [currentReflection, setCurrentReflection] = useState({
     mood: "calm",
     emotionalDump: "",
@@ -104,7 +105,45 @@ const Reflections = () => {
 
   useEffect(() => {
     loadData();
+    loadGeneralLearningGoals();
   }, [currentMode]);
+
+  const loadGeneralLearningGoals = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: profile } = await db
+        .from("profiles")
+        .select("general_learning_goals")
+        .eq("user_id", user.id)
+        .single();
+
+      if (profile) {
+        setGeneralLearningGoals(profile.general_learning_goals || "");
+      }
+    } catch (error) {
+      console.error("Error loading general learning goals:", error);
+    }
+  };
+
+  const saveGeneralLearningGoals = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { error } = await db
+        .from("profiles")
+        .update({ general_learning_goals: generalLearningGoals })
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+      toast.success("Learning goals saved!");
+    } catch (error) {
+      console.error("Error saving general learning goals:", error);
+      toast.error("Failed to save learning goals");
+    }
+  };
 
   // Handle reflectionId from query params (when navigating from project detail view)
   useEffect(() => {
@@ -254,12 +293,12 @@ const Reflections = () => {
           <div className="flex items-center justify-between">
             <div className="space-y-2">
               <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-                {currentMode === "personal" ? "💭 Time-Out Reflection Studio" : "🎓 Sprint Reflection"}
+                {currentMode === "personal" ? "💭 Time-Out Reflection Studio" : "🎓 Learning Reflection"}
               </h1>
               <p className="text-muted-foreground text-sm md:text-base max-w-2xl">
                 {currentMode === "personal" 
                   ? "Process emotions and thoughts in a structured, calming space"
-                  : "Reflect on learning outcomes and sprint progress"}
+                  : "Reflect on learning outcomes and session progress"}
               </p>
             </div>
             <ModeToggle mode={currentMode} onModeChange={setCurrentMode} />
@@ -299,6 +338,34 @@ const Reflections = () => {
             </div>
           </div>
         </div>
+
+        {/* General Learning Goals Section */}
+        <Card className="shadow-md border-l-4 border-l-accent mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              💡 General Learning Goals
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Explore and jot down learning goals in a free-form way before organizing them into competencies
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Textarea
+              placeholder="• What skills do I want to develop?&#10;• What topics interest me?&#10;• What challenges do I want to tackle?&#10;&#10;Write freely here - you can organize these into competencies later..."
+              value={generalLearningGoals}
+              onChange={(e) => setGeneralLearningGoals(e.target.value)}
+              className="min-h-40"
+            />
+            <Button 
+              onClick={saveGeneralLearningGoals}
+              className="gap-2"
+              disabled={isViewerMode}
+            >
+              <Save className="h-4 w-4" />
+              Save Learning Goals
+            </Button>
+          </CardContent>
+        </Card>
 
         {/* Project Selection - Now Optional */}
         <Card className="shadow-md border-l-4 border-l-primary">
@@ -504,17 +571,17 @@ const Reflections = () => {
             </>
           ) : (
             <>
-              {/* Lecture Mode: Sprint Reflection */}
+              {/* Lecture Mode: Session Reflection */}
               <Card className="overflow-hidden" style={{ borderLeft: `4px solid ${moodColor}` }}>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    1️⃣ Sprint Summary
+                    1️⃣ Session Summary
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
                     <label className="text-sm font-semibold mb-3 block flex items-center gap-2">
-                      <span>How satisfied were you with this sprint?</span>
+                      <span>How satisfied were you with this session?</span>
                       <span className="text-xs text-muted-foreground font-normal">(Select satisfaction level)</span>
                     </label>
                     <div className="flex gap-2 flex-wrap mb-4">
@@ -541,7 +608,7 @@ const Reflections = () => {
                   <div>
                     <label className="text-sm font-medium mb-2 block">What did you learn?</label>
                     <Textarea
-                      placeholder="Key learnings and insights from this sprint..."
+                      placeholder="Key learnings and insights from this session..."
                       value={currentReflection.emotionalDump}
                       onChange={(e) =>
                         setCurrentReflection((prev) => ({ ...prev, emotionalDump: e.target.value }))

@@ -11,7 +11,8 @@ import {
   getReflections,
 } from "@/lib/storage";
 import { CompetencyProgress, Competency } from "@/types";
-import { TrendingUp, Award, RefreshCw } from "lucide-react";
+import { TrendingUp, Award, RefreshCw, Save } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { db } from "@/lib/supabaseHelpers";
 import { calculateCompetencyProgressFromProjects } from "@/lib/growthCalculations";
@@ -35,10 +36,49 @@ const Growth = () => {
     averageProgress: 0,
   });
   const [isAutoCalculating, setIsAutoCalculating] = useState(false);
+  const [generalLearningGoals, setGeneralLearningGoals] = useState("");
 
   useEffect(() => {
     loadStats();
+    loadGeneralLearningGoals();
   }, [progress]);
+
+  const loadGeneralLearningGoals = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: profile } = await db
+        .from("profiles")
+        .select("general_learning_goals")
+        .eq("user_id", user.id)
+        .single();
+
+      if (profile) {
+        setGeneralLearningGoals(profile.general_learning_goals || "");
+      }
+    } catch (error) {
+      console.error("Error loading general learning goals:", error);
+    }
+  };
+
+  const saveGeneralLearningGoals = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { error } = await db
+        .from("profiles")
+        .update({ general_learning_goals: generalLearningGoals })
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+      toast.success("Learning goals saved!");
+    } catch (error) {
+      console.error("Error saving general learning goals:", error);
+      toast.error("Failed to save learning goals");
+    }
+  };
 
   const loadStats = async () => {
     const reflections = getReflections();
@@ -154,6 +194,35 @@ const Growth = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* General Learning Goals Section */}
+        <section className="mb-12 animate-fade-in">
+          <Card className="glass-card border-l-4 border-l-accent">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                💡 General Learning Goals
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Explore and jot down learning goals in a free-form way before organizing them into competencies
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <textarea
+                placeholder="• What skills do I want to develop?&#10;• What topics interest me?&#10;• What challenges do I want to tackle?&#10;&#10;Write freely here - you can organize these into competencies later..."
+                value={generalLearningGoals}
+                onChange={(e) => setGeneralLearningGoals(e.target.value)}
+                className="w-full min-h-40 p-3 rounded-md border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+              />
+              <Button 
+                onClick={saveGeneralLearningGoals}
+                className="gap-2"
+              >
+                <Save className="h-4 w-4" />
+                Save Learning Goals
+              </Button>
+            </CardContent>
+          </Card>
+        </section>
 
         {/* Competency Wheel */}
         <section className="mb-12 animate-fade-in">
