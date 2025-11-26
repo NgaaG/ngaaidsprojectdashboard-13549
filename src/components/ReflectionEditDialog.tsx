@@ -61,7 +61,6 @@ export const ReflectionEditDialog = ({
   const [solutionsStructured, setSolutionsStructured] = useState<ChallengeEntry[]>(reflection.solutions_structured || []);
   const [fillTheGaps, setFillTheGaps] = useState<ReflectionEntry[]>(reflection.fill_the_gaps || []);
   const [nextSteps, setNextSteps] = useState<ReflectionEntry[]>(reflection.next_steps || []);
-  const [whatIExecuted, setWhatIExecuted] = useState<ReflectionEntry[]>(reflection.what_i_executed || []);
   
   const [loading, setLoading] = useState(false);
 
@@ -80,7 +79,6 @@ export const ReflectionEditDialog = ({
       setSolutionsStructured(reflection.solutions_structured || []);
       setFillTheGaps(reflection.fill_the_gaps || []);
       setNextSteps(reflection.next_steps || []);
-      setWhatIExecuted(reflection.what_i_executed || []);
     }
   }, [open, reflection]);
 
@@ -97,10 +95,9 @@ export const ReflectionEditDialog = ({
         challengesStructured.length > 0 || solutionsStructured.length > 0,
         fillTheGaps.length > 0,
         nextSteps.length > 0,
-        whatIExecuted.length > 0,
       ];
       const filledSections = sections.filter(s => typeof s === "string" ? s.trim() : s).length;
-      return (filledSections / 7) * 100;
+      return (filledSections / 6) * 100;
     }
   };
 
@@ -188,7 +185,6 @@ export const ReflectionEditDialog = ({
         updateData.solutions_structured = solutionsStructured;
         updateData.fill_the_gaps = fillTheGaps;
         updateData.next_steps = nextSteps;
-        updateData.what_i_executed = whatIExecuted;
       }
 
       const { error } = await db
@@ -522,7 +518,6 @@ export const ReflectionEditDialog = ({
 
                 {renderEntrySection("5️⃣ Where I Want to Fill in the Gaps", fillTheGaps, setFillTheGaps)}
                 {renderEntrySection("6️⃣ Next Steps", nextSteps, setNextSteps)}
-                {renderEntrySection("7️⃣ What I Actually Executed", whatIExecuted, setWhatIExecuted)}
               </>
             )}
           </div>

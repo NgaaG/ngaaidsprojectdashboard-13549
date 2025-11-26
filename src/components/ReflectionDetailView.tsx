@@ -322,14 +322,6 @@ export const ReflectionDetailView = ({
                 {renderEntryList(reflection.next_steps, "No next steps planned")}
               </div>
 
-              {/* What I Actually Executed */}
-              <div className="border-l-4 border-accent/50 pl-5 py-3 rounded-r-lg bg-gradient-to-r from-transparent to-accent/5">
-                <p className="text-base font-bold mb-3 text-primary flex items-center gap-2">
-                  <span>7️⃣</span>
-                  <span>What I Actually Executed</span>
-                </p>
-                {renderEntryList(reflection.what_i_executed, "No execution recorded")}
-              </div>
             </>
           )}
         </div>
