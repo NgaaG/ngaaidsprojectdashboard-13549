@@ -46,17 +46,13 @@ const Growth = () => {
 
   const loadGeneralLearningGoals = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data: profile } = await db
+      const { data: profiles } = await db
         .from("profiles")
         .select("general_learning_goals")
-        .eq("user_id", user.id)
-        .single();
+        .limit(1);
 
-      if (profile?.general_learning_goals) {
-        setGeneralLearningGoals(profile.general_learning_goals);
+      if (profiles && profiles.length > 0 && profiles[0]?.general_learning_goals) {
+        setGeneralLearningGoals(profiles[0].general_learning_goals);
       }
     } catch (error) {
       console.error("Error loading general learning goals:", error);
@@ -65,13 +61,19 @@ const Growth = () => {
 
   const saveGeneralLearningGoals = async (goalsData: any) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      const { data: profiles } = await db
+        .from("profiles")
+        .select("id")
+        .limit(1);
+
+      const profileId = profiles && profiles.length > 0 ? profiles[0].id : null;
 
       const { error } = await db
         .from("profiles")
-        .update({ general_learning_goals: goalsData })
-        .eq("user_id", user.id);
+        .upsert({ 
+          id: profileId || undefined,
+          general_learning_goals: goalsData 
+        });
 
       if (error) throw error;
       setGeneralLearningGoals(goalsData);

@@ -230,53 +230,68 @@ export type Database = {
         Row: {
           audio_url: string | null
           category: string | null
+          challenges_structured: Json | null
           contingency_plan: string | null
           created_at: string | null
           emotional_dump: string | null
+          fill_the_gaps: Json | null
           id: string
           mode: string | null
           mood: string
           progress: number | null
           project_id: string | null
           sentiment: number | null
+          solutions_structured: Json | null
           thoughts_what_i_think: string | null
           thoughts_what_is_true: string | null
           todo_list: Json | null
           user_id: string | null
+          what_i_did: Json | null
+          what_i_executed: Json | null
         }
         Insert: {
           audio_url?: string | null
           category?: string | null
+          challenges_structured?: Json | null
           contingency_plan?: string | null
           created_at?: string | null
           emotional_dump?: string | null
+          fill_the_gaps?: Json | null
           id?: string
           mode?: string | null
           mood: string
           progress?: number | null
           project_id?: string | null
           sentiment?: number | null
+          solutions_structured?: Json | null
           thoughts_what_i_think?: string | null
           thoughts_what_is_true?: string | null
           todo_list?: Json | null
           user_id?: string | null
+          what_i_did?: Json | null
+          what_i_executed?: Json | null
         }
         Update: {
           audio_url?: string | null
           category?: string | null
+          challenges_structured?: Json | null
           contingency_plan?: string | null
           created_at?: string | null
           emotional_dump?: string | null
+          fill_the_gaps?: Json | null
           id?: string
           mode?: string | null
           mood?: string
           progress?: number | null
           project_id?: string | null
           sentiment?: number | null
+          solutions_structured?: Json | null
           thoughts_what_i_think?: string | null
           thoughts_what_is_true?: string | null
           todo_list?: Json | null
           user_id?: string | null
+          what_i_did?: Json | null
+          what_i_executed?: Json | null
         }
         Relationships: [
           {
