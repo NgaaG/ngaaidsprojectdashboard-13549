@@ -609,9 +609,9 @@ const Reflections = () => {
                     </div>
                   </div>
                   <div>
-                    <label className="text-sm font-medium mb-2 block">What did you learn?</label>
+                    <label className="text-sm font-medium mb-2 block">Session Summary</label>
                     <Textarea
-                      placeholder="Key learnings and insights from this session..."
+                      placeholder="Quick overview of this session..."
                       value={currentReflection.emotionalDump}
                       onChange={(e) =>
                         setCurrentReflection((prev) => ({ ...prev, emotionalDump: e.target.value }))
@@ -622,67 +622,15 @@ const Reflections = () => {
                 </CardContent>
               </Card>
 
-              <Card className="border-l-4 border-l-secondary shadow-md">
+              {/* Structured sections for lecture mode - Coming soon */}
+              <Card className="border-l-4 border-l-primary shadow-md">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    2️⃣ Challenges & Solutions
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground">Document obstacles and how you overcame them</p>
+                  <CardTitle>🚧 Enhanced Reflection Format Coming Soon</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    The new structured format with subheadings, multiple entries, and categorized challenges is being implemented.
+                    For now, please use the Edit feature after saving to access the full structured input.
+                  </p>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium mb-2 block">Challenges Faced</label>
-                      <Textarea
-                        placeholder="What obstacles did you encounter?"
-                        value={currentReflection.thoughtsWhatIThink}
-                        onChange={(e) =>
-                          setCurrentReflection((prev) => ({
-                            ...prev,
-                            thoughtsWhatIThink: e.target.value,
-                          }))
-                        }
-                        className="min-h-32"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium mb-2 block">How You Overcame Them</label>
-                      <Textarea
-                        placeholder="Solutions and strategies used..."
-                        value={currentReflection.thoughtsWhatIsTrue}
-                        onChange={(e) =>
-                          setCurrentReflection((prev) => ({
-                            ...prev,
-                            thoughtsWhatIsTrue: e.target.value,
-                          }))
-                        }
-                        className="min-h-32"
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-l-4 border-l-accent shadow-md">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    3️⃣ Next Steps
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground">Plan your approach for future sprints</p>
-                </CardHeader>
-                <CardContent>
-                  <Textarea
-                    placeholder="What will you do differently or work on next?"
-                    value={currentReflection.contingencyPlan}
-                    onChange={(e) =>
-                      setCurrentReflection((prev) => ({
-                        ...prev,
-                        contingencyPlan: e.target.value,
-                      }))
-                    }
-                    className="min-h-24"
-                  />
-                </CardContent>
               </Card>
             </>
           )}
