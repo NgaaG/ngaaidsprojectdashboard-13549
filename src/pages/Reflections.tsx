@@ -55,7 +55,7 @@ const Reflections = () => {
   const [selectedReflection, setSelectedReflection] = useState<any | null>(null);
   const [editingReflection, setEditingReflection] = useState<any | null>(null);
   const [generalLearningGoals, setGeneralLearningGoals] = useState<any>(null);
-  const [currentReflection, setCurrentReflection] = useState({
+  const [currentReflection, setCurrentReflection] = useState<any>({
     mood: "calm",
     emotionalDump: "",
     thoughtsWhatIThink: "",
@@ -66,6 +66,13 @@ const Reflections = () => {
     sentiment: 50,
     category: "time-out",
     audioUrl: "",
+    whatIDid: [],
+    whatILearned: [],
+    challengesStructured: [],
+    solutionsStructured: [],
+    fillTheGaps: [],
+    nextSteps: [],
+    whatIExecuted: [],
   });
 
   const handleTranscriptionComplete = async (transcription: string, audioUrl: string) => {
@@ -111,17 +118,13 @@ const Reflections = () => {
 
   const loadGeneralLearningGoals = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data: profile } = await db
+      const { data: profiles } = await db
         .from("profiles")
         .select("general_learning_goals")
-        .eq("user_id", user.id)
-        .single();
+        .limit(1);
 
-      if (profile?.general_learning_goals) {
-        setGeneralLearningGoals(profile.general_learning_goals);
+      if (profiles && profiles.length > 0 && profiles[0]?.general_learning_goals) {
+        setGeneralLearningGoals(profiles[0].general_learning_goals);
       }
     } catch (error) {
       console.error("Error loading general learning goals:", error);
@@ -130,13 +133,19 @@ const Reflections = () => {
 
   const saveGeneralLearningGoals = async (goalsData: any) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      const { data: profiles } = await db
+        .from("profiles")
+        .select("id")
+        .limit(1);
+
+      const profileId = profiles && profiles.length > 0 ? profiles[0].id : null;
 
       const { error } = await db
         .from("profiles")
-        .update({ general_learning_goals: goalsData })
-        .eq("user_id", user.id);
+        .upsert({ 
+          id: profileId || undefined,
+          general_learning_goals: goalsData 
+        });
 
       if (error) throw error;
       setGeneralLearningGoals(goalsData);
@@ -208,20 +217,33 @@ const Reflections = () => {
   const handleSave = async () => {
     // Project is now optional - allow daily reflections
     try {
-      const { error } = await db.from("reflections").insert({
+      const insertData: any = {
         project_id: selectedProjectId || null,
         mood: currentReflection.mood,
         emotional_dump: currentReflection.emotionalDump,
-        thoughts_what_i_think: currentReflection.thoughtsWhatIThink,
-        thoughts_what_is_true: currentReflection.thoughtsWhatIsTrue,
-        contingency_plan: currentReflection.contingencyPlan,
-        todo_list: currentReflection.todoList,
         progress: currentReflection.progress,
         sentiment: currentReflection.sentiment,
         category: currentReflection.category,
         mode: currentMode,
         audio_url: currentReflection.audioUrl || null,
-      });
+      };
+
+      if (currentMode === "personal") {
+        insertData.thoughts_what_i_think = currentReflection.thoughtsWhatIThink;
+        insertData.thoughts_what_is_true = currentReflection.thoughtsWhatIsTrue;
+        insertData.contingency_plan = currentReflection.contingencyPlan;
+        insertData.todo_list = currentReflection.todoList;
+      } else {
+        insertData.what_i_did = currentReflection.whatIDid;
+        insertData.what_i_learned = currentReflection.whatILearned;
+        insertData.challenges_structured = currentReflection.challengesStructured;
+        insertData.solutions_structured = currentReflection.solutionsStructured;
+        insertData.fill_the_gaps = currentReflection.fillTheGaps;
+        insertData.next_steps = currentReflection.nextSteps;
+        insertData.what_i_executed = currentReflection.whatIExecuted;
+      }
+
+      const { error } = await db.from("reflections").insert(insertData);
 
       if (error) throw error;
 

@@ -4,6 +4,18 @@ export type Competency = "Research" | "Create" | "Organize" | "Communicate" | "L
 
 export type MoodType = "calm" | "anxious" | "focused" | "overwhelmed" | "energized";
 
+export interface ReflectionEntry {
+  id: string;
+  subheading: string;
+  content: string;
+}
+
+export interface ChallengeEntry {
+  id: string;
+  category: "ideas-design" | "personal";
+  content: string;
+}
+
 export interface Reflection {
   id: string;
   timestamp: string;
@@ -15,6 +27,11 @@ export interface Reflection {
   todoList: string[];
   progress: number;
   sentiment: number; // 0-100
+  whatIDid?: ReflectionEntry[];
+  fillTheGaps?: ReflectionEntry[];
+  whatIExecuted?: ReflectionEntry[];
+  challengesStructured?: ChallengeEntry[];
+  solutionsStructured?: ChallengeEntry[];
 }
 
 export interface MentorLog {

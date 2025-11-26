@@ -10,8 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2, Save } from "lucide-react";
-import { MoodType, Mode } from "@/types";
+import { Trash2, Save, Plus } from "lucide-react";
+import { MoodType, Mode, ReflectionEntry, ChallengeEntry } from "@/types";
 import { db } from "@/lib/supabaseHelpers";
 import { toast } from "sonner";
 
@@ -53,6 +53,16 @@ export const ReflectionEditDialog = ({
   const [thoughtsWhatIsTrue, setThoughtsWhatIsTrue] = useState(reflection.thoughts_what_is_true || "");
   const [contingencyPlan, setContingencyPlan] = useState(reflection.contingency_plan || "");
   const [todoList, setTodoList] = useState<string[]>(reflection.todo_list || []);
+  
+  // New structured fields for lecture mode
+  const [whatIDid, setWhatIDid] = useState<ReflectionEntry[]>(reflection.what_i_did || []);
+  const [whatILearned, setWhatILearned] = useState<ReflectionEntry[]>(reflection.what_i_learned || []);
+  const [challengesStructured, setChallengesStructured] = useState<ChallengeEntry[]>(reflection.challenges_structured || []);
+  const [solutionsStructured, setSolutionsStructured] = useState<ChallengeEntry[]>(reflection.solutions_structured || []);
+  const [fillTheGaps, setFillTheGaps] = useState<ReflectionEntry[]>(reflection.fill_the_gaps || []);
+  const [nextSteps, setNextSteps] = useState<ReflectionEntry[]>(reflection.next_steps || []);
+  const [whatIExecuted, setWhatIExecuted] = useState<ReflectionEntry[]>(reflection.what_i_executed || []);
+  
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -64,16 +74,87 @@ export const ReflectionEditDialog = ({
       setThoughtsWhatIsTrue(reflection.thoughts_what_is_true || "");
       setContingencyPlan(reflection.contingency_plan || "");
       setTodoList(reflection.todo_list || []);
+      setWhatIDid(reflection.what_i_did || []);
+      setWhatILearned(reflection.what_i_learned || []);
+      setChallengesStructured(reflection.challenges_structured || []);
+      setSolutionsStructured(reflection.solutions_structured || []);
+      setFillTheGaps(reflection.fill_the_gaps || []);
+      setNextSteps(reflection.next_steps || []);
+      setWhatIExecuted(reflection.what_i_executed || []);
     }
   }, [open, reflection]);
 
   const calculateProgress = () => {
-    const fields = [emotionalDump, thoughtsWhatIThink, thoughtsWhatIsTrue, contingencyPlan];
-    const filledFields = fields.filter((f) => f.trim().length > 0).length;
-    return (filledFields / 4) * 100;
+    if (reflection.mode === "personal") {
+      const fields = [emotionalDump, thoughtsWhatIThink, thoughtsWhatIsTrue, contingencyPlan];
+      const filledFields = fields.filter((f) => f.trim().length > 0).length;
+      return (filledFields / 4) * 100;
+    } else {
+      const sections = [
+        emotionalDump,
+        whatIDid.length > 0,
+        whatILearned.length > 0,
+        challengesStructured.length > 0 || solutionsStructured.length > 0,
+        fillTheGaps.length > 0,
+        nextSteps.length > 0,
+        whatIExecuted.length > 0,
+      ];
+      const filledSections = sections.filter(s => typeof s === "string" ? s.trim() : s).length;
+      return (filledSections / 7) * 100;
+    }
   };
 
   const emotionOptions = reflection.mode === "personal" ? MOODS : SATISFACTION;
+
+  // Helper functions for entry management
+  const addEntry = (
+    entries: ReflectionEntry[],
+    setEntries: (entries: ReflectionEntry[]) => void
+  ) => {
+    setEntries([...entries, { id: crypto.randomUUID(), subheading: "", content: "" }]);
+  };
+
+  const updateEntry = (
+    entries: ReflectionEntry[],
+    setEntries: (entries: ReflectionEntry[]) => void,
+    id: string,
+    field: "subheading" | "content",
+    value: string
+  ) => {
+    setEntries(entries.map(e => e.id === id ? { ...e, [field]: value } : e));
+  };
+
+  const removeEntry = (
+    entries: ReflectionEntry[],
+    setEntries: (entries: ReflectionEntry[]) => void,
+    id: string
+  ) => {
+    setEntries(entries.filter(e => e.id !== id));
+  };
+
+  // Challenge entry helpers
+  const addChallenge = (type: "challenge" | "solution") => {
+    const entries = type === "challenge" ? challengesStructured : solutionsStructured;
+    const setEntries = type === "challenge" ? setChallengesStructured : setSolutionsStructured;
+    setEntries([...entries, { id: crypto.randomUUID(), category: "ideas-design", content: "" }]);
+  };
+
+  const updateChallenge = (
+    type: "challenge" | "solution",
+    id: string,
+    field: "category" | "content",
+    value: string
+  ) => {
+    const entries = type === "challenge" ? challengesStructured : solutionsStructured;
+    const setEntries = type === "challenge" ? setChallengesStructured : setSolutionsStructured;
+    setEntries(entries.map(e => e.id === id ? { ...e, [field]: value } : e));
+  };
+
+  const removeChallenge = (type: "challenge" | "solution", id: string) => {
+    const entries = type === "challenge" ? challengesStructured : solutionsStructured;
+    const setEntries = type === "challenge" ? setChallengesStructured : setSolutionsStructured;
+    setEntries(entries.filter(e => e.id !== id));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,18 +169,31 @@ export const ReflectionEditDialog = ({
     try {
       const progress = calculateProgress();
       
+      const updateData: any = {
+        project_id: projectId,
+        mood,
+        emotional_dump: emotionalDump,
+        progress,
+      };
+
+      if (reflection.mode === "personal") {
+        updateData.thoughts_what_i_think = thoughtsWhatIThink;
+        updateData.thoughts_what_is_true = thoughtsWhatIsTrue;
+        updateData.contingency_plan = contingencyPlan;
+        updateData.todo_list = todoList;
+      } else {
+        updateData.what_i_did = whatIDid;
+        updateData.what_i_learned = whatILearned;
+        updateData.challenges_structured = challengesStructured;
+        updateData.solutions_structured = solutionsStructured;
+        updateData.fill_the_gaps = fillTheGaps;
+        updateData.next_steps = nextSteps;
+        updateData.what_i_executed = whatIExecuted;
+      }
+
       const { error } = await db
         .from("reflections")
-        .update({
-          project_id: projectId,
-          mood,
-          emotional_dump: emotionalDump,
-          thoughts_what_i_think: thoughtsWhatIThink,
-          thoughts_what_is_true: thoughtsWhatIsTrue,
-          contingency_plan: contingencyPlan,
-          todo_list: todoList,
-          progress,
-        })
+        .update(updateData)
         .eq("id", reflection.id);
 
       if (error) throw error;
@@ -127,6 +221,51 @@ export const ReflectionEditDialog = ({
   const removeTodoItem = (index: number) => {
     setTodoList(todoList.filter((_, i) => i !== index));
   };
+
+  const renderEntrySection = (
+    title: string,
+    entries: ReflectionEntry[],
+    setEntries: (entries: ReflectionEntry[]) => void
+  ) => (
+    <div className="space-y-3">
+      <Label className="text-base font-semibold">{title}</Label>
+      {entries.map((entry, index) => (
+        <div key={entry.id} className="p-4 border rounded-lg space-y-3 bg-muted/10">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-muted-foreground">Entry {index + 1}</span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => removeEntry(entries, setEntries, entry.id)}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+          <Input
+            placeholder="Subheading (optional one-liner)"
+            value={entry.subheading}
+            onChange={(e) => updateEntry(entries, setEntries, entry.id, "subheading", e.target.value)}
+          />
+          <Textarea
+            placeholder="Content..."
+            value={entry.content}
+            onChange={(e) => updateEntry(entries, setEntries, entry.id, "content", e.target.value)}
+            className="min-h-24"
+          />
+        </div>
+      ))}
+      <Button
+        type="button"
+        variant="outline"
+        onClick={() => addEntry(entries, setEntries)}
+        className="w-full gap-2"
+      >
+        <Plus className="h-4 w-4" />
+        Add Entry
+      </Button>
+    </div>
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -192,93 +331,199 @@ export const ReflectionEditDialog = ({
           </div>
 
           {/* Content Sections */}
-          <div className="space-y-4">
+          <div className="space-y-6">
+            {/* Session Summary (both modes) */}
             <div>
               <Label htmlFor="emotional-dump">
-                {reflection.mode === "personal" ? "Emotional Brain Dump" : "Sprint Summary - What I Learned"}
+                {reflection.mode === "personal" ? "Emotional Brain Dump" : "Session Summary"}
               </Label>
               <Textarea
                 id="emotional-dump"
                 value={emotionalDump}
                 onChange={(e) => setEmotionalDump(e.target.value)}
-                placeholder={reflection.mode === "personal" ? "Let it all out..." : "What I learned..."}
+                placeholder={reflection.mode === "personal" ? "Let it all out..." : "Summary of the session..."}
                 className="min-h-32 mt-2"
               />
             </div>
 
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="thoughts-think">
-                  {reflection.mode === "personal" ? "What I Think" : "Challenges Faced"}
-                </Label>
-                <Textarea
-                  id="thoughts-think"
-                  value={thoughtsWhatIThink}
-                  onChange={(e) => setThoughtsWhatIThink(e.target.value)}
-                  placeholder={reflection.mode === "personal" ? "The thought that's bothering me..." : "Challenges I faced..."}
-                  className="min-h-32 mt-2"
-                />
-              </div>
-              <div>
-                <Label htmlFor="thoughts-true">
-                  {reflection.mode === "personal" ? "What's True" : "How I Overcame Them"}
-                </Label>
-                <Textarea
-                  id="thoughts-true"
-                  value={thoughtsWhatIsTrue}
-                  onChange={(e) => setThoughtsWhatIsTrue(e.target.value)}
-                  placeholder={reflection.mode === "personal" ? "The evidence and reality..." : "How I solved them..."}
-                  className="min-h-32 mt-2"
-                />
-              </div>
-            </div>
+            {reflection.mode === "personal" ? (
+              <>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="thoughts-think">What I Think</Label>
+                    <Textarea
+                      id="thoughts-think"
+                      value={thoughtsWhatIThink}
+                      onChange={(e) => setThoughtsWhatIThink(e.target.value)}
+                      placeholder="The thought that's bothering me..."
+                      className="min-h-32 mt-2"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="thoughts-true">What's True</Label>
+                    <Textarea
+                      id="thoughts-true"
+                      value={thoughtsWhatIsTrue}
+                      onChange={(e) => setThoughtsWhatIsTrue(e.target.value)}
+                      placeholder="The evidence and reality..."
+                      className="min-h-32 mt-2"
+                    />
+                  </div>
+                </div>
 
-            <div>
-              <Label htmlFor="contingency-plan">
-                {reflection.mode === "personal" ? "Contingency Plan" : "Next Steps"}
-              </Label>
-              <Textarea
-                id="contingency-plan"
-                value={contingencyPlan}
-                onChange={(e) => setContingencyPlan(e.target.value)}
-                placeholder={reflection.mode === "personal" ? "What can I do next?" : "Next steps..."}
-                className="min-h-24 mt-2"
-              />
-            </div>
+                <div>
+                  <Label htmlFor="contingency-plan">Contingency Plan</Label>
+                  <Textarea
+                    id="contingency-plan"
+                    value={contingencyPlan}
+                    onChange={(e) => setContingencyPlan(e.target.value)}
+                    placeholder="What can I do next?"
+                    className="min-h-24 mt-2"
+                  />
+                </div>
 
-            {/* To-Do List (only for personal mode) */}
-            {reflection.mode === "personal" && (
-              <div>
-                <Label>To-Do Anchor</Label>
-                <p className="text-xs text-muted-foreground mb-3">Break it down into bite-sized tasks</p>
-                <div className="space-y-2">
-                  {todoList.map((todo, index) => (
-                    <div key={index} className="flex gap-2">
-                      <Input
-                        value={todo}
-                        onChange={(e) => updateTodoItem(index, e.target.value)}
-                        placeholder="Small actionable task..."
-                      />
+                <div>
+                  <Label>To-Do Anchor</Label>
+                  <p className="text-xs text-muted-foreground mb-3">Break it down into bite-sized tasks</p>
+                  <div className="space-y-2">
+                    {todoList.map((todo, index) => (
+                      <div key={index} className="flex gap-2">
+                        <Input
+                          value={todo}
+                          onChange={(e) => updateTodoItem(index, e.target.value)}
+                          placeholder="Small actionable task..."
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeTodoItem(index)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={addTodoItem}
+                      className="w-full"
+                    >
+                      + Add Task
+                    </Button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Lecture Mode Sections */}
+                {renderEntrySection("2️⃣ What I Did", whatIDid, setWhatIDid)}
+                {renderEntrySection("3️⃣ What I Learned", whatILearned, setWhatILearned)}
+
+                {/* Challenges & Solutions */}
+                <div className="space-y-4">
+                  <Label className="text-base font-semibold">4️⃣ Challenges & Solutions</Label>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    {/* Challenges */}
+                    <div className="space-y-3">
+                      <p className="text-sm font-medium">Challenges</p>
+                      {challengesStructured.map((entry, index) => (
+                        <div key={entry.id} className="p-3 border rounded-lg space-y-2 bg-muted/10">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-muted-foreground">Challenge {index + 1}</span>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeChallenge("challenge", entry.id)}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                          <Select
+                            value={entry.category}
+                            onValueChange={(value) => updateChallenge("challenge", entry.id, "category", value)}
+                          >
+                            <SelectTrigger className="h-9">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="ideas-design">💡 Ideas/Design Skills</SelectItem>
+                              <SelectItem value="personal">🧠 Personal</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Textarea
+                            placeholder="Describe the challenge..."
+                            value={entry.content}
+                            onChange={(e) => updateChallenge("challenge", entry.id, "content", e.target.value)}
+                            className="min-h-20"
+                          />
+                        </div>
+                      ))}
                       <Button
                         type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeTodoItem(index)}
+                        variant="outline"
+                        onClick={() => addChallenge("challenge")}
+                        className="w-full gap-2"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Plus className="h-4 w-4" />
+                        Add Challenge
                       </Button>
                     </div>
-                  ))}
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={addTodoItem}
-                    className="w-full"
-                  >
-                    + Add Task
-                  </Button>
+
+                    {/* Solutions */}
+                    <div className="space-y-3">
+                      <p className="text-sm font-medium">Solutions</p>
+                      {solutionsStructured.map((entry, index) => (
+                        <div key={entry.id} className="p-3 border rounded-lg space-y-2 bg-muted/10">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-muted-foreground">Solution {index + 1}</span>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeChallenge("solution", entry.id)}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                          <Select
+                            value={entry.category}
+                            onValueChange={(value) => updateChallenge("solution", entry.id, "category", value)}
+                          >
+                            <SelectTrigger className="h-9">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="ideas-design">💡 Ideas/Design Skills</SelectItem>
+                              <SelectItem value="personal">🧠 Personal</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Textarea
+                            placeholder="Describe the solution..."
+                            value={entry.content}
+                            onChange={(e) => updateChallenge("solution", entry.id, "content", e.target.value)}
+                            className="min-h-20"
+                          />
+                        </div>
+                      ))}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => addChallenge("solution")}
+                        className="w-full gap-2"
+                      >
+                        <Plus className="h-4 w-4" />
+                        Add Solution
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-              </div>
+
+                {renderEntrySection("5️⃣ Where I Want to Fill in the Gaps", fillTheGaps, setFillTheGaps)}
+                {renderEntrySection("6️⃣ Next Steps", nextSteps, setNextSteps)}
+                {renderEntrySection("7️⃣ What I Actually Executed", whatIExecuted, setWhatIExecuted)}
+              </>
             )}
           </div>
 
