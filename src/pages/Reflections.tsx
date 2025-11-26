@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { PresenceIndicator } from "@/components/PresenceIndicator";
 import { AudioRecorder } from "@/components/AudioRecorder";
+import { GeneralLearningGoalsSection } from "@/components/GeneralLearningGoalsSection";
 import {
   Select,
   SelectContent,
@@ -53,7 +54,7 @@ const Reflections = () => {
   const [highlightedReflectionId, setHighlightedReflectionId] = useState<string | null>(null);
   const [selectedReflection, setSelectedReflection] = useState<any | null>(null);
   const [editingReflection, setEditingReflection] = useState<any | null>(null);
-  const [generalLearningGoals, setGeneralLearningGoals] = useState("");
+  const [generalLearningGoals, setGeneralLearningGoals] = useState<any>(null);
   const [currentReflection, setCurrentReflection] = useState({
     mood: "calm",
     emotionalDump: "",
@@ -119,29 +120,30 @@ const Reflections = () => {
         .eq("user_id", user.id)
         .single();
 
-      if (profile) {
-        setGeneralLearningGoals(profile.general_learning_goals || "");
+      if (profile?.general_learning_goals) {
+        setGeneralLearningGoals(profile.general_learning_goals);
       }
     } catch (error) {
       console.error("Error loading general learning goals:", error);
     }
   };
 
-  const saveGeneralLearningGoals = async () => {
+  const saveGeneralLearningGoals = async (goalsData: any) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
       const { error } = await db
         .from("profiles")
-        .update({ general_learning_goals: generalLearningGoals })
+        .update({ general_learning_goals: goalsData })
         .eq("user_id", user.id);
 
       if (error) throw error;
-      toast.success("Learning goals saved!");
+      setGeneralLearningGoals(goalsData);
     } catch (error) {
       console.error("Error saving general learning goals:", error);
       toast.error("Failed to save learning goals");
+      throw error;
     }
   };
 
@@ -340,44 +342,11 @@ const Reflections = () => {
         </div>
 
         {/* General Learning Goals Section */}
-        <Card className="shadow-md border-l-4 border-l-accent mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              💡 General Learning Goals
-            </CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Explore and jot down learning goals in a free-form way before organizing them into competencies
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Textarea
-              placeholder="• What skills do I want to develop?&#10;• What topics interest me?&#10;• What challenges do I want to tackle?&#10;&#10;Write freely here - you can organize these into competencies later..."
-              value={generalLearningGoals}
-              onChange={(e) => setGeneralLearningGoals(e.target.value)}
-              className="min-h-40"
-            />
-            <Button 
-              onClick={saveGeneralLearningGoals}
-              className="gap-2"
-              disabled={isViewerMode}
-            >
-              <Save className="h-4 w-4" />
-              Save Learning Goals
-            </Button>
-
-            {/* Overview Display */}
-            {generalLearningGoals && (
-              <div className="mt-6 pt-6 border-t">
-                <h4 className="font-semibold mb-3 flex items-center gap-2">
-                  📋 Saved Overview
-                </h4>
-                <div className="bg-muted/30 rounded-lg p-4 whitespace-pre-wrap text-sm">
-                  {generalLearningGoals}
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <GeneralLearningGoalsSection
+          data={generalLearningGoals}
+          onSave={saveGeneralLearningGoals}
+          isViewerMode={isViewerMode}
+        />
 
         {/* Project Selection - Now Optional */}
         <Card className="shadow-md border-l-4 border-l-primary">
