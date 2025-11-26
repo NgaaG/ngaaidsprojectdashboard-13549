@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, X, Edit2, Trash2 } from "lucide-react";
+import { Plus, X, Edit2, Trash2, Save } from "lucide-react";
 import { toast } from "sonner";
 
 interface GeneralLearningGoalsData {
@@ -23,11 +23,17 @@ export const GeneralLearningGoalsSection = ({
   onSave, 
   isViewerMode = false 
 }: GeneralLearningGoalsSectionProps) => {
-  const [isEditing, setIsEditing] = useState(!data?.heading && !data?.goals?.length);
-  const [heading, setHeading] = useState(data?.heading || "");
-  const [subheading, setSubheading] = useState(data?.subheading || "");
-  const [goals, setGoals] = useState<string[]>(data?.goals || []);
+  const [heading, setHeading] = useState("");
+  const [subheading, setSubheading] = useState("");
+  const [goals, setGoals] = useState<string[]>([]);
   const [newGoal, setNewGoal] = useState("");
+  const [savedData, setSavedData] = useState<GeneralLearningGoalsData | null>(data);
+
+  useEffect(() => {
+    if (data) {
+      setSavedData(data);
+    }
+  }, [data]);
 
   const addGoal = () => {
     if (!newGoal.trim()) {
@@ -43,6 +49,11 @@ export const GeneralLearningGoalsSection = ({
   };
 
   const handleSave = async () => {
+    if (!heading.trim() && goals.length === 0) {
+      toast.error("Please enter a heading and at least one goal");
+      return;
+    }
+
     if (!heading.trim()) {
       toast.error("Please enter a heading");
       return;
@@ -54,88 +65,42 @@ export const GeneralLearningGoalsSection = ({
       goals: goals.filter(g => g.trim()),
     };
 
-    await onSave(goalsData);
-    setIsEditing(false);
-    toast.success("Learning goals saved!");
+    try {
+      await onSave(goalsData);
+      setSavedData(goalsData);
+      // Clear form after save
+      setHeading("");
+      setSubheading("");
+      setGoals([]);
+      toast.success("Learning goals saved!");
+    } catch (error) {
+      // Error already handled in parent
+    }
   };
 
   const handleEdit = () => {
-    if (data) {
-      setHeading(data.heading);
-      setSubheading(data.subheading);
-      setGoals(data.goals);
+    if (savedData) {
+      setHeading(savedData.heading);
+      setSubheading(savedData.subheading);
+      setGoals(savedData.goals);
     }
-    setIsEditing(true);
   };
 
   const handleDelete = async () => {
     if (window.confirm("Are you sure you want to delete all general learning goals?")) {
-      await onSave({ heading: "", subheading: "", goals: [] });
-      setHeading("");
-      setSubheading("");
-      setGoals([]);
-      setIsEditing(true);
-      toast.success("Learning goals deleted");
+      try {
+        await onSave({ heading: "", subheading: "", goals: [] });
+        setSavedData(null);
+        setHeading("");
+        setSubheading("");
+        setGoals([]);
+        toast.success("Learning goals deleted");
+      } catch (error) {
+        // Error already handled in parent
+      }
     }
   };
 
-  if (!isEditing && data?.heading) {
-    // Display mode
-    return (
-      <Card>
-        <CardHeader>
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <CardTitle className="flex items-center gap-2">
-                💡 {data.heading}
-              </CardTitle>
-              {data.subheading && (
-                <CardDescription className="mt-1">{data.subheading}</CardDescription>
-              )}
-            </div>
-            {!isViewerMode && (
-              <div className="flex gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleEdit}
-                  className="gap-2"
-                >
-                  <Edit2 className="h-4 w-4" />
-                  Edit
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleDelete}
-                  className="gap-2 text-destructive hover:text-destructive"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Delete
-                </Button>
-              </div>
-            )}
-          </div>
-        </CardHeader>
-        <CardContent>
-          {data.goals.length > 0 ? (
-            <ul className="space-y-2">
-              {data.goals.map((goal, index) => (
-                <li key={index} className="flex items-start gap-2 text-sm">
-                  <span className="font-bold mt-0.5">•</span>
-                  <span className="flex-1">{goal}</span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-sm text-muted-foreground italic">No goals added yet</p>
-          )}
-        </CardContent>
-      </Card>
-    );
-  }
-
-  // Edit mode
   return (
     <Card>
       <CardHeader>
@@ -145,6 +110,7 @@ export const GeneralLearningGoalsSection = ({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Input Form */}
         <div className="space-y-2">
           <Label htmlFor="heading">Main Heading/Title</Label>
           <Input
@@ -215,22 +181,60 @@ export const GeneralLearningGoalsSection = ({
         </div>
 
         {!isViewerMode && (
-          <div className="flex gap-2 pt-4">
-            <Button onClick={handleSave} className="flex-1">
-              Save Learning Goals
-            </Button>
-            {data?.heading && (
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  setIsEditing(false);
-                  setHeading(data.heading);
-                  setSubheading(data.subheading);
-                  setGoals(data.goals);
-                }}
-              >
-                Cancel
-              </Button>
+          <Button onClick={handleSave} className="w-full gap-2">
+            <Save className="h-4 w-4" />
+            Save Learning Goals
+          </Button>
+        )}
+
+        {/* Saved Overview Display */}
+        {savedData && savedData.heading && (
+          <div className="mt-6 pt-6 border-t space-y-3">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h4 className="font-semibold text-base mb-1">
+                  📋 Saved Overview
+                </h4>
+                <h5 className="text-lg font-bold">{savedData.heading}</h5>
+                {savedData.subheading && (
+                  <p className="text-sm text-muted-foreground mt-1">{savedData.subheading}</p>
+                )}
+              </div>
+              {!isViewerMode && (
+                <div className="flex gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleEdit}
+                    className="gap-2"
+                  >
+                    <Edit2 className="h-4 w-4" />
+                    Edit
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleDelete}
+                    className="gap-2 text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Delete
+                  </Button>
+                </div>
+              )}
+            </div>
+            
+            {savedData.goals.length > 0 ? (
+              <ul className="space-y-2 bg-muted/30 rounded-lg p-4">
+                {savedData.goals.map((goal, index) => (
+                  <li key={index} className="flex items-start gap-2 text-sm">
+                    <span className="font-bold mt-0.5">•</span>
+                    <span className="flex-1">{goal}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground italic">No goals added yet</p>
             )}
           </div>
         )}
