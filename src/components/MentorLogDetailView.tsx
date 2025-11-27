@@ -3,7 +3,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Edit, Calendar, ExternalLink, Trash2, Plus, Download } from "lucide-react";
 import { Competency } from "@/types";
@@ -45,7 +44,6 @@ export const MentorLogDetailView = ({
   const [newOutcomeInput, setNewOutcomeInput] = useState("");
   const captureRef = useRef<HTMLDivElement>(null);
 
-  // Key goals are now stored as an array
   const keyGoalsList = log.key_goals || [];
 
   const handleDownloadImage = async () => {
@@ -106,7 +104,6 @@ export const MentorLogDetailView = ({
       if (isCurrentlyAchieved) {
         return prev.filter(g => g !== goal);
       } else {
-        // Remove from not covered if adding to achieved
         setNotCoveredGoals(prevNotCovered => prevNotCovered.filter(g => g !== goal));
         return [...prev, goal];
       }
@@ -119,7 +116,6 @@ export const MentorLogDetailView = ({
       if (isCurrentlyNotCovered) {
         return prev.filter(g => g !== goal);
       } else {
-        // Remove from achieved if adding to not covered
         setAchievedGoals(prevAchieved => prevAchieved.filter(g => g !== goal));
         return [...prev, goal];
       }
@@ -392,7 +388,6 @@ export const MentorLogDetailView = ({
               <div className="space-y-6">
                 {selectedTasks.map((task) => (
                   <div key={task.id} className="p-6 bg-background rounded-xl border border-border/50 shadow-sm space-y-4 hover:shadow-md transition-shadow">
-                    {/* Project Name Header */}
                     {task.projectName && (
                       <div className="flex items-center gap-2 pb-3 border-b border-border/30">
                         <span className="text-xs font-semibold text-primary/80 uppercase tracking-wide">
@@ -414,7 +409,6 @@ export const MentorLogDetailView = ({
                       </span>
                     </div>
 
-                    {/* Competency & Learning Goal */}
                     {(task.competency || task.learningGoal) && (
                       <div className="space-y-2 p-3 bg-muted/30 rounded-lg border border-border/30">
                         {task.competency && (
@@ -434,7 +428,6 @@ export const MentorLogDetailView = ({
                       <p className="text-sm text-muted-foreground leading-relaxed">{task.description}</p>
                     )}
 
-                    {/* Media Gallery */}
                     {task.files && task.files.length > 0 && (
                       <div className="pt-4 border-t border-border/30">
                         <p className="text-xs font-semibold mb-3 text-muted-foreground">📎 Files & Media</p>
@@ -466,7 +459,6 @@ export const MentorLogDetailView = ({
                       </div>
                     )}
 
-                    {/* Links */}
                     {task.links && task.links.length > 0 && (
                       <div className="pt-4 border-t border-border/30">
                         <p className="text-xs font-semibold mb-3 text-muted-foreground">🔗 Links</p>
