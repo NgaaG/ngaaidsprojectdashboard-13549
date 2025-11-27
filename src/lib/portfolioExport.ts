@@ -71,59 +71,68 @@ export const generateNotionMarkdown = (data: PortfolioData): string => {
     md += `## 💭 My Reflection on the Feedback\n\n`;
     md += `${section.reflectionOnFeedback}\n\n`;
 
-    // First Half
-    if (section.firstHalf.length > 0) {
-      md += `## 📖 FIRST HALF\n\n`;
-      section.firstHalf.forEach((goal, idx) => {
-        md += `### 🎯 Learning Goal ${idx + 1}: ${goal.title}\n\n`;
-        md += `**Rewritten Learning Outcome:**\n${goal.rewrittenOutcome}\n\n`;
-        
-        if (goal.learningActivities.length > 0) {
-          md += `**🛠 Learning Activities:**\n`;
-          goal.learningActivities.forEach(activity => {
-            md += `- ${activity}\n`;
-          });
-          md += `\n`;
-        }
-        
-        md += `**🧠 Reflection: Knowledge, Skills, Transfer**\n\n`;
-        md += `**KNOWLEDGE:**\n${goal.reflection.knowledge}\n\n`;
-        md += `**SKILLS:**\n${goal.reflection.skills}\n\n`;
-        md += `**TRANSFER:**\n${goal.reflection.transfer}\n\n`;
-        md += `---\n\n`;
+    // Learning Goals
+    md += `## 🎯 Learning Goals\n\n`;
+    if (section.learningGoals.length > 0) {
+      section.learningGoals.forEach(goal => {
+        md += `- ${goal}\n`;
       });
+    } else {
+      md += `[No learning goals yet]\n`;
+    }
+    md += `\n`;
+
+    // Learning Activities (Key Tasks)
+    md += `## 🛠 Learning Activities\n\n`;
+    if (section.learningActivities.length > 0) {
+      section.learningActivities.forEach(activity => {
+        md += `### ${activity.name}\n`;
+        md += `**Project:** ${activity.projectName}\n`;
+        if (activity.description) {
+          md += `**Description:** ${activity.description}\n`;
+        }
+        md += `\n`;
+      });
+    } else {
+      md += `[No learning activities yet]\n\n`;
     }
 
-    // Second Half
-    if (section.secondHalf.length > 0) {
-      md += `## 📖 SECOND HALF\n\n`;
-      section.secondHalf.forEach((goal, idx) => {
-        md += `### 🎯 Learning Goal ${idx + 1}: ${goal.title}\n\n`;
-        md += `**Rewritten Learning Outcome:**\n${goal.rewrittenOutcome}\n\n`;
-        
-        if (goal.learningActivities.length > 0) {
-          md += `**🛠 Learning Activities:**\n`;
-          goal.learningActivities.forEach(activity => {
-            md += `- ${activity}\n`;
-          });
-          md += `\n`;
-        }
-        
-        md += `**🧠 Reflection: Knowledge, Skills, Transfer**\n\n`;
-        md += `**KNOWLEDGE:**\n${goal.reflection.knowledge}\n\n`;
-        md += `**SKILLS:**\n${goal.reflection.skills}\n\n`;
-        md += `**TRANSFER:**\n${goal.reflection.transfer}\n\n`;
-        md += `---\n\n`;
+    // Reflections
+    md += `## 💭 Reflections\n\n`;
+    if (section.reflections.length > 0) {
+      section.reflections.forEach(reflection => {
+        md += `### Project: ${reflection.projectName}\n\n`;
+        reflection.content.forEach(content => {
+          md += `- ${content}\n`;
+        });
+        md += `\n`;
       });
+    } else {
+      md += `[No reflections yet]\n\n`;
     }
 
-    // Appendix
-    if (section.appendixEvidence.length > 0) {
-      md += `## 📎 Appendix: Evidence\n\n`;
-      section.appendixEvidence.forEach(evidence => {
-        md += `- ${evidence}\n`;
+    // Appendix - Files and Links
+    md += `## 📎 Appendix: Files and Evidence\n\n`;
+    
+    if (section.appendixFiles.length > 0) {
+      md += `### Files to Upload\n\n`;
+      section.appendixFiles.forEach(file => {
+        md += `- **${file.name}** (from "${file.taskName}")\n`;
+        md += `  - URL: ${file.url}\n`;
+        md += `  - [Insert image/file here]\n\n`;
+      });
+    }
+    
+    if (section.appendixLinks.length > 0) {
+      md += `### Links\n\n`;
+      section.appendixLinks.forEach(link => {
+        md += `- [${link.title}](${link.url}) (from "${link.taskName}")\n`;
       });
       md += `\n`;
+    }
+    
+    if (section.appendixFiles.length === 0 && section.appendixLinks.length === 0) {
+      md += `[No files or links to attach]\n\n`;
     }
     
     md += `---\n\n`;
