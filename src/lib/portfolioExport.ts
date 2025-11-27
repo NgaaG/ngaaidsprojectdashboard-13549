@@ -74,8 +74,12 @@ export const generateNotionMarkdown = (data: PortfolioData): string => {
     // Learning Goals
     md += `## 🎯 Learning Goals\n\n`;
     if (section.learningGoals.length > 0) {
-      section.learningGoals.forEach(goal => {
-        md += `- ${goal}\n`;
+      section.learningGoals.forEach(goalGroup => {
+        md += `### Project: ${goalGroup.projectName}\n\n`;
+        goalGroup.goals.forEach(goal => {
+          md += `- ${goal}\n`;
+        });
+        md += `\n`;
       });
     } else {
       md += `[No learning goals yet]\n`;
@@ -85,12 +89,16 @@ export const generateNotionMarkdown = (data: PortfolioData): string => {
     // Learning Activities (Key Tasks)
     md += `## 🛠 Learning Activities\n\n`;
     if (section.learningActivities.length > 0) {
-      section.learningActivities.forEach(activity => {
-        md += `### ${activity.name}\n`;
-        md += `**Project:** ${activity.projectName}\n`;
-        if (activity.description) {
-          md += `**Description:** ${activity.description}\n`;
-        }
+      section.learningActivities.forEach(activityGroup => {
+        md += `### Project: ${activityGroup.projectName}\n\n`;
+        activityGroup.tasks.forEach(task => {
+          md += `**${task.name}**\n`;
+          if (task.description) {
+            md += `${task.description}\n\n`;
+          } else {
+            md += `\n`;
+          }
+        });
         md += `\n`;
       });
     } else {
