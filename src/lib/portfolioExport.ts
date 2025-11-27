@@ -76,6 +76,7 @@ export const generateNotionMarkdown = (data: PortfolioData): string => {
       md += `## 📖 FIRST HALF\n\n`;
       section.firstHalf.forEach((goal, idx) => {
         md += `### 🎯 Learning Goal ${idx + 1}: ${goal.title}\n\n`;
+        md += `**📦 Code Sprint / Project:** ${goal.sprint}\n\n`;
         md += `**Rewritten Learning Outcome:**\n${goal.rewrittenOutcome}\n\n`;
         
         if (goal.learningActivities.length > 0) {
@@ -101,6 +102,7 @@ export const generateNotionMarkdown = (data: PortfolioData): string => {
       md += `## 📖 SECOND HALF\n\n`;
       section.secondHalf.forEach((goal, idx) => {
         md += `### 🎯 Learning Goal ${idx + 1}: ${goal.title}\n\n`;
+        md += `**📦 Code Sprint / Project:** ${goal.sprint}\n\n`;
         md += `**Rewritten Learning Outcome:**\n${goal.rewrittenOutcome}\n\n`;
         
         if (goal.learningActivities.length > 0) {

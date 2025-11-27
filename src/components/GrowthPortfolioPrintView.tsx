@@ -191,6 +191,8 @@ export const GrowthPortfolioPrintView = ({ data }: GrowthPortfolioPrintViewProps
                 <div key={idx} style={{ marginBottom: '30px' }}>
                   <h3 className="print-heading-3">🎯 Learning Goal {idx + 1}: {goal.title}</h3>
                   
+                  <h4 style={{ fontWeight: 600, marginTop: '10px', color: '#6366f1' }}>📦 Code Sprint / Project: {goal.sprint}</h4>
+                  
                   <h4 style={{ fontWeight: 600, marginTop: '15px' }}>Rewritten Learning Outcome:</h4>
                   <p>{goal.rewrittenOutcome || '[To be completed]'}</p>
                   
@@ -223,6 +225,8 @@ export const GrowthPortfolioPrintView = ({ data }: GrowthPortfolioPrintViewProps
               {section.secondHalf.map((goal, idx) => (
                 <div key={idx} style={{ marginBottom: '30px' }}>
                   <h3 className="print-heading-3">🎯 Learning Goal {idx + 1}: {goal.title}</h3>
+                  
+                  <h4 style={{ fontWeight: 600, marginTop: '10px', color: '#6366f1' }}>📦 Code Sprint / Project: {goal.sprint}</h4>
                   
                   <h4 style={{ fontWeight: 600, marginTop: '15px' }}>Rewritten Learning Outcome:</h4>
                   <p>{goal.rewrittenOutcome || '[To be completed]'}</p>

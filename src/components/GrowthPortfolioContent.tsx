@@ -168,6 +168,12 @@ export const GrowthPortfolioContent = ({ data }: GrowthPortfolioContentProps) =>
                     </h3>
                     
                     <div>
+                      <h4 className="text-sm font-semibold mb-2 text-primary">
+                        📦 Code Sprint / Project: {goal.sprint}
+                      </h4>
+                    </div>
+                    
+                    <div>
                       <h4 className="text-sm font-semibold mb-2 text-muted-foreground">
                         Rewritten Learning Outcome:
                       </h4>
@@ -237,6 +243,12 @@ export const GrowthPortfolioContent = ({ data }: GrowthPortfolioContentProps) =>
                     <h3 className="text-lg font-semibold">
                       🎯 Learning Goal {idx + 1}: {goal.title}
                     </h3>
+                    
+                    <div>
+                      <h4 className="text-sm font-semibold mb-2 text-primary">
+                        📦 Code Sprint / Project: {goal.sprint}
+                      </h4>
+                    </div>
                     
                     <div>
                       <h4 className="text-sm font-semibold mb-2 text-muted-foreground">
