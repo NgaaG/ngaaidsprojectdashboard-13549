@@ -154,150 +154,121 @@ export const GrowthPortfolioContent = ({ data }: GrowthPortfolioContentProps) =>
             </CardContent>
           </Card>
 
-          {/* First Half */}
-          {section.firstHalf.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl">📖 FIRST HALF</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-8">
-                {section.firstHalf.map((goal, idx) => (
-                  <div key={idx} className="space-y-4">
-                    <h3 className="text-lg font-semibold">
-                      🎯 Learning Goal {idx + 1}: {goal.title}
-                    </h3>
-                    
-                    <div>
-                      <h4 className="text-sm font-semibold mb-2 text-muted-foreground">
-                        Rewritten Learning Outcome:
-                      </h4>
-                      <p className="text-sm">{goal.rewrittenOutcome}</p>
-                    </div>
-
-                    {goal.learningActivities.length > 0 && (
-                      <div>
-                        <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
-                          🛠 Learning Activities:
-                        </h4>
-                        <ul className="space-y-1 ml-6">
-                          {goal.learningActivities.map((activity, aIdx) => (
-                            <li key={aIdx} className="flex gap-2">
-                              <span className="text-primary">•</span>
-                              <span className="text-sm">{activity}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-
-                    <div>
-                      <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                        🧠 Reflection: Knowledge, Skills, Transfer
-                      </h4>
-                      <div className="space-y-3 ml-4">
-                        <div>
-                          <p className="text-xs font-semibold text-muted-foreground mb-1">KNOWLEDGE</p>
-                          <p className="text-sm">{goal.reflection.knowledge}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs font-semibold text-muted-foreground mb-1">SKILLS</p>
-                          <p className="text-sm">{goal.reflection.skills}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs font-semibold text-muted-foreground mb-1">TRANSFER</p>
-                          <p className="text-sm">{goal.reflection.transfer}</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {idx < section.firstHalf.length - 1 && <Separator />}
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Second Half */}
-          {section.secondHalf.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl">📖 SECOND HALF</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-8">
-                {section.secondHalf.map((goal, idx) => (
-                  <div key={idx} className="space-y-4">
-                    <h3 className="text-lg font-semibold">
-                      🎯 Learning Goal {idx + 1}: {goal.title}
-                    </h3>
-                    
-                    <div>
-                      <h4 className="text-sm font-semibold mb-2 text-muted-foreground">
-                        Rewritten Learning Outcome:
-                      </h4>
-                      <p className="text-sm">{goal.rewrittenOutcome}</p>
-                    </div>
-
-                    {goal.learningActivities.length > 0 && (
-                      <div>
-                        <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
-                          🛠 Learning Activities:
-                        </h4>
-                        <ul className="space-y-1 ml-6">
-                          {goal.learningActivities.map((activity, aIdx) => (
-                            <li key={aIdx} className="flex gap-2">
-                              <span className="text-primary">•</span>
-                              <span className="text-sm">{activity}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-
-                    <div>
-                      <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                        🧠 Reflection: Knowledge, Skills, Transfer
-                      </h4>
-                      <div className="space-y-3 ml-4">
-                        <div>
-                          <p className="text-xs font-semibold text-muted-foreground mb-1">KNOWLEDGE</p>
-                          <p className="text-sm">{goal.reflection.knowledge}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs font-semibold text-muted-foreground mb-1">SKILLS</p>
-                          <p className="text-sm">{goal.reflection.skills}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs font-semibold text-muted-foreground mb-1">TRANSFER</p>
-                          <p className="text-sm">{goal.reflection.transfer}</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {idx < section.secondHalf.length - 1 && <Separator />}
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Appendix Evidence */}
-          {section.appendixEvidence.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl">📎 Appendix: Evidence</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-1">
-                  {section.appendixEvidence.map((evidence, idx) => (
+          {/* Learning Goals */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-2xl">🎯 Learning Goals</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {section.learningGoals.length > 0 ? (
+                <ul className="space-y-2">
+                  {section.learningGoals.map((goal, idx) => (
                     <li key={idx} className="flex gap-2">
                       <span className="text-primary">•</span>
-                      <span className="text-xs text-muted-foreground">{evidence}</span>
+                      <span className="text-sm">{goal}</span>
                     </li>
                   ))}
                 </ul>
-              </CardContent>
-            </Card>
-          )}
+              ) : (
+                <p className="text-sm text-muted-foreground">[No learning goals yet]</p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Learning Activities (Key Tasks) */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-2xl">🛠 Learning Activities</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {section.learningActivities.length > 0 ? (
+                section.learningActivities.map((activity, idx) => (
+                  <div key={idx} className="space-y-1">
+                    <h4 className="font-semibold text-sm">{activity.name}</h4>
+                    <p className="text-xs text-muted-foreground">Project: {activity.projectName}</p>
+                    {activity.description && (
+                      <p className="text-sm">{activity.description}</p>
+                    )}
+                    {idx < section.learningActivities.length - 1 && <Separator className="mt-3" />}
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">[No learning activities yet]</p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Reflections */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-2xl">💭 Reflections</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {section.reflections.length > 0 ? (
+                section.reflections.map((reflection, idx) => (
+                  <div key={idx} className="space-y-2">
+                    <h4 className="font-semibold text-sm">Project: {reflection.projectName}</h4>
+                    <ul className="space-y-1 ml-4">
+                      {reflection.content.map((content, cIdx) => (
+                        <li key={cIdx} className="flex gap-2">
+                          <span className="text-primary text-xs">•</span>
+                          <span className="text-sm">{content}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    {idx < section.reflections.length - 1 && <Separator className="mt-3" />}
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">[No reflections yet]</p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Appendix - Files and Links */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-xl">📎 Appendix: Files and Evidence</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {section.appendixFiles.length > 0 && (
+                <div>
+                  <h4 className="font-semibold text-sm mb-2">Files to Upload</h4>
+                  <ul className="space-y-2">
+                    {section.appendixFiles.map((file, idx) => (
+                      <li key={idx} className="text-xs space-y-1">
+                        <p className="font-medium">{file.name}</p>
+                        <p className="text-muted-foreground">From: {file.taskName}</p>
+                        <a href={file.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                          View File
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              
+              {section.appendixLinks.length > 0 && (
+                <div>
+                  <h4 className="font-semibold text-sm mb-2">Links</h4>
+                  <ul className="space-y-1">
+                    {section.appendixLinks.map((link, idx) => (
+                      <li key={idx} className="flex gap-2">
+                        <span className="text-primary text-xs">•</span>
+                        <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">
+                          {link.title} <span className="text-muted-foreground">(from {link.taskName})</span>
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              
+              {section.appendixFiles.length === 0 && section.appendixLinks.length === 0 && (
+                <p className="text-sm text-muted-foreground">[No files or links to attach]</p>
+              )}
+            </CardContent>
+          </Card>
         </div>
       ))}
 

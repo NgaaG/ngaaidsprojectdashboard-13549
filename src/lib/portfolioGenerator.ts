@@ -1,23 +1,29 @@
 import { Competency } from "@/types";
 
-export interface LearningGoal {
-  title: string;
-  rewrittenOutcome: string;
-  learningActivities: string[];
-  reflection: {
-    knowledge: string;
-    skills: string;
-    transfer: string;
-  };
-}
-
 export interface PortfolioSection {
   competency: Competency;
   feedbackSummary: string;
   reflectionOnFeedback: string;
-  firstHalf: LearningGoal[];
-  secondHalf: LearningGoal[];
-  appendixEvidence: string[];
+  learningGoals: string[];
+  learningActivities: {
+    name: string;
+    description: string;
+    projectName: string;
+  }[];
+  reflections: {
+    projectName: string;
+    content: string[];
+  }[];
+  appendixFiles: {
+    name: string;
+    url: string;
+    taskName: string;
+  }[];
+  appendixLinks: {
+    title: string;
+    url: string;
+    taskName: string;
+  }[];
 }
 
 export interface PortfolioData {
@@ -99,126 +105,130 @@ export const generatePortfolio = async (
       p.competencies?.includes(competency)
     );
     
-    const relatedLogs = lecturerMentorLogs.filter(log => 
-      log.competencies?.includes(competency)
-    );
-    
-    const allLearningGoals: LearningGoal[] = [];
-    
-    // Extract learning goals from projects
+    // 1. Learning Goals - All goals for this competency across all projects
+    const learningGoals: string[] = [];
     relatedProjects.forEach(project => {
       const projectGoals = project.learning_goals?.[competency];
-      const goalsArray = Array.isArray(projectGoals) 
-        ? projectGoals 
-        : (projectGoals ? [projectGoals] : []);
-      
-      goalsArray.filter(Boolean).forEach((goalTitle: string) => {
-        // Find related reflections
-        const projectReflections = lecturerReflections.filter(
-          r => r.project_id === project.id
-        );
+      if (projectGoals) {
+        if (Array.isArray(projectGoals)) {
+          learningGoals.push(...projectGoals.filter(Boolean));
+        } else if (typeof projectGoals === 'string' && projectGoals.trim()) {
+          learningGoals.push(projectGoals);
+        }
+      }
+    });
 
-        // Extract learning activities
-        const activities: string[] = [];
-        
-        // From reflections
-        projectReflections.forEach(r => {
-          // Old format fields (for backwards compatibility)
-          if (r.thoughts_what_i_think) activities.push(r.thoughts_what_i_think);
-          if (r.thoughts_what_is_true) activities.push(r.thoughts_what_is_true);
-          
-          // New structured fields
-          if (r.what_i_did) {
-            r.what_i_did.forEach((entry: any) => {
-              if (entry.content) activities.push(entry.content);
-            });
-          }
-          if (r.what_i_learned) {
-            r.what_i_learned.forEach((entry: any) => {
-              if (entry.content) activities.push(entry.content);
-            });
-          }
-          if (r.challenges_structured) {
-            r.challenges_structured.forEach((entry: any) => {
-              if (entry.content) activities.push(`Challenge: ${entry.content}`);
-            });
-          }
-          if (r.solutions_structured) {
-            r.solutions_structured.forEach((entry: any) => {
-              if (entry.content) activities.push(`Solution: ${entry.content}`);
-            });
-          }
-          if (r.fill_the_gaps) {
-            r.fill_the_gaps.forEach((entry: any) => {
-              if (entry.content) activities.push(entry.content);
-            });
-          }
-          if (r.next_steps) {
-            r.next_steps.forEach((entry: any) => {
-              if (entry.content) activities.push(`Next: ${entry.content}`);
-            });
-          }
-        });
-
-        // From mentor logs
-        const projectLogs = relatedLogs.filter(log => 
-          log.project_ids?.includes(project.id)
-        );
-        projectLogs.forEach(log => {
-          if (log.outcomes) {
-            const outcomes = Array.isArray(log.outcomes) ? log.outcomes : [log.outcomes];
-            outcomes.forEach((o: any) => {
-              const outcomeText = typeof o === 'string' ? o : (o?.outcome || '');
-              if (outcomeText) activities.push(outcomeText);
-            });
-          }
-        });
-
-        // Build reflection from achievements
-        const achievements = project.learning_goals_achievements?.[competency];
-        const achievementsArray = Array.isArray(achievements) ? achievements : [];
-        
-        const knowledgeText = achievementsArray
-          .map((a: any) => a.explanation || '')
-          .filter(Boolean)
-          .join(' ');
-        
-        const reflection = {
-          knowledge: knowledgeText || '[To be completed]',
-          skills: `[To be completed]`,
-          transfer: `[To be completed]`
-        };
-
-        allLearningGoals.push({
-          title: goalTitle,
-          rewrittenOutcome: '[To be completed]',
-          learningActivities: activities.slice(0, 5),
-          reflection
-        });
+    // 2. Learning Activities - All key tasks for this competency across all projects
+    const learningActivities: { name: string; description: string; projectName: string }[] = [];
+    relatedProjects.forEach(project => {
+      const keyTasks = project.key_tasks || [];
+      keyTasks.forEach((task: any) => {
+        if (task.competency === competency && task.title) {
+          learningActivities.push({
+            name: task.title,
+            description: task.description || '',
+            projectName: project.name
+          });
+        }
       });
     });
 
-    // Split into first and second half
-    const midpoint = Math.ceil(allLearningGoals.length / 2);
-    const firstHalf = allLearningGoals.slice(0, midpoint);
-    const secondHalf = allLearningGoals.slice(midpoint);
-
-    // Evidence from projects and logs
-    const evidence: string[] = [];
-    relatedProjects.forEach(p => {
-      if (p.name) evidence.push(`Project: ${p.name}`);
+    // 3. Reflections - All reflection content for this competency
+    const reflections: { projectName: string; content: string[] }[] = [];
+    relatedProjects.forEach(project => {
+      const projectReflections = lecturerReflections.filter(
+        r => r.project_id === project.id
+      );
+      
+      const reflectionContent: string[] = [];
+      projectReflections.forEach(r => {
+        if (r.emotional_dump) reflectionContent.push(r.emotional_dump);
+        
+        if (r.what_i_did) {
+          r.what_i_did.forEach((entry: any) => {
+            if (entry.content) reflectionContent.push(`What I Did: ${entry.content}`);
+          });
+        }
+        
+        if (r.what_i_learned) {
+          r.what_i_learned.forEach((entry: any) => {
+            if (entry.content) reflectionContent.push(`What I Learned: ${entry.content}`);
+          });
+        }
+        
+        if (r.challenges_structured) {
+          r.challenges_structured.forEach((entry: any) => {
+            if (entry.content) reflectionContent.push(`Challenge: ${entry.content}`);
+          });
+        }
+        
+        if (r.solutions_structured) {
+          r.solutions_structured.forEach((entry: any) => {
+            if (entry.content) reflectionContent.push(`Solution: ${entry.content}`);
+          });
+        }
+        
+        if (r.fill_the_gaps) {
+          r.fill_the_gaps.forEach((entry: any) => {
+            if (entry.content) reflectionContent.push(`Gap: ${entry.content}`);
+          });
+        }
+      });
+      
+      if (reflectionContent.length > 0) {
+        reflections.push({
+          projectName: project.name,
+          content: reflectionContent
+        });
+      }
     });
-    relatedLogs.forEach(log => {
-      evidence.push(`Session: ${log.title} (${log.date})`);
+
+    // 4. Appendix - Files and links from key tasks
+    const appendixFiles: { name: string; url: string; taskName: string }[] = [];
+    const appendixLinks: { title: string; url: string; taskName: string }[] = [];
+    
+    relatedProjects.forEach(project => {
+      const keyTasks = project.key_tasks || [];
+      keyTasks.forEach((task: any) => {
+        if (task.competency === competency) {
+          // Extract files
+          if (task.files && Array.isArray(task.files)) {
+            task.files.forEach((file: any) => {
+              if (file.url && file.name) {
+                appendixFiles.push({
+                  name: file.name,
+                  url: file.url,
+                  taskName: task.title || 'Unnamed Task'
+                });
+              }
+            });
+          }
+          
+          // Extract links
+          if (task.links && Array.isArray(task.links)) {
+            task.links.forEach((link: any) => {
+              if (link.url && link.title) {
+                appendixLinks.push({
+                  title: link.title,
+                  url: link.url,
+                  taskName: task.title || 'Unnamed Task'
+                });
+              }
+            });
+          }
+        }
+      });
     });
 
     return {
       competency,
       feedbackSummary: '[To be completed]',
       reflectionOnFeedback: '[To be completed]',
-      firstHalf,
-      secondHalf,
-      appendixEvidence: evidence
+      learningGoals,
+      learningActivities,
+      reflections,
+      appendixFiles,
+      appendixLinks
     };
   });
 
