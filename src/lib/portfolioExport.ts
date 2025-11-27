@@ -99,73 +99,15 @@ export const generateNotionMarkdown = (data: PortfolioData): string => {
 
     // Reflections
     md += `## 💭 Reflections\n\n`;
-    
-    if (section.reflections.emotionalDump.length > 0) {
-      md += `### Emotional Dump\n\n`;
-      section.reflections.emotionalDump.forEach(content => {
-        md += `- ${content}\n`;
+    if (section.reflections.length > 0) {
+      section.reflections.forEach(reflection => {
+        md += `### Project: ${reflection.projectName}\n\n`;
+        reflection.content.forEach(content => {
+          md += `- ${content}\n`;
+        });
+        md += `\n`;
       });
-      md += `\n`;
-    }
-    
-    if (section.reflections.whatIDid.length > 0) {
-      md += `### What I Did\n\n`;
-      section.reflections.whatIDid.forEach(content => {
-        md += `- ${content}\n`;
-      });
-      md += `\n`;
-    }
-    
-    if (section.reflections.whatILearned.length > 0) {
-      md += `### What I Learned\n\n`;
-      section.reflections.whatILearned.forEach(content => {
-        md += `- ${content}\n`;
-      });
-      md += `\n`;
-    }
-    
-    if (section.reflections.challengesFaced.length > 0) {
-      md += `### Challenges Faced\n\n`;
-      section.reflections.challengesFaced.forEach(content => {
-        md += `- ${content}\n`;
-      });
-      md += `\n`;
-    }
-    
-    if (section.reflections.solutions.length > 0) {
-      md += `### Solutions\n\n`;
-      section.reflections.solutions.forEach(content => {
-        md += `- ${content}\n`;
-      });
-      md += `\n`;
-    }
-    
-    if (section.reflections.fillTheGaps.length > 0) {
-      md += `### Fill the Gaps\n\n`;
-      section.reflections.fillTheGaps.forEach(content => {
-        md += `- ${content}\n`;
-      });
-      md += `\n`;
-    }
-    
-    if (section.reflections.nextSteps.length > 0) {
-      md += `### Next Steps\n\n`;
-      section.reflections.nextSteps.forEach(content => {
-        md += `- ${content}\n`;
-      });
-      md += `\n`;
-    }
-    
-    const hasAnyReflections = 
-      section.reflections.emotionalDump.length > 0 ||
-      section.reflections.whatIDid.length > 0 ||
-      section.reflections.whatILearned.length > 0 ||
-      section.reflections.challengesFaced.length > 0 ||
-      section.reflections.solutions.length > 0 ||
-      section.reflections.fillTheGaps.length > 0 ||
-      section.reflections.nextSteps.length > 0;
-    
-    if (!hasAnyReflections) {
+    } else {
       md += `[No reflections yet]\n\n`;
     }
 

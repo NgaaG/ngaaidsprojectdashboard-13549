@@ -214,77 +214,16 @@ export const GrowthPortfolioPrintView = ({ data }: GrowthPortfolioPrintViewProps
           {/* Reflections */}
           <div className="print-section">
             <h2 className="print-heading-2">💭 Reflections</h2>
-            
-            {section.reflections.emotionalDump.length > 0 && (
-              <div style={{ marginBottom: '15px' }}>
-                <h3 className="print-heading-3">Emotional Dump</h3>
-                {section.reflections.emotionalDump.map((content, idx) => (
-                  <div key={idx} className="print-bullet">• {content}</div>
-                ))}
-              </div>
-            )}
-            
-            {section.reflections.whatIDid.length > 0 && (
-              <div style={{ marginBottom: '15px' }}>
-                <h3 className="print-heading-3">What I Did</h3>
-                {section.reflections.whatIDid.map((content, idx) => (
-                  <div key={idx} className="print-bullet">• {content}</div>
-                ))}
-              </div>
-            )}
-            
-            {section.reflections.whatILearned.length > 0 && (
-              <div style={{ marginBottom: '15px' }}>
-                <h3 className="print-heading-3">What I Learned</h3>
-                {section.reflections.whatILearned.map((content, idx) => (
-                  <div key={idx} className="print-bullet">• {content}</div>
-                ))}
-              </div>
-            )}
-            
-            {section.reflections.challengesFaced.length > 0 && (
-              <div style={{ marginBottom: '15px' }}>
-                <h3 className="print-heading-3">Challenges Faced</h3>
-                {section.reflections.challengesFaced.map((content, idx) => (
-                  <div key={idx} className="print-bullet">• {content}</div>
-                ))}
-              </div>
-            )}
-            
-            {section.reflections.solutions.length > 0 && (
-              <div style={{ marginBottom: '15px' }}>
-                <h3 className="print-heading-3">Solutions</h3>
-                {section.reflections.solutions.map((content, idx) => (
-                  <div key={idx} className="print-bullet">• {content}</div>
-                ))}
-              </div>
-            )}
-            
-            {section.reflections.fillTheGaps.length > 0 && (
-              <div style={{ marginBottom: '15px' }}>
-                <h3 className="print-heading-3">Fill the Gaps</h3>
-                {section.reflections.fillTheGaps.map((content, idx) => (
-                  <div key={idx} className="print-bullet">• {content}</div>
-                ))}
-              </div>
-            )}
-            
-            {section.reflections.nextSteps.length > 0 && (
-              <div style={{ marginBottom: '15px' }}>
-                <h3 className="print-heading-3">Next Steps</h3>
-                {section.reflections.nextSteps.map((content, idx) => (
-                  <div key={idx} className="print-bullet">• {content}</div>
-                ))}
-              </div>
-            )}
-            
-            {!section.reflections.emotionalDump.length && 
-             !section.reflections.whatIDid.length && 
-             !section.reflections.whatILearned.length && 
-             !section.reflections.challengesFaced.length && 
-             !section.reflections.solutions.length && 
-             !section.reflections.fillTheGaps.length && 
-             !section.reflections.nextSteps.length && (
+            {section.reflections.length > 0 ? (
+              section.reflections.map((reflection, idx) => (
+                <div key={idx} style={{ marginBottom: '20px' }}>
+                  <h3 className="print-heading-3">Project: {reflection.projectName}</h3>
+                  {reflection.content.map((content, cIdx) => (
+                    <div key={cIdx} className="print-bullet">• {content}</div>
+                  ))}
+                </div>
+              ))
+            ) : (
               <p>[No reflections yet]</p>
             )}
           </div>

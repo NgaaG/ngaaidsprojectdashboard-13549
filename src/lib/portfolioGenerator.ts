@@ -11,14 +11,9 @@ export interface PortfolioSection {
     projectName: string;
   }[];
   reflections: {
-    emotionalDump: string[];
-    whatIDid: string[];
-    whatILearned: string[];
-    challengesFaced: string[];
-    solutions: string[];
-    fillTheGaps: string[];
-    nextSteps: string[];
-  };
+    projectName: string;
+    content: string[];
+  }[];
   appendixFiles: {
     name: string;
     url: string;
@@ -138,70 +133,54 @@ export const generatePortfolio = async (
       });
     });
 
-    // 3. Reflections - All reflection content for this competency organized by heading
-    const reflections = {
-      emotionalDump: [] as string[],
-      whatIDid: [] as string[],
-      whatILearned: [] as string[],
-      challengesFaced: [] as string[],
-      solutions: [] as string[],
-      fillTheGaps: [] as string[],
-      nextSteps: [] as string[]
-    };
-    
+    // 3. Reflections - All reflection content for this competency
+    const reflections: { projectName: string; content: string[] }[] = [];
     relatedProjects.forEach(project => {
       const projectReflections = lecturerReflections.filter(
         r => r.project_id === project.id
       );
       
+      const reflectionContent: string[] = [];
       projectReflections.forEach(r => {
-        // Emotional Dump
-        if (r.emotional_dump) {
-          reflections.emotionalDump.push(r.emotional_dump);
-        }
+        if (r.emotional_dump) reflectionContent.push(r.emotional_dump);
         
-        // What I Did
-        if (r.what_i_did && Array.isArray(r.what_i_did)) {
+        if (r.what_i_did) {
           r.what_i_did.forEach((entry: any) => {
-            if (entry.content) reflections.whatIDid.push(entry.content);
+            if (entry.content) reflectionContent.push(`What I Did: ${entry.content}`);
           });
         }
         
-        // What I Learned
-        if (r.what_i_learned && Array.isArray(r.what_i_learned)) {
+        if (r.what_i_learned) {
           r.what_i_learned.forEach((entry: any) => {
-            if (entry.content) reflections.whatILearned.push(entry.content);
+            if (entry.content) reflectionContent.push(`What I Learned: ${entry.content}`);
           });
         }
         
-        // Challenges Faced
-        if (r.challenges_structured && Array.isArray(r.challenges_structured)) {
+        if (r.challenges_structured) {
           r.challenges_structured.forEach((entry: any) => {
-            if (entry.content) reflections.challengesFaced.push(entry.content);
+            if (entry.content) reflectionContent.push(`Challenge: ${entry.content}`);
           });
         }
         
-        // Solutions
-        if (r.solutions_structured && Array.isArray(r.solutions_structured)) {
+        if (r.solutions_structured) {
           r.solutions_structured.forEach((entry: any) => {
-            if (entry.content) reflections.solutions.push(entry.content);
+            if (entry.content) reflectionContent.push(`Solution: ${entry.content}`);
           });
         }
         
-        // Fill the Gaps
-        if (r.fill_the_gaps && Array.isArray(r.fill_the_gaps)) {
+        if (r.fill_the_gaps) {
           r.fill_the_gaps.forEach((entry: any) => {
-            if (entry.content) reflections.fillTheGaps.push(entry.content);
-          });
-        }
-        
-        // Next Steps
-        if (r.next_steps && Array.isArray(r.next_steps)) {
-          r.next_steps.forEach((entry: any) => {
-            if (entry.content) reflections.nextSteps.push(entry.content);
+            if (entry.content) reflectionContent.push(`Gap: ${entry.content}`);
           });
         }
       });
+      
+      if (reflectionContent.length > 0) {
+        reflections.push({
+          projectName: project.name,
+          content: reflectionContent
+        });
+      }
     });
 
     // 4. Appendix - Files and links from key tasks
