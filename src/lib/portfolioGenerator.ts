@@ -123,8 +123,41 @@ export const generatePortfolio = async (
         
         // From reflections
         projectReflections.forEach(r => {
+          // Old format fields (for backwards compatibility)
           if (r.thoughts_what_i_think) activities.push(r.thoughts_what_i_think);
           if (r.thoughts_what_is_true) activities.push(r.thoughts_what_is_true);
+          
+          // New structured fields
+          if (r.what_i_did) {
+            r.what_i_did.forEach((entry: any) => {
+              if (entry.content) activities.push(entry.content);
+            });
+          }
+          if (r.what_i_learned) {
+            r.what_i_learned.forEach((entry: any) => {
+              if (entry.content) activities.push(entry.content);
+            });
+          }
+          if (r.challenges_structured) {
+            r.challenges_structured.forEach((entry: any) => {
+              if (entry.content) activities.push(`Challenge: ${entry.content}`);
+            });
+          }
+          if (r.solutions_structured) {
+            r.solutions_structured.forEach((entry: any) => {
+              if (entry.content) activities.push(`Solution: ${entry.content}`);
+            });
+          }
+          if (r.fill_the_gaps) {
+            r.fill_the_gaps.forEach((entry: any) => {
+              if (entry.content) activities.push(entry.content);
+            });
+          }
+          if (r.next_steps) {
+            r.next_steps.forEach((entry: any) => {
+              if (entry.content) activities.push(`Next: ${entry.content}`);
+            });
+          }
         });
 
         // From mentor logs
