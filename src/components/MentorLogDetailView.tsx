@@ -1,14 +1,15 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { Edit, Calendar, ExternalLink, Trash2, Plus } from "lucide-react";
+import { Edit, Calendar, ExternalLink, Trash2, Plus, Download } from "lucide-react";
 import { Competency } from "@/types";
 import { db } from "@/lib/supabaseHelpers";
 import { toast } from "sonner";
+import html2canvas from "html2canvas";
 
 const COMPETENCY_COLORS: Record<Competency, string> = {
   Research: "hsl(265 45% 80%)",
@@ -42,9 +43,39 @@ export const MentorLogDetailView = ({
   const [notCoveredGoals, setNotCoveredGoals] = useState<string[]>(log.not_covered_goals || []);
   const [loading, setLoading] = useState(false);
   const [newOutcomeInput, setNewOutcomeInput] = useState("");
+  const captureRef = useRef<HTMLDivElement>(null);
 
   // Key goals are now stored as an array
   const keyGoalsList = log.key_goals || [];
+
+  const handleDownloadImage = async () => {
+    if (!captureRef.current) return;
+    
+    try {
+      toast.loading("Generating image...");
+      
+      const canvas = await html2canvas(captureRef.current, {
+        backgroundColor: "#ffffff",
+        scale: 2,
+        logging: false,
+        useCORS: true,
+        allowTaint: true,
+      });
+      
+      const image = canvas.toDataURL("image/png");
+      const link = document.createElement("a");
+      link.download = `mentor-log-${log.title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-${new Date(log.date).toISOString().split('T')[0]}.png`;
+      link.href = image;
+      link.click();
+      
+      toast.dismiss();
+      toast.success("Mentor log downloaded!");
+    } catch (error) {
+      console.error("Error generating image:", error);
+      toast.dismiss();
+      toast.error("Failed to generate image");
+    }
+  };
 
   const handleSave = async () => {
     setLoading(true);
@@ -133,24 +164,38 @@ export const MentorLogDetailView = ({
                 ))}
               </div>
             </div>
-            {!isEditing && (
-              <Button
-                variant="default"
-                size="sm"
-                className="shrink-0 font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg flex-col h-auto py-3 px-4 gap-1"
-                onClick={() => setIsEditing(true)}
-              >
-                <div className="flex items-center gap-2">
-                  <Edit className="h-4 w-4" />
-                  <span className="font-bold">Edit Post-Session</span>
-                </div>
-                <span className="text-[10px] font-normal opacity-90">Session outcomes notes & feedback: mine & lecturer</span>
-              </Button>
-            )}
+            <div className="flex gap-2">
+              {!isEditing && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="shrink-0 flex items-center gap-2"
+                    onClick={handleDownloadImage}
+                  >
+                    <Download className="h-4 w-4" />
+                    <span>Download</span>
+                  </Button>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="shrink-0 font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg flex-col h-auto py-3 px-4 gap-1"
+                    onClick={() => setIsEditing(true)}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Edit className="h-4 w-4" />
+                      <span className="font-bold">Edit Post-Session</span>
+                    </div>
+                    <span className="text-[10px] font-normal opacity-90">Session outcomes notes & feedback: mine & lecturer</span>
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
+        {/* Capture Content - Excludes Project Tasks */}
+        <div ref={captureRef} className="space-y-6 py-4">
           {/* Projects Info */}
           {log.projects && log.projects.length > 0 && (
             <div className="p-5 bg-gradient-to-br from-muted/20 to-muted/40 rounded-xl border border-border/50 shadow-sm">
@@ -290,8 +335,56 @@ export const MentorLogDetailView = ({
             </div>
           </div>
 
-          {/* Selected Tasks Gallery */}
-          {selectedTasks.length > 0 && (
+          {/* Lecturer Feedback */}
+          <div className="border rounded-xl p-6 bg-gradient-to-br from-accent/5 to-accent/10 shadow-sm space-y-5">
+            <div>
+              <div className="flex flex-wrap items-center gap-2 mb-4">
+                <p className="text-base font-semibold text-accent flex items-center gap-2">
+                  <span>🎓</span>
+                  <span>Lecturer Feedback</span>
+                </p>
+                {isEditing && <span className="text-xs text-muted-foreground px-2 py-1 bg-muted/50 rounded">(editable)</span>}
+              </div>
+              {isEditing ? (
+                <Textarea
+                  value={mentorComments}
+                  onChange={(e) => setMentorComments(e.target.value)}
+                  placeholder="Add feedback, comments, or next-step recommendations..."
+                  rows={5}
+                  className="text-sm"
+                />
+              ) : (
+                <p className="text-sm text-muted-foreground whitespace-pre-line">
+                  {mentorComments || "No feedback provided yet"}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <Label className="text-base font-semibold text-accent mb-3 flex items-center gap-2">
+                <span>📚</span>
+                <span>Resource Links</span>
+              </Label>
+              {isEditing ? (
+                <Textarea
+                  value={resourceLinks}
+                  onChange={(e) => setResourceLinks(e.target.value)}
+                  placeholder="Add links to resources, articles, tutorials, etc.&#10;• https://example.com/resource1&#10;• https://example.com/resource2"
+                  rows={3}
+                  className="text-sm"
+                />
+              ) : (
+                <p className="text-sm text-muted-foreground whitespace-pre-line">
+                  {resourceLinks || "No resource links added yet"}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Selected Tasks Gallery - Outside capture area */}
+        {selectedTasks.length > 0 && (
+          <div className="space-y-6 py-4">
             <div className="border rounded-xl p-6 bg-gradient-to-br from-accent/5 to-accent/10 shadow-sm">
               <h3 className="font-semibold text-lg mb-5 flex items-center gap-2 text-foreground">
                 ✅ Referenced Project Tasks
@@ -399,54 +492,8 @@ export const MentorLogDetailView = ({
                 ))}
               </div>
             </div>
-          )}
-
-          {/* Lecturer Feedback */}
-          <div className="border rounded-xl p-6 bg-gradient-to-br from-accent/5 to-accent/10 shadow-sm space-y-5">
-            <div>
-              <div className="flex flex-wrap items-center gap-2 mb-4">
-                <p className="text-base font-semibold text-accent flex items-center gap-2">
-                  <span>🎓</span>
-                  <span>Lecturer Feedback</span>
-                </p>
-                {isEditing && <span className="text-xs text-muted-foreground px-2 py-1 bg-muted/50 rounded">(editable)</span>}
-              </div>
-              {isEditing ? (
-                <Textarea
-                  value={mentorComments}
-                  onChange={(e) => setMentorComments(e.target.value)}
-                  placeholder="Add feedback, comments, or next-step recommendations..."
-                  rows={5}
-                  className="text-sm"
-                />
-              ) : (
-                <p className="text-sm text-muted-foreground whitespace-pre-line">
-                  {mentorComments || "No feedback provided yet"}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <Label className="text-base font-semibold text-accent mb-3 flex items-center gap-2">
-                <span>📚</span>
-                <span>Resource Links</span>
-              </Label>
-              {isEditing ? (
-                <Textarea
-                  value={resourceLinks}
-                  onChange={(e) => setResourceLinks(e.target.value)}
-                  placeholder="Add links to resources, articles, tutorials, etc.&#10;• https://example.com/resource1&#10;• https://example.com/resource2"
-                  rows={3}
-                  className="text-sm"
-                />
-              ) : (
-                <p className="text-sm text-muted-foreground whitespace-pre-line">
-                  {resourceLinks || "No resource links added yet"}
-                </p>
-              )}
-            </div>
           </div>
-        </div>
+        )}
 
         {/* Footer Actions */}
         {isEditing && (
