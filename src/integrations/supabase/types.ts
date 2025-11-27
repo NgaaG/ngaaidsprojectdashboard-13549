@@ -249,6 +249,7 @@ export type Database = {
           user_id: string | null
           what_i_did: Json | null
           what_i_executed: Json | null
+          what_i_learned: Json | null
         }
         Insert: {
           audio_url?: string | null
@@ -272,6 +273,7 @@ export type Database = {
           user_id?: string | null
           what_i_did?: Json | null
           what_i_executed?: Json | null
+          what_i_learned?: Json | null
         }
         Update: {
           audio_url?: string | null
@@ -295,6 +297,7 @@ export type Database = {
           user_id?: string | null
           what_i_did?: Json | null
           what_i_executed?: Json | null
+          what_i_learned?: Json | null
         }
         Relationships: [
           {
