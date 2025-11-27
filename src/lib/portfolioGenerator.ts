@@ -12,7 +12,10 @@ export interface PortfolioSection {
   }[];
   reflections: {
     projectName: string;
-    content: string[];
+    sections: {
+      heading: string;
+      content: string[];
+    }[];
   }[];
   appendixFiles: {
     name: string;
@@ -133,52 +136,131 @@ export const generatePortfolio = async (
       });
     });
 
-    // 3. Reflections - All reflection content for this competency
-    const reflections: { projectName: string; content: string[] }[] = [];
+    // 3. Reflections - All reflection content for this competency, organized by heading
+    const reflections: { projectName: string; sections: { heading: string; content: string[] }[] }[] = [];
     relatedProjects.forEach(project => {
       const projectReflections = lecturerReflections.filter(
         r => r.project_id === project.id
       );
       
-      const reflectionContent: string[] = [];
+      const sections: { heading: string; content: string[] }[] = [];
+      
       projectReflections.forEach(r => {
-        if (r.emotional_dump) reflectionContent.push(r.emotional_dump);
-        
-        if (r.what_i_did) {
-          r.what_i_did.forEach((entry: any) => {
-            if (entry.content) reflectionContent.push(`What I Did: ${entry.content}`);
+        // Emotional Dump
+        if (r.emotional_dump) {
+          sections.push({
+            heading: "Emotional Dump",
+            content: [r.emotional_dump]
           });
         }
         
-        if (r.what_i_learned) {
-          r.what_i_learned.forEach((entry: any) => {
-            if (entry.content) reflectionContent.push(`What I Learned: ${entry.content}`);
+        // What I Did
+        if (r.what_i_did && Array.isArray(r.what_i_did)) {
+          const whatDidContent = r.what_i_did
+            .map((entry: any) => entry.content)
+            .filter(Boolean);
+          if (whatDidContent.length > 0) {
+            sections.push({
+              heading: "What I Did",
+              content: whatDidContent
+            });
+          }
+        }
+        
+        // What I Learned
+        if (r.what_i_learned && Array.isArray(r.what_i_learned)) {
+          const whatLearnedContent = r.what_i_learned
+            .map((entry: any) => entry.content)
+            .filter(Boolean);
+          if (whatLearnedContent.length > 0) {
+            sections.push({
+              heading: "What I Learned",
+              content: whatLearnedContent
+            });
+          }
+        }
+        
+        // Challenges
+        if (r.challenges_structured && Array.isArray(r.challenges_structured)) {
+          const challengesContent = r.challenges_structured
+            .map((entry: any) => entry.content)
+            .filter(Boolean);
+          if (challengesContent.length > 0) {
+            sections.push({
+              heading: "Challenges",
+              content: challengesContent
+            });
+          }
+        }
+        
+        // Solutions
+        if (r.solutions_structured && Array.isArray(r.solutions_structured)) {
+          const solutionsContent = r.solutions_structured
+            .map((entry: any) => entry.content)
+            .filter(Boolean);
+          if (solutionsContent.length > 0) {
+            sections.push({
+              heading: "Solutions",
+              content: solutionsContent
+            });
+          }
+        }
+        
+        // Fill the Gaps
+        if (r.fill_the_gaps && Array.isArray(r.fill_the_gaps)) {
+          const gapsContent = r.fill_the_gaps
+            .map((entry: any) => entry.content)
+            .filter(Boolean);
+          if (gapsContent.length > 0) {
+            sections.push({
+              heading: "Fill the Gaps",
+              content: gapsContent
+            });
+          }
+        }
+        
+        // Thoughts - What I Think
+        if (r.thoughts_what_i_think) {
+          sections.push({
+            heading: "What I Think",
+            content: [r.thoughts_what_i_think]
           });
         }
         
-        if (r.challenges_structured) {
-          r.challenges_structured.forEach((entry: any) => {
-            if (entry.content) reflectionContent.push(`Challenge: ${entry.content}`);
+        // Thoughts - What is True
+        if (r.thoughts_what_is_true) {
+          sections.push({
+            heading: "What is True",
+            content: [r.thoughts_what_is_true]
           });
         }
         
-        if (r.solutions_structured) {
-          r.solutions_structured.forEach((entry: any) => {
-            if (entry.content) reflectionContent.push(`Solution: ${entry.content}`);
-          });
+        // Next Steps
+        if (r.next_steps && Array.isArray(r.next_steps)) {
+          const nextStepsContent = r.next_steps
+            .map((entry: any) => entry.content)
+            .filter(Boolean);
+          if (nextStepsContent.length > 0) {
+            sections.push({
+              heading: "Next Steps",
+              content: nextStepsContent
+            });
+          }
         }
         
-        if (r.fill_the_gaps) {
-          r.fill_the_gaps.forEach((entry: any) => {
-            if (entry.content) reflectionContent.push(`Gap: ${entry.content}`);
+        // Contingency Plan
+        if (r.contingency_plan) {
+          sections.push({
+            heading: "Contingency Plan",
+            content: [r.contingency_plan]
           });
         }
       });
       
-      if (reflectionContent.length > 0) {
+      if (sections.length > 0) {
         reflections.push({
           projectName: project.name,
-          content: reflectionContent
+          sections
         });
       }
     });

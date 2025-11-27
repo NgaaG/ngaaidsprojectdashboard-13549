@@ -206,16 +206,21 @@ export const GrowthPortfolioContent = ({ data }: GrowthPortfolioContentProps) =>
             <CardContent className="space-y-6">
               {section.reflections.length > 0 ? (
                 section.reflections.map((reflection, idx) => (
-                  <div key={idx} className="space-y-2">
+                  <div key={idx} className="space-y-4">
                     <h4 className="font-semibold text-sm">Project: {reflection.projectName}</h4>
-                    <ul className="space-y-1 ml-4">
-                      {reflection.content.map((content, cIdx) => (
-                        <li key={cIdx} className="flex gap-2">
-                          <span className="text-primary text-xs">•</span>
-                          <span className="text-sm">{content}</span>
-                        </li>
-                      ))}
-                    </ul>
+                    {reflection.sections.map((sec, sIdx) => (
+                      <div key={sIdx} className="space-y-2">
+                        <h5 className="font-medium text-sm text-primary">{sec.heading}</h5>
+                        <ul className="space-y-1 ml-4">
+                          {sec.content.map((content, cIdx) => (
+                            <li key={cIdx} className="flex gap-2">
+                              <span className="text-primary text-xs">•</span>
+                              <span className="text-sm">{content}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
                     {idx < section.reflections.length - 1 && <Separator className="mt-3" />}
                   </div>
                 ))
