@@ -2,6 +2,7 @@ import { Competency } from "@/types";
 
 export interface LearningGoal {
   title: string;
+  sprint: string;
   rewrittenOutcome: string;
   learningActivities: string[];
   reflection: {
@@ -227,6 +228,7 @@ export const generatePortfolio = async (
 
         allLearningGoals.push({
           title: goalTitle,
+          sprint: project.name || 'Unknown Project',
           rewrittenOutcome: '[To be completed]',
           learningActivities: activities,
           reflection
