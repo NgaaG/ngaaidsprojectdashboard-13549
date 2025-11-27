@@ -164,7 +164,7 @@ export const ReflectionEditDialog = ({
     setLoading(true);
 
     try {
-      const progress = calculateProgress();
+      const progress = Math.round(calculateProgress());
       
       const updateData: any = {
         project_id: projectId,
