@@ -183,100 +183,77 @@ export const GrowthPortfolioPrintView = ({ data }: GrowthPortfolioPrintViewProps
             <p>{section.reflectionOnFeedback || '[To be completed]'}</p>
           </div>
 
-          {/* Learning Goals */}
-          <div className="print-section">
-            <h2 className="print-heading-2">🎯 Learning Goals</h2>
-            {section.learningGoals.length > 0 ? (
-              section.learningGoals.map((goalGroup, idx) => (
-                <div key={idx} style={{ marginBottom: '15px' }}>
-                  <h3 className="print-heading-3">Project: {goalGroup.projectName}</h3>
-                  {goalGroup.goals.map((goal, gIdx) => (
-                    <div key={gIdx} className="print-bullet">• {goal}</div>
-                  ))}
-                </div>
-              ))
-            ) : (
-              <p>[No learning goals yet]</p>
-            )}
-          </div>
-
-          {/* Learning Activities */}
-          <div className="print-section">
-            <h2 className="print-heading-2">🛠 Learning Activities</h2>
-            {section.learningActivities.length > 0 ? (
-              section.learningActivities.map((activityGroup, idx) => (
-                <div key={idx} style={{ marginBottom: '15px' }}>
-                  <h3 className="print-heading-3">Project: {activityGroup.projectName}</h3>
-                  {activityGroup.tasks.map((task, tIdx) => (
-                    <div key={tIdx} style={{ marginBottom: '10px' }}>
-                      <p style={{ fontWeight: 600, fontSize: '14px' }}>{task.name}</p>
-                      {task.description && <p style={{ fontSize: '12px', color: '#666' }}>{task.description}</p>}
-                    </div>
-                  ))}
-                </div>
-              ))
-            ) : (
-              <p>[No learning activities yet]</p>
-            )}
-          </div>
-
-          {/* Reflections */}
-          <div className="print-section">
-            <h2 className="print-heading-2">💭 Reflections</h2>
-            {section.reflections.length > 0 ? (
-              section.reflections.map((reflection, idx) => (
-                <div key={idx} style={{ marginBottom: '20px' }}>
-                  <h3 className="print-heading-3">Project: {reflection.projectName}</h3>
-                  {reflection.sections.map((sec, sIdx) => (
-                    <div key={sIdx} style={{ marginBottom: '15px' }}>
-                      <h4 style={{ fontWeight: 600, fontSize: '14px', marginBottom: '8px', color: '#666' }}>
-                        {sec.heading}
-                      </h4>
-                      {sec.content.map((content, cIdx) => (
-                        <div key={cIdx} className="print-bullet">• {content}</div>
+          {/* First Half Learning Goals */}
+          {section.firstHalf.length > 0 && (
+            <div className="print-section">
+              <h2 className="print-heading-2">📖 FIRST HALF</h2>
+              {section.firstHalf.map((goal, idx) => (
+                <div key={idx} style={{ marginBottom: '30px' }}>
+                  <h3 className="print-heading-3">🎯 Learning Goal {idx + 1}: {goal.title}</h3>
+                  
+                  <h4 style={{ fontWeight: 600, marginTop: '15px' }}>Rewritten Learning Outcome:</h4>
+                  <p>{goal.rewrittenOutcome || '[To be completed]'}</p>
+                  
+                  {goal.learningActivities.length > 0 && (
+                    <>
+                      <h4 style={{ fontWeight: 600, marginTop: '15px' }}>🛠 Learning Activities:</h4>
+                      {goal.learningActivities.map((activity, aIdx) => (
+                        <div key={aIdx} className="print-bullet">• {activity}</div>
                       ))}
-                    </div>
-                  ))}
+                    </>
+                  )}
+                  
+                  <h4 style={{ fontWeight: 600, marginTop: '15px' }}>🧠 Reflection: Knowledge, Skills, Transfer</h4>
+                  <div style={{ marginLeft: '20px' }}>
+                    <p><strong>KNOWLEDGE:</strong> {goal.reflection.knowledge || '[To be completed]'}</p>
+                    <p style={{ marginTop: '10px' }}><strong>SKILLS:</strong> {goal.reflection.skills || '[To be completed]'}</p>
+                    <p style={{ marginTop: '10px' }}><strong>TRANSFER:</strong> {goal.reflection.transfer || '[To be completed]'}</p>
+                  </div>
                 </div>
-              ))
-            ) : (
-              <p>[No reflections yet]</p>
-            )}
-          </div>
+              ))}
+            </div>
+          )}
 
-          {/* Appendix - Files and Links */}
-          <div className="print-section">
-            <h2 className="print-heading-2">📎 Appendix: Files and Evidence</h2>
-            
-            {section.appendixFiles.length > 0 && (
-              <div style={{ marginBottom: '20px' }}>
-                <h3 className="print-heading-3">Files to Upload</h3>
-                {section.appendixFiles.map((file, idx) => (
-                  <div key={idx} style={{ marginBottom: '10px', fontSize: '12px' }}>
-                    <p style={{ fontWeight: 600 }}>{file.name}</p>
-                    <p style={{ color: '#666' }}>From: {file.taskName}</p>
-                    <p style={{ color: '#666' }}>URL: {file.url}</p>
-                    <p style={{ fontStyle: 'italic' }}>[Insert image/file here]</p>
+          {/* Second Half Learning Goals */}
+          {section.secondHalf.length > 0 && (
+            <div className="print-section">
+              <h2 className="print-heading-2">📖 SECOND HALF</h2>
+              {section.secondHalf.map((goal, idx) => (
+                <div key={idx} style={{ marginBottom: '30px' }}>
+                  <h3 className="print-heading-3">🎯 Learning Goal {idx + 1}: {goal.title}</h3>
+                  
+                  <h4 style={{ fontWeight: 600, marginTop: '15px' }}>Rewritten Learning Outcome:</h4>
+                  <p>{goal.rewrittenOutcome || '[To be completed]'}</p>
+                  
+                  {goal.learningActivities.length > 0 && (
+                    <>
+                      <h4 style={{ fontWeight: 600, marginTop: '15px' }}>🛠 Learning Activities:</h4>
+                      {goal.learningActivities.map((activity, aIdx) => (
+                        <div key={aIdx} className="print-bullet">• {activity}</div>
+                      ))}
+                    </>
+                  )}
+                  
+                  <h4 style={{ fontWeight: 600, marginTop: '15px' }}>🧠 Reflection: Knowledge, Skills, Transfer</h4>
+                  <div style={{ marginLeft: '20px' }}>
+                    <p><strong>KNOWLEDGE:</strong> {goal.reflection.knowledge || '[To be completed]'}</p>
+                    <p style={{ marginTop: '10px' }}><strong>SKILLS:</strong> {goal.reflection.skills || '[To be completed]'}</p>
+                    <p style={{ marginTop: '10px' }}><strong>TRANSFER:</strong> {goal.reflection.transfer || '[To be completed]'}</p>
                   </div>
-                ))}
-              </div>
-            )}
-            
-            {section.appendixLinks.length > 0 && (
-              <div>
-                <h3 className="print-heading-3">Links</h3>
-                {section.appendixLinks.map((link, idx) => (
-                  <div key={idx} className="print-bullet">
-                    • {link.title} - {link.url} (from {link.taskName})
-                  </div>
-                ))}
-              </div>
-            )}
-            
-            {section.appendixFiles.length === 0 && section.appendixLinks.length === 0 && (
-              <p>[No files or links to attach]</p>
-            )}
-          </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Appendix */}
+          {section.appendixEvidence.length > 0 && (
+            <div className="print-section">
+              <h2 className="print-heading-2">📎 Appendix: Evidence</h2>
+              {section.appendixEvidence.map((evidence, idx) => (
+                <div key={idx} className="print-bullet">• {evidence}</div>
+              ))}
+            </div>
+          )}
         </div>
       ))}
 
