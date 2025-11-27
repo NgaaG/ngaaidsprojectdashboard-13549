@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Edit, Calendar, ExternalLink, Trash2, Plus } from "lucide-react";
+import { Edit, Calendar, ExternalLink, Trash2, Plus, Download } from "lucide-react";
 import { Competency } from "@/types";
 import { db } from "@/lib/supabaseHelpers";
 import { toast } from "sonner";
+import { toPng } from 'html-to-image';
 
 const COMPETENCY_COLORS: Record<Competency, string> = {
   Research: "hsl(265 45% 80%)",
@@ -41,8 +42,35 @@ export const MentorLogDetailView = ({
   const [notCoveredGoals, setNotCoveredGoals] = useState<string[]>(log.not_covered_goals || []);
   const [loading, setLoading] = useState(false);
   const [newOutcomeInput, setNewOutcomeInput] = useState("");
+  const captureRef = useRef<HTMLDivElement>(null);
 
   const keyGoalsList = log.key_goals || [];
+
+  const handleDownloadImage = async () => {
+    if (!captureRef.current) return;
+    
+    try {
+      toast.loading("Generating image...");
+      
+      const dataUrl = await toPng(captureRef.current, {
+        cacheBust: true,
+        backgroundColor: '#ffffff',
+        quality: 0.95,
+      });
+      
+      const link = document.createElement("a");
+      link.download = `mentor-log-${log.title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-${new Date(log.date).toISOString().split('T')[0]}.png`;
+      link.href = dataUrl;
+      link.click();
+      
+      toast.dismiss();
+      toast.success("Mentor log downloaded!");
+    } catch (error) {
+      console.error("Error generating image:", error);
+      toast.dismiss();
+      toast.error("Failed to generate image");
+    }
+  };
 
   const handleSave = async () => {
     setLoading(true);
@@ -133,6 +161,15 @@ export const MentorLogDetailView = ({
               {!isEditing && (
                 <>
                   <Button
+                    variant="outline"
+                    size="sm"
+                    className="shrink-0 flex items-center gap-2"
+                    onClick={handleDownloadImage}
+                  >
+                    <Download className="h-4 w-4" />
+                    <span>Download</span>
+                  </Button>
+                  <Button
                     variant="default"
                     size="sm"
                     className="shrink-0 font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg flex-col h-auto py-3 px-4 gap-1"
@@ -150,8 +187,8 @@ export const MentorLogDetailView = ({
           </div>
         </DialogHeader>
 
-        {/* Main Content */}
-        <div className="space-y-6 py-4">
+        {/* Main Content - Capture for Download (excludes Referenced Project Tasks) */}
+        <div ref={captureRef} className="space-y-6 py-4">
           {/* Projects Info */}
           {log.projects && log.projects.length > 0 && (
             <div className="p-5 bg-gradient-to-br from-muted/20 to-muted/40 rounded-xl border border-border/50 shadow-sm">
