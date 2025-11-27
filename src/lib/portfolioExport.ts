@@ -86,10 +86,12 @@ export const generateNotionMarkdown = (data: PortfolioData): string => {
           md += `\n`;
         }
         
-        md += `**🧠 Reflection: Knowledge, Skills, Transfer**\n\n`;
-        md += `**KNOWLEDGE:**\n${goal.reflection.knowledge}\n\n`;
-        md += `**SKILLS:**\n${goal.reflection.skills}\n\n`;
-        md += `**TRANSFER:**\n${goal.reflection.transfer}\n\n`;
+        md += `**🧠 Reflection**\n\n`;
+        md += `**WHAT I DID:**\n${goal.reflection.whatIDid}\n\n`;
+        md += `**WHAT I LEARNED:**\n${goal.reflection.whatILearned}\n\n`;
+        md += `**CHALLENGES & SOLUTIONS:**\n${goal.reflection.challengesAndSolutions}\n\n`;
+        md += `**WHERE I WANT TO FILL THE GAPS:**\n${goal.reflection.fillTheGaps}\n\n`;
+        md += `**NEXT STEPS:**\n${goal.reflection.nextSteps}\n\n`;
         md += `---\n\n`;
       });
     }
@@ -109,10 +111,12 @@ export const generateNotionMarkdown = (data: PortfolioData): string => {
           md += `\n`;
         }
         
-        md += `**🧠 Reflection: Knowledge, Skills, Transfer**\n\n`;
-        md += `**KNOWLEDGE:**\n${goal.reflection.knowledge}\n\n`;
-        md += `**SKILLS:**\n${goal.reflection.skills}\n\n`;
-        md += `**TRANSFER:**\n${goal.reflection.transfer}\n\n`;
+        md += `**🧠 Reflection**\n\n`;
+        md += `**WHAT I DID:**\n${goal.reflection.whatIDid}\n\n`;
+        md += `**WHAT I LEARNED:**\n${goal.reflection.whatILearned}\n\n`;
+        md += `**CHALLENGES & SOLUTIONS:**\n${goal.reflection.challengesAndSolutions}\n\n`;
+        md += `**WHERE I WANT TO FILL THE GAPS:**\n${goal.reflection.fillTheGaps}\n\n`;
+        md += `**NEXT STEPS:**\n${goal.reflection.nextSteps}\n\n`;
         md += `---\n\n`;
       });
     }

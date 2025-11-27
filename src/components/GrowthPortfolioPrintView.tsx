@@ -203,11 +203,13 @@ export const GrowthPortfolioPrintView = ({ data }: GrowthPortfolioPrintViewProps
                     </>
                   )}
                   
-                  <h4 style={{ fontWeight: 600, marginTop: '15px' }}>🧠 Reflection: Knowledge, Skills, Transfer</h4>
+                  <h4 style={{ fontWeight: 600, marginTop: '15px' }}>🧠 Reflection</h4>
                   <div style={{ marginLeft: '20px' }}>
-                    <p><strong>KNOWLEDGE:</strong> {goal.reflection.knowledge || '[To be completed]'}</p>
-                    <p style={{ marginTop: '10px' }}><strong>SKILLS:</strong> {goal.reflection.skills || '[To be completed]'}</p>
-                    <p style={{ marginTop: '10px' }}><strong>TRANSFER:</strong> {goal.reflection.transfer || '[To be completed]'}</p>
+                    <p><strong>WHAT I DID:</strong> <span style={{ whiteSpace: 'pre-line' }}>{goal.reflection.whatIDid || '[To be completed]'}</span></p>
+                    <p style={{ marginTop: '10px' }}><strong>WHAT I LEARNED:</strong> <span style={{ whiteSpace: 'pre-line' }}>{goal.reflection.whatILearned || '[To be completed]'}</span></p>
+                    <p style={{ marginTop: '10px' }}><strong>CHALLENGES & SOLUTIONS:</strong> <span style={{ whiteSpace: 'pre-line' }}>{goal.reflection.challengesAndSolutions || '[To be completed]'}</span></p>
+                    <p style={{ marginTop: '10px' }}><strong>WHERE I WANT TO FILL THE GAPS:</strong> <span style={{ whiteSpace: 'pre-line' }}>{goal.reflection.fillTheGaps || '[To be completed]'}</span></p>
+                    <p style={{ marginTop: '10px' }}><strong>NEXT STEPS:</strong> <span style={{ whiteSpace: 'pre-line' }}>{goal.reflection.nextSteps || '[To be completed]'}</span></p>
                   </div>
                 </div>
               ))}
@@ -234,11 +236,13 @@ export const GrowthPortfolioPrintView = ({ data }: GrowthPortfolioPrintViewProps
                     </>
                   )}
                   
-                  <h4 style={{ fontWeight: 600, marginTop: '15px' }}>🧠 Reflection: Knowledge, Skills, Transfer</h4>
+                  <h4 style={{ fontWeight: 600, marginTop: '15px' }}>🧠 Reflection</h4>
                   <div style={{ marginLeft: '20px' }}>
-                    <p><strong>KNOWLEDGE:</strong> {goal.reflection.knowledge || '[To be completed]'}</p>
-                    <p style={{ marginTop: '10px' }}><strong>SKILLS:</strong> {goal.reflection.skills || '[To be completed]'}</p>
-                    <p style={{ marginTop: '10px' }}><strong>TRANSFER:</strong> {goal.reflection.transfer || '[To be completed]'}</p>
+                    <p><strong>WHAT I DID:</strong> <span style={{ whiteSpace: 'pre-line' }}>{goal.reflection.whatIDid || '[To be completed]'}</span></p>
+                    <p style={{ marginTop: '10px' }}><strong>WHAT I LEARNED:</strong> <span style={{ whiteSpace: 'pre-line' }}>{goal.reflection.whatILearned || '[To be completed]'}</span></p>
+                    <p style={{ marginTop: '10px' }}><strong>CHALLENGES & SOLUTIONS:</strong> <span style={{ whiteSpace: 'pre-line' }}>{goal.reflection.challengesAndSolutions || '[To be completed]'}</span></p>
+                    <p style={{ marginTop: '10px' }}><strong>WHERE I WANT TO FILL THE GAPS:</strong> <span style={{ whiteSpace: 'pre-line' }}>{goal.reflection.fillTheGaps || '[To be completed]'}</span></p>
+                    <p style={{ marginTop: '10px' }}><strong>NEXT STEPS:</strong> <span style={{ whiteSpace: 'pre-line' }}>{goal.reflection.nextSteps || '[To be completed]'}</span></p>
                   </div>
                 </div>
               ))}
