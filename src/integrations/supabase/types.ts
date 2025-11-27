@@ -226,6 +226,84 @@ export type Database = {
         }
         Relationships: []
       }
+      reflection_versions: {
+        Row: {
+          category: string | null
+          challenges_structured: Json | null
+          change_description: string | null
+          changed_by: string | null
+          contingency_plan: string | null
+          created_at: string
+          emotional_dump: string | null
+          fill_the_gaps: Json | null
+          id: string
+          mode: string | null
+          mood: string
+          next_steps: Json | null
+          progress: number | null
+          project_id: string | null
+          reflection_id: string
+          solutions_structured: Json | null
+          thoughts_what_i_think: string | null
+          thoughts_what_is_true: string | null
+          todo_list: Json | null
+          user_id: string | null
+          version_number: number
+          what_i_did: Json | null
+          what_i_learned: Json | null
+        }
+        Insert: {
+          category?: string | null
+          challenges_structured?: Json | null
+          change_description?: string | null
+          changed_by?: string | null
+          contingency_plan?: string | null
+          created_at?: string
+          emotional_dump?: string | null
+          fill_the_gaps?: Json | null
+          id?: string
+          mode?: string | null
+          mood: string
+          next_steps?: Json | null
+          progress?: number | null
+          project_id?: string | null
+          reflection_id: string
+          solutions_structured?: Json | null
+          thoughts_what_i_think?: string | null
+          thoughts_what_is_true?: string | null
+          todo_list?: Json | null
+          user_id?: string | null
+          version_number: number
+          what_i_did?: Json | null
+          what_i_learned?: Json | null
+        }
+        Update: {
+          category?: string | null
+          challenges_structured?: Json | null
+          change_description?: string | null
+          changed_by?: string | null
+          contingency_plan?: string | null
+          created_at?: string
+          emotional_dump?: string | null
+          fill_the_gaps?: Json | null
+          id?: string
+          mode?: string | null
+          mood?: string
+          next_steps?: Json | null
+          progress?: number | null
+          project_id?: string | null
+          reflection_id?: string
+          solutions_structured?: Json | null
+          thoughts_what_i_think?: string | null
+          thoughts_what_is_true?: string | null
+          todo_list?: Json | null
+          user_id?: string | null
+          version_number?: number
+          what_i_did?: Json | null
+          what_i_learned?: Json | null
+        }
+        Relationships: []
+      }
       reflections: {
         Row: {
           audio_url: string | null

@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Plus, Save, Trash2, Calendar } from "lucide-react";
+import { Plus, Save, Trash2, Calendar, CheckSquare, Square, History, Edit } from "lucide-react";
 import { MoodType, Mode } from "@/types";
 import { db } from "@/lib/supabaseHelpers";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,6 +26,9 @@ import { useSearchParams } from "react-router-dom";
 import { useViewMode } from "@/hooks/useViewMode";
 import { ReflectionDetailView } from "@/components/ReflectionDetailView";
 import { ReflectionEditDialog } from "@/components/ReflectionEditDialog";
+import { ReflectionBulkEditDialog } from "@/components/ReflectionBulkEditDialog";
+import { ReflectionVersionHistory } from "@/components/ReflectionVersionHistory";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const MOODS: { value: MoodType; emoji: string; label: string; color: string }[] = [
   { value: "calm", emoji: "😌", label: "Calm", color: "hsl(195 60% 76%)" },
@@ -55,6 +58,9 @@ const Reflections = () => {
   const [selectedReflection, setSelectedReflection] = useState<any | null>(null);
   const [editingReflection, setEditingReflection] = useState<any | null>(null);
   const [generalLearningGoals, setGeneralLearningGoals] = useState<any>(null);
+  const [selectedReflectionIds, setSelectedReflectionIds] = useState<string[]>([]);
+  const [showBulkEditDialog, setShowBulkEditDialog] = useState(false);
+  const [versionHistoryReflectionId, setVersionHistoryReflectionId] = useState<string | null>(null);
   const [currentReflection, setCurrentReflection] = useState<any>({
     mood: "calm",
     emotionalDump: "",
@@ -297,6 +303,24 @@ const Reflections = () => {
 
   const emotionOptions = currentMode === "personal" ? MOODS : SATISFACTION;
   const moodColor = emotionOptions.find((m) => m.value === currentReflection.mood)?.color || "hsl(195 60% 76%)";
+
+  const toggleReflectionSelection = (reflectionId: string) => {
+    setSelectedReflectionIds(prev =>
+      prev.includes(reflectionId)
+        ? prev.filter(id => id !== reflectionId)
+        : [...prev, reflectionId]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedReflectionIds.length === reflections.length) {
+      setSelectedReflectionIds([]);
+    } else {
+      setSelectedReflectionIds(reflections.map(r => r.id));
+    }
+  };
+
+  const selectedReflections = reflections.filter(r => selectedReflectionIds.includes(r.id));
 
   return (
     <div className="min-h-screen">
@@ -687,14 +711,60 @@ const Reflections = () => {
         {/* Past Reflections */}
         <section className="mt-12">
           <div className="flex items-center justify-between mb-6">
-            <div>
+            <div className="flex-1">
               <h2 className="text-2xl font-bold">Past Reflections</h2>
               <p className="text-sm text-muted-foreground mt-1">View your reflection history for this mode</p>
             </div>
-            <Badge variant="outline" className="text-sm">
-              {reflections.length} {reflections.length === 1 ? 'Entry' : 'Entries'}
-            </Badge>
+            <div className="flex items-center gap-3">
+              {reflections.length > 0 && !isViewerMode && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={toggleSelectAll}
+                  className="gap-2"
+                >
+                  {selectedReflectionIds.length === reflections.length ? (
+                    <CheckSquare className="h-4 w-4" />
+                  ) : (
+                    <Square className="h-4 w-4" />
+                  )}
+                  {selectedReflectionIds.length > 0 ? `${selectedReflectionIds.length} Selected` : 'Select All'}
+                </Button>
+              )}
+              <Badge variant="outline" className="text-sm">
+                {reflections.length} {reflections.length === 1 ? 'Entry' : 'Entries'}
+              </Badge>
+            </div>
           </div>
+
+          {/* Bulk Actions Toolbar */}
+          {selectedReflectionIds.length > 0 && !isViewerMode && (
+            <div className="mb-4 p-4 bg-primary/10 border border-primary/20 rounded-lg">
+              <div className="flex items-center justify-between gap-4">
+                <p className="text-sm font-semibold">
+                  {selectedReflectionIds.length} reflection{selectedReflectionIds.length !== 1 ? 's' : ''} selected
+                </p>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowBulkEditDialog(true)}
+                    className="gap-2"
+                  >
+                    <Edit className="h-4 w-4" />
+                    Bulk Edit
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSelectedReflectionIds([])}
+                  >
+                    Clear Selection
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
           <div className="space-y-4">
             {reflections.length === 0 ? (
               <Card className="border-dashed">
@@ -710,16 +780,24 @@ const Reflections = () => {
                 const mood = emotionSet.find((m) => m.value === reflection.mood);
                  const isHighlighted = highlightedReflectionId === reflection.id;
                 return (
-                  <Card 
-                    key={reflection.id} 
-                    id={`reflection-${reflection.id}`}
-                    className={`hover:shadow-lg transition-all border-l-4 cursor-pointer ${isHighlighted ? 'ring-2 ring-primary shadow-xl animate-pulse' : ''}`}
-                    style={{ borderLeftColor: mood?.color || 'hsl(195 60% 76%)' }}
-                    onClick={() => setSelectedReflection(reflection)}
-                  >
-                    <CardContent className="p-5">
-                      <div className="flex justify-between items-start gap-4">
-                        <div className="flex-1">
+                   <Card 
+                     key={reflection.id} 
+                     id={`reflection-${reflection.id}`}
+                     className={`hover:shadow-lg transition-all border-l-4 ${isHighlighted ? 'ring-2 ring-primary shadow-xl animate-pulse' : ''} ${selectedReflectionIds.includes(reflection.id) ? 'ring-2 ring-primary/50 bg-primary/5' : ''}`}
+                     style={{ borderLeftColor: mood?.color || 'hsl(195 60% 76%)' }}
+                   >
+                     <CardContent className="p-5">
+                       <div className="flex items-start gap-4">
+                         {!isViewerMode && (
+                           <div className="pt-1">
+                             <Checkbox
+                               checked={selectedReflectionIds.includes(reflection.id)}
+                               onCheckedChange={() => toggleReflectionSelection(reflection.id)}
+                               onClick={(e) => e.stopPropagation()}
+                             />
+                           </div>
+                         )}
+                         <div className="flex-1 cursor-pointer" onClick={() => setSelectedReflection(reflection)}>
                           <div className="flex items-center gap-3 mb-3">
                             <span className="text-3xl emoji-animate">{mood?.emoji}</span>
                             <div className="flex-1">
@@ -756,23 +834,37 @@ const Reflections = () => {
                           <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
                             {reflection.emotional_dump}
                           </p>
-                        </div>
-                        {!isViewerMode && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDelete(reflection.id);
-                            }}
-                            className="hover:text-destructive hover:bg-destructive/10"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
+                         </div>
+                         {!isViewerMode && (
+                           <div className="flex gap-1">
+                             <Button
+                               variant="ghost"
+                               size="icon"
+                               onClick={(e) => {
+                                 e.stopPropagation();
+                                 setVersionHistoryReflectionId(reflection.id);
+                               }}
+                               className="hover:text-primary hover:bg-primary/10"
+                               title="View version history"
+                             >
+                               <History className="h-4 w-4" />
+                             </Button>
+                             <Button
+                               variant="ghost"
+                               size="icon"
+                               onClick={(e) => {
+                                 e.stopPropagation();
+                                 handleDelete(reflection.id);
+                               }}
+                               className="hover:text-destructive hover:bg-destructive/10"
+                             >
+                               <Trash2 className="h-4 w-4" />
+                             </Button>
+                           </div>
+                         )}
+                       </div>
+                     </CardContent>
+                   </Card>
                 );
               })
             )}
@@ -791,6 +883,10 @@ const Reflections = () => {
             setEditingReflection(selectedReflection);
             setSelectedReflection(null);
           } : undefined}
+          onViewHistory={!isViewerMode ? () => {
+            setVersionHistoryReflectionId(selectedReflection.id);
+            setSelectedReflection(null);
+          } : undefined}
         />
       )}
 
@@ -804,6 +900,32 @@ const Reflections = () => {
           onSuccess={() => {
             loadData();
             setEditingReflection(null);
+          }}
+        />
+      )}
+
+      {/* Bulk Edit Dialog */}
+      <ReflectionBulkEditDialog
+        selectedReflections={selectedReflections}
+        projects={projects}
+        open={showBulkEditDialog}
+        onOpenChange={setShowBulkEditDialog}
+        onSuccess={() => {
+          loadData();
+          setSelectedReflectionIds([]);
+          setShowBulkEditDialog(false);
+        }}
+      />
+
+      {/* Version History Dialog */}
+      {versionHistoryReflectionId && (
+        <ReflectionVersionHistory
+          reflectionId={versionHistoryReflectionId}
+          open={!!versionHistoryReflectionId}
+          onOpenChange={(open) => !open && setVersionHistoryReflectionId(null)}
+          onRevert={() => {
+            loadData();
+            setVersionHistoryReflectionId(null);
           }}
         />
       )}

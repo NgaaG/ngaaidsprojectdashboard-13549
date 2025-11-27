@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Pencil } from "lucide-react";
+import { Calendar, Pencil, History } from "lucide-react";
 import { MoodType, ReflectionEntry, ChallengeEntry } from "@/types";
 
 const MOODS: { value: MoodType; emoji: string; label: string; color: string }[] = [
@@ -26,6 +26,7 @@ interface ReflectionDetailViewProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onEdit?: () => void;
+  onViewHistory?: () => void;
 }
 
 export const ReflectionDetailView = ({ 
@@ -33,7 +34,8 @@ export const ReflectionDetailView = ({
   projectName,
   open, 
   onOpenChange,
-  onEdit
+  onEdit,
+  onViewHistory
 }: ReflectionDetailViewProps) => {
   const emotionSet = reflection.mode === "personal" ? MOODS : SATISFACTION;
   const mood = emotionSet.find((m) => m.value === reflection.mood);
@@ -188,16 +190,31 @@ export const ReflectionDetailView = ({
                 </div>
               )}
             </div>
-            {onEdit && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onEdit}
-                className="gap-2 shrink-0"
-              >
-                <Pencil className="h-4 w-4" />
-                Edit
-              </Button>
+            {(onEdit || onViewHistory) && (
+              <div className="flex gap-2 shrink-0">
+                {onViewHistory && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={onViewHistory}
+                    className="gap-2"
+                  >
+                    <History className="h-4 w-4" />
+                    History
+                  </Button>
+                )}
+                {onEdit && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={onEdit}
+                    className="gap-2"
+                  >
+                    <Pencil className="h-4 w-4" />
+                    Edit
+                  </Button>
+                )}
+              </div>
             )}
           </div>
         </DialogHeader>
