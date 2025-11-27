@@ -102,8 +102,12 @@ export const generateNotionMarkdown = (data: PortfolioData): string => {
     if (section.reflections.length > 0) {
       section.reflections.forEach(reflection => {
         md += `### Project: ${reflection.projectName}\n\n`;
-        reflection.content.forEach(content => {
-          md += `- ${content}\n`;
+        reflection.sections.forEach(sec => {
+          md += `#### ${sec.heading}\n\n`;
+          sec.content.forEach(content => {
+            md += `- ${content}\n`;
+          });
+          md += `\n`;
         });
         md += `\n`;
       });

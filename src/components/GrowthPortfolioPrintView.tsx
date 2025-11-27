@@ -218,8 +218,15 @@ export const GrowthPortfolioPrintView = ({ data }: GrowthPortfolioPrintViewProps
               section.reflections.map((reflection, idx) => (
                 <div key={idx} style={{ marginBottom: '20px' }}>
                   <h3 className="print-heading-3">Project: {reflection.projectName}</h3>
-                  {reflection.content.map((content, cIdx) => (
-                    <div key={cIdx} className="print-bullet">• {content}</div>
+                  {reflection.sections.map((sec, sIdx) => (
+                    <div key={sIdx} style={{ marginBottom: '15px' }}>
+                      <h4 style={{ fontWeight: 600, fontSize: '14px', marginBottom: '8px', color: '#666' }}>
+                        {sec.heading}
+                      </h4>
+                      {sec.content.map((content, cIdx) => (
+                        <div key={cIdx} className="print-bullet">• {content}</div>
+                      ))}
+                    </div>
                   ))}
                 </div>
               ))
