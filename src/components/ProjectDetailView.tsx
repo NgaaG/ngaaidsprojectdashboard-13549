@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Project, Mode, LearningGoals } from "@/types";
 import { db } from "@/lib/supabaseHelpers";
-import { Edit, ExternalLink, Calendar, Trash2, Eye, Edit2 } from "lucide-react";
+import { Edit, ExternalLink, Calendar, Trash2, Eye, Edit2, Download } from "lucide-react";
+import { toPng } from 'html-to-image';
 import { ProjectEditDialog } from "./ProjectEditDialog";
 import { LearningGoalsEditDialog } from "./LearningGoalsEditDialog";
 import { useNavigate } from "react-router-dom";
@@ -68,6 +69,7 @@ export const ProjectDetailView = ({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [goalsEditDialogOpen, setGoalsEditDialogOpen] = useState(false);
   const navigate = useNavigate();
+  const captureRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (open) {
@@ -159,6 +161,32 @@ export const ProjectDetailView = ({
     }
   };
 
+  const handleDownloadImage = async () => {
+    if (!captureRef.current) return;
+    
+    try {
+      toast.loading("Generating image...");
+      
+      const dataUrl = await toPng(captureRef.current, {
+        cacheBust: true,
+        backgroundColor: '#ffffff',
+        quality: 0.95,
+      });
+      
+      const link = document.createElement("a");
+      link.download = `project-${project.name.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.png`;
+      link.href = dataUrl;
+      link.click();
+      
+      toast.dismiss();
+      toast.success("Project overview downloaded!");
+    } catch (error) {
+      console.error("Error generating image:", error);
+      toast.dismiss();
+      toast.error("Failed to generate image");
+    }
+  };
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -172,6 +200,15 @@ export const ProjectDetailView = ({
                 </p>
               </div>
               <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDownloadImage}
+                  className="gap-2"
+                >
+                  <Download className="h-4 w-4" />
+                  Download
+                </Button>
                 {!isViewerMode && (
                   <>
                     <Button
@@ -197,7 +234,7 @@ export const ProjectDetailView = ({
             </div>
           </DialogHeader>
 
-          <div className="space-y-6 mt-6">
+          <div ref={captureRef} className="space-y-6 mt-6">
             {/* Basic Info Section */}
             <Card className="border-l-4 border-l-primary">
               <CardHeader>
