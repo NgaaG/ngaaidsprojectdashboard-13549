@@ -238,6 +238,7 @@ export type Database = {
           id: string
           mode: string | null
           mood: string
+          next_steps: Json | null
           progress: number | null
           project_id: string | null
           sentiment: number | null
@@ -260,6 +261,7 @@ export type Database = {
           id?: string
           mode?: string | null
           mood: string
+          next_steps?: Json | null
           progress?: number | null
           project_id?: string | null
           sentiment?: number | null
@@ -282,6 +284,7 @@ export type Database = {
           id?: string
           mode?: string | null
           mood?: string
+          next_steps?: Json | null
           progress?: number | null
           project_id?: string | null
           sentiment?: number | null
