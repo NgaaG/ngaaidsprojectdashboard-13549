@@ -159,16 +159,22 @@ export const GrowthPortfolioContent = ({ data }: GrowthPortfolioContentProps) =>
             <CardHeader>
               <CardTitle className="text-2xl">🎯 Learning Goals</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
               {section.learningGoals.length > 0 ? (
-                <ul className="space-y-2">
-                  {section.learningGoals.map((goal, idx) => (
-                    <li key={idx} className="flex gap-2">
-                      <span className="text-primary">•</span>
-                      <span className="text-sm">{goal}</span>
-                    </li>
-                  ))}
-                </ul>
+                section.learningGoals.map((goalGroup, idx) => (
+                  <div key={idx} className="space-y-2">
+                    <h4 className="font-semibold text-sm">Project: {goalGroup.projectName}</h4>
+                    <ul className="space-y-1 ml-4">
+                      {goalGroup.goals.map((goal, gIdx) => (
+                        <li key={gIdx} className="flex gap-2">
+                          <span className="text-primary text-xs">•</span>
+                          <span className="text-sm">{goal}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    {idx < section.learningGoals.length - 1 && <Separator className="mt-3" />}
+                  </div>
+                ))
               ) : (
                 <p className="text-sm text-muted-foreground">[No learning goals yet]</p>
               )}
@@ -182,13 +188,19 @@ export const GrowthPortfolioContent = ({ data }: GrowthPortfolioContentProps) =>
             </CardHeader>
             <CardContent className="space-y-4">
               {section.learningActivities.length > 0 ? (
-                section.learningActivities.map((activity, idx) => (
-                  <div key={idx} className="space-y-1">
-                    <h4 className="font-semibold text-sm">{activity.name}</h4>
-                    <p className="text-xs text-muted-foreground">Project: {activity.projectName}</p>
-                    {activity.description && (
-                      <p className="text-sm">{activity.description}</p>
-                    )}
+                section.learningActivities.map((activityGroup, idx) => (
+                  <div key={idx} className="space-y-2">
+                    <h4 className="font-semibold text-sm">Project: {activityGroup.projectName}</h4>
+                    <div className="space-y-3 ml-4">
+                      {activityGroup.tasks.map((task, tIdx) => (
+                        <div key={tIdx} className="space-y-1">
+                          <p className="font-medium text-sm">{task.name}</p>
+                          {task.description && (
+                            <p className="text-sm text-muted-foreground">{task.description}</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                     {idx < section.learningActivities.length - 1 && <Separator className="mt-3" />}
                   </div>
                 ))

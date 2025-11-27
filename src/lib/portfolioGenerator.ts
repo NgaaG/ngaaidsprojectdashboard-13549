@@ -4,11 +4,16 @@ export interface PortfolioSection {
   competency: Competency;
   feedbackSummary: string;
   reflectionOnFeedback: string;
-  learningGoals: string[];
-  learningActivities: {
-    name: string;
-    description: string;
+  learningGoals: {
     projectName: string;
+    goals: string[];
+  }[];
+  learningActivities: {
+    projectName: string;
+    tasks: {
+      name: string;
+      description: string;
+    }[];
   }[];
   reflections: {
     projectName: string;
@@ -108,32 +113,49 @@ export const generatePortfolio = async (
       p.competencies?.includes(competency)
     );
     
-    // 1. Learning Goals - All goals for this competency across all projects
-    const learningGoals: string[] = [];
+    // 1. Learning Goals - Grouped by project
+    const learningGoals: { projectName: string; goals: string[] }[] = [];
     relatedProjects.forEach(project => {
       const projectGoals = project.learning_goals?.[competency];
+      const goals: string[] = [];
+      
       if (projectGoals) {
         if (Array.isArray(projectGoals)) {
-          learningGoals.push(...projectGoals.filter(Boolean));
+          goals.push(...projectGoals.filter(Boolean));
         } else if (typeof projectGoals === 'string' && projectGoals.trim()) {
-          learningGoals.push(projectGoals);
+          goals.push(projectGoals);
         }
+      }
+      
+      if (goals.length > 0) {
+        learningGoals.push({
+          projectName: project.name,
+          goals
+        });
       }
     });
 
-    // 2. Learning Activities - All key tasks for this competency across all projects
-    const learningActivities: { name: string; description: string; projectName: string }[] = [];
+    // 2. Learning Activities - Grouped by project
+    const learningActivities: { projectName: string; tasks: { name: string; description: string }[] }[] = [];
     relatedProjects.forEach(project => {
       const keyTasks = project.key_tasks || [];
+      const tasks: { name: string; description: string }[] = [];
+      
       keyTasks.forEach((task: any) => {
         if (task.competency === competency && task.title) {
-          learningActivities.push({
+          tasks.push({
             name: task.title,
-            description: task.description || '',
-            projectName: project.name
+            description: task.description || ''
           });
         }
       });
+      
+      if (tasks.length > 0) {
+        learningActivities.push({
+          projectName: project.name,
+          tasks
+        });
+      }
     });
 
     // 3. Reflections - All reflection content for this competency, organized by heading

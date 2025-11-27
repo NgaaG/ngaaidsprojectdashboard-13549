@@ -187,8 +187,13 @@ export const GrowthPortfolioPrintView = ({ data }: GrowthPortfolioPrintViewProps
           <div className="print-section">
             <h2 className="print-heading-2">🎯 Learning Goals</h2>
             {section.learningGoals.length > 0 ? (
-              section.learningGoals.map((goal, idx) => (
-                <div key={idx} className="print-bullet">• {goal}</div>
+              section.learningGoals.map((goalGroup, idx) => (
+                <div key={idx} style={{ marginBottom: '15px' }}>
+                  <h3 className="print-heading-3">Project: {goalGroup.projectName}</h3>
+                  {goalGroup.goals.map((goal, gIdx) => (
+                    <div key={gIdx} className="print-bullet">• {goal}</div>
+                  ))}
+                </div>
               ))
             ) : (
               <p>[No learning goals yet]</p>
@@ -199,11 +204,15 @@ export const GrowthPortfolioPrintView = ({ data }: GrowthPortfolioPrintViewProps
           <div className="print-section">
             <h2 className="print-heading-2">🛠 Learning Activities</h2>
             {section.learningActivities.length > 0 ? (
-              section.learningActivities.map((activity, idx) => (
+              section.learningActivities.map((activityGroup, idx) => (
                 <div key={idx} style={{ marginBottom: '15px' }}>
-                  <h3 className="print-heading-3">{activity.name}</h3>
-                  <p style={{ fontSize: '12px', color: '#666' }}>Project: {activity.projectName}</p>
-                  {activity.description && <p>{activity.description}</p>}
+                  <h3 className="print-heading-3">Project: {activityGroup.projectName}</h3>
+                  {activityGroup.tasks.map((task, tIdx) => (
+                    <div key={tIdx} style={{ marginBottom: '10px' }}>
+                      <p style={{ fontWeight: 600, fontSize: '14px' }}>{task.name}</p>
+                      {task.description && <p style={{ fontSize: '12px', color: '#666' }}>{task.description}</p>}
+                    </div>
+                  ))}
                 </div>
               ))
             ) : (
