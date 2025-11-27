@@ -5,9 +5,11 @@ export interface LearningGoal {
   rewrittenOutcome: string;
   learningActivities: string[];
   reflection: {
-    knowledge: string;
-    skills: string;
-    transfer: string;
+    whatIDid: string;
+    whatILearned: string;
+    challengesAndSolutions: string;
+    fillTheGaps: string;
+    nextSteps: string;
   };
 }
 
@@ -118,45 +120,76 @@ export const generatePortfolio = async (
           r => r.project_id === project.id
         );
 
-        // Extract learning activities
+        // Extract learning activities from project key tasks
         const activities: string[] = [];
-        
-        // From reflections
+        if (project.key_tasks && Array.isArray(project.key_tasks)) {
+          project.key_tasks.forEach((task: any) => {
+            if (task.name || task.task) {
+              activities.push(task.name || task.task);
+            }
+          });
+        }
+
+        // Build reflection from actual reflection entries
+        const whatIDidEntries: string[] = [];
+        const whatILearnedEntries: string[] = [];
+        const challengesEntries: string[] = [];
+        const solutionsEntries: string[] = [];
+        const fillTheGapsEntries: string[] = [];
+        const nextStepsEntries: string[] = [];
+
         projectReflections.forEach(r => {
-          // Old format fields (for backwards compatibility)
-          if (r.thoughts_what_i_think) activities.push(r.thoughts_what_i_think);
-          if (r.thoughts_what_is_true) activities.push(r.thoughts_what_is_true);
-          
-          // New structured fields
-          if (r.what_i_did) {
+          // What I did
+          if (r.what_i_did && Array.isArray(r.what_i_did)) {
             r.what_i_did.forEach((entry: any) => {
-              if (entry.content) activities.push(entry.content);
+              if (entry.content) whatIDidEntries.push(entry.content);
             });
           }
-          if (r.what_i_learned) {
+
+          // What I learned
+          if (r.what_i_learned && Array.isArray(r.what_i_learned)) {
             r.what_i_learned.forEach((entry: any) => {
-              if (entry.content) activities.push(entry.content);
+              if (entry.content) whatILearnedEntries.push(entry.content);
             });
           }
-          if (r.challenges_structured) {
+
+          // Challenges
+          if (r.challenges_structured && Array.isArray(r.challenges_structured)) {
             r.challenges_structured.forEach((entry: any) => {
-              if (entry.content) activities.push(`Challenge: ${entry.content}`);
+              if (entry.content) challengesEntries.push(entry.content);
             });
           }
-          if (r.solutions_structured) {
+
+          // Solutions
+          if (r.solutions_structured && Array.isArray(r.solutions_structured)) {
             r.solutions_structured.forEach((entry: any) => {
-              if (entry.content) activities.push(`Solution: ${entry.content}`);
+              if (entry.content) solutionsEntries.push(entry.content);
             });
           }
-          if (r.fill_the_gaps) {
+
+          // Fill the gaps
+          if (r.fill_the_gaps && Array.isArray(r.fill_the_gaps)) {
             r.fill_the_gaps.forEach((entry: any) => {
-              if (entry.content) activities.push(entry.content);
+              if (entry.content) fillTheGapsEntries.push(entry.content);
             });
           }
-          if (r.next_steps) {
+
+          // Next steps
+          if (r.next_steps && Array.isArray(r.next_steps)) {
             r.next_steps.forEach((entry: any) => {
-              if (entry.content) activities.push(`Next: ${entry.content}`);
+              if (entry.content) nextStepsEntries.push(entry.content);
             });
+          }
+        });
+
+        // Combine challenges and solutions
+        const challengesAndSolutions: string[] = [];
+        challengesEntries.forEach((challenge, idx) => {
+          const solution = solutionsEntries[idx] || '';
+          if (solution) {
+            challengesAndSolutions.push(`Challenge: ${challenge}\nSolution: ${solution}`);
+          } else {
+            challengesAndSolutions.push(`Challenge: ${challenge}`);
           }
         });
 
@@ -174,25 +207,28 @@ export const generatePortfolio = async (
           }
         });
 
-        // Build reflection from achievements
-        const achievements = project.learning_goals_achievements?.[competency];
-        const achievementsArray = Array.isArray(achievements) ? achievements : [];
-        
-        const knowledgeText = achievementsArray
-          .map((a: any) => a.explanation || '')
-          .filter(Boolean)
-          .join(' ');
-        
         const reflection = {
-          knowledge: knowledgeText || '[To be completed]',
-          skills: `[To be completed]`,
-          transfer: `[To be completed]`
+          whatIDid: whatIDidEntries.length > 0 
+            ? whatIDidEntries.map((entry, idx) => `${idx + 1}. ${entry}`).join('\n')
+            : '[To be completed]',
+          whatILearned: whatILearnedEntries.length > 0
+            ? whatILearnedEntries.map((entry, idx) => `${idx + 1}. ${entry}`).join('\n')
+            : '[To be completed]',
+          challengesAndSolutions: challengesAndSolutions.length > 0
+            ? challengesAndSolutions.map((entry, idx) => `${idx + 1}. ${entry}`).join('\n\n')
+            : '[To be completed]',
+          fillTheGaps: fillTheGapsEntries.length > 0
+            ? fillTheGapsEntries.map((entry, idx) => `${idx + 1}. ${entry}`).join('\n')
+            : '[To be completed]',
+          nextSteps: nextStepsEntries.length > 0
+            ? nextStepsEntries.map((entry, idx) => `${idx + 1}. ${entry}`).join('\n')
+            : '[To be completed]'
         };
 
         allLearningGoals.push({
           title: goalTitle,
           rewrittenOutcome: '[To be completed]',
-          learningActivities: activities.slice(0, 5),
+          learningActivities: activities,
           reflection
         });
       });

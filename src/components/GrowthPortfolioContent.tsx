@@ -192,20 +192,28 @@ export const GrowthPortfolioContent = ({ data }: GrowthPortfolioContentProps) =>
 
                     <div>
                       <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                        🧠 Reflection: Knowledge, Skills, Transfer
+                        🧠 Reflection
                       </h4>
                       <div className="space-y-3 ml-4">
                         <div>
-                          <p className="text-xs font-semibold text-muted-foreground mb-1">KNOWLEDGE</p>
-                          <p className="text-sm">{goal.reflection.knowledge}</p>
+                          <p className="text-xs font-semibold text-muted-foreground mb-1">WHAT I DID</p>
+                          <p className="text-sm whitespace-pre-line">{goal.reflection.whatIDid}</p>
                         </div>
                         <div>
-                          <p className="text-xs font-semibold text-muted-foreground mb-1">SKILLS</p>
-                          <p className="text-sm">{goal.reflection.skills}</p>
+                          <p className="text-xs font-semibold text-muted-foreground mb-1">WHAT I LEARNED</p>
+                          <p className="text-sm whitespace-pre-line">{goal.reflection.whatILearned}</p>
                         </div>
                         <div>
-                          <p className="text-xs font-semibold text-muted-foreground mb-1">TRANSFER</p>
-                          <p className="text-sm">{goal.reflection.transfer}</p>
+                          <p className="text-xs font-semibold text-muted-foreground mb-1">CHALLENGES & SOLUTIONS</p>
+                          <p className="text-sm whitespace-pre-line">{goal.reflection.challengesAndSolutions}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs font-semibold text-muted-foreground mb-1">WHERE I WANT TO FILL THE GAPS</p>
+                          <p className="text-sm whitespace-pre-line">{goal.reflection.fillTheGaps}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs font-semibold text-muted-foreground mb-1">NEXT STEPS</p>
+                          <p className="text-sm whitespace-pre-line">{goal.reflection.nextSteps}</p>
                         </div>
                       </div>
                     </div>
@@ -255,20 +263,28 @@ export const GrowthPortfolioContent = ({ data }: GrowthPortfolioContentProps) =>
 
                     <div>
                       <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                        🧠 Reflection: Knowledge, Skills, Transfer
+                        🧠 Reflection
                       </h4>
                       <div className="space-y-3 ml-4">
                         <div>
-                          <p className="text-xs font-semibold text-muted-foreground mb-1">KNOWLEDGE</p>
-                          <p className="text-sm">{goal.reflection.knowledge}</p>
+                          <p className="text-xs font-semibold text-muted-foreground mb-1">WHAT I DID</p>
+                          <p className="text-sm whitespace-pre-line">{goal.reflection.whatIDid}</p>
                         </div>
                         <div>
-                          <p className="text-xs font-semibold text-muted-foreground mb-1">SKILLS</p>
-                          <p className="text-sm">{goal.reflection.skills}</p>
+                          <p className="text-xs font-semibold text-muted-foreground mb-1">WHAT I LEARNED</p>
+                          <p className="text-sm whitespace-pre-line">{goal.reflection.whatILearned}</p>
                         </div>
                         <div>
-                          <p className="text-xs font-semibold text-muted-foreground mb-1">TRANSFER</p>
-                          <p className="text-sm">{goal.reflection.transfer}</p>
+                          <p className="text-xs font-semibold text-muted-foreground mb-1">CHALLENGES & SOLUTIONS</p>
+                          <p className="text-sm whitespace-pre-line">{goal.reflection.challengesAndSolutions}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs font-semibold text-muted-foreground mb-1">WHERE I WANT TO FILL THE GAPS</p>
+                          <p className="text-sm whitespace-pre-line">{goal.reflection.fillTheGaps}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs font-semibold text-muted-foreground mb-1">NEXT STEPS</p>
+                          <p className="text-sm whitespace-pre-line">{goal.reflection.nextSteps}</p>
                         </div>
                       </div>
                     </div>
