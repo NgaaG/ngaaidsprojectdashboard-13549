@@ -204,22 +204,111 @@ export const GrowthPortfolioContent = ({ data }: GrowthPortfolioContentProps) =>
               <CardTitle className="text-2xl">💭 Reflections</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {section.reflections.length > 0 ? (
-                section.reflections.map((reflection, idx) => (
-                  <div key={idx} className="space-y-2">
-                    <h4 className="font-semibold text-sm">Project: {reflection.projectName}</h4>
-                    <ul className="space-y-1 ml-4">
-                      {reflection.content.map((content, cIdx) => (
-                        <li key={cIdx} className="flex gap-2">
-                          <span className="text-primary text-xs">•</span>
-                          <span className="text-sm">{content}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    {idx < section.reflections.length - 1 && <Separator className="mt-3" />}
-                  </div>
-                ))
-              ) : (
+              {section.reflections.emotionalDump.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-sm">Emotional Dump</h4>
+                  <ul className="space-y-1 ml-4">
+                    {section.reflections.emotionalDump.map((content, idx) => (
+                      <li key={idx} className="flex gap-2">
+                        <span className="text-primary text-xs">•</span>
+                        <span className="text-sm">{content}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              
+              {section.reflections.whatIDid.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-sm">What I Did</h4>
+                  <ul className="space-y-1 ml-4">
+                    {section.reflections.whatIDid.map((content, idx) => (
+                      <li key={idx} className="flex gap-2">
+                        <span className="text-primary text-xs">•</span>
+                        <span className="text-sm">{content}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              
+              {section.reflections.whatILearned.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-sm">What I Learned</h4>
+                  <ul className="space-y-1 ml-4">
+                    {section.reflections.whatILearned.map((content, idx) => (
+                      <li key={idx} className="flex gap-2">
+                        <span className="text-primary text-xs">•</span>
+                        <span className="text-sm">{content}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              
+              {section.reflections.challengesFaced.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-sm">Challenges Faced</h4>
+                  <ul className="space-y-1 ml-4">
+                    {section.reflections.challengesFaced.map((content, idx) => (
+                      <li key={idx} className="flex gap-2">
+                        <span className="text-primary text-xs">•</span>
+                        <span className="text-sm">{content}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              
+              {section.reflections.solutions.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-sm">Solutions</h4>
+                  <ul className="space-y-1 ml-4">
+                    {section.reflections.solutions.map((content, idx) => (
+                      <li key={idx} className="flex gap-2">
+                        <span className="text-primary text-xs">•</span>
+                        <span className="text-sm">{content}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              
+              {section.reflections.fillTheGaps.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-sm">Fill the Gaps</h4>
+                  <ul className="space-y-1 ml-4">
+                    {section.reflections.fillTheGaps.map((content, idx) => (
+                      <li key={idx} className="flex gap-2">
+                        <span className="text-primary text-xs">•</span>
+                        <span className="text-sm">{content}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              
+              {section.reflections.nextSteps.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-sm">Next Steps</h4>
+                  <ul className="space-y-1 ml-4">
+                    {section.reflections.nextSteps.map((content, idx) => (
+                      <li key={idx} className="flex gap-2">
+                        <span className="text-primary text-xs">•</span>
+                        <span className="text-sm">{content}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              
+              {!section.reflections.emotionalDump.length && 
+               !section.reflections.whatIDid.length && 
+               !section.reflections.whatILearned.length && 
+               !section.reflections.challengesFaced.length && 
+               !section.reflections.solutions.length && 
+               !section.reflections.fillTheGaps.length && 
+               !section.reflections.nextSteps.length && (
                 <p className="text-sm text-muted-foreground">[No reflections yet]</p>
               )}
             </CardContent>
