@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { CompetencyWheel } from "@/components/CompetencyWheel";
-import { GeneralLearningGoalsSection } from "@/components/GeneralLearningGoalsSection";
+import { GeneralLearningGoalsHistory } from "@/components/GeneralLearningGoalsHistory";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -37,52 +37,10 @@ const Growth = () => {
     averageProgress: 0,
   });
   const [isAutoCalculating, setIsAutoCalculating] = useState(false);
-  const [generalLearningGoals, setGeneralLearningGoals] = useState<any>(null);
 
   useEffect(() => {
     loadStats();
-    loadGeneralLearningGoals();
   }, [progress]);
-
-  const loadGeneralLearningGoals = async () => {
-    try {
-      const { data: profiles } = await db
-        .from("profiles")
-        .select("general_learning_goals")
-        .limit(1);
-
-      if (profiles && profiles.length > 0 && profiles[0]?.general_learning_goals) {
-        setGeneralLearningGoals(profiles[0].general_learning_goals);
-      }
-    } catch (error) {
-      console.error("Error loading general learning goals:", error);
-    }
-  };
-
-  const saveGeneralLearningGoals = async (goalsData: any) => {
-    try {
-      const { data: profiles } = await db
-        .from("profiles")
-        .select("id")
-        .limit(1);
-
-      const profileId = profiles && profiles.length > 0 ? profiles[0].id : null;
-
-      const { error } = await db
-        .from("profiles")
-        .upsert({ 
-          id: profileId || undefined,
-          general_learning_goals: goalsData 
-        });
-
-      if (error) throw error;
-      setGeneralLearningGoals(goalsData);
-    } catch (error) {
-      console.error("Error saving general learning goals:", error);
-      toast.error("Failed to save learning goals");
-      throw error;
-    }
-  };
 
   const loadStats = async () => {
     const reflections = getReflections();
@@ -201,10 +159,7 @@ const Growth = () => {
 
         {/* General Learning Goals Section */}
         <section className="mb-12 animate-fade-in">
-          <GeneralLearningGoalsSection
-            data={generalLearningGoals}
-            onSave={saveGeneralLearningGoals}
-          />
+          <GeneralLearningGoalsHistory />
         </section>
 
         {/* Competency Wheel */}

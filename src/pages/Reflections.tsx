@@ -7,7 +7,9 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { PresenceIndicator } from "@/components/PresenceIndicator";
 import { AudioRecorder } from "@/components/AudioRecorder";
-import { GeneralLearningGoalsSection } from "@/components/GeneralLearningGoalsSection";
+import { GeneralLearningGoalsHistory } from "@/components/GeneralLearningGoalsHistory";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -16,7 +18,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Plus, Save, Trash2, Calendar, CheckSquare, Square, History, Edit } from "lucide-react";
+import { Plus, Save, Trash2, Calendar, CheckSquare, Square, History, Edit, CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 import { MoodType, Mode } from "@/types";
 import { db } from "@/lib/supabaseHelpers";
 import { supabase } from "@/integrations/supabase/client";
@@ -57,10 +61,10 @@ const Reflections = () => {
   const [highlightedReflectionId, setHighlightedReflectionId] = useState<string | null>(null);
   const [selectedReflection, setSelectedReflection] = useState<any | null>(null);
   const [editingReflection, setEditingReflection] = useState<any | null>(null);
-  const [generalLearningGoals, setGeneralLearningGoals] = useState<any>(null);
   const [selectedReflectionIds, setSelectedReflectionIds] = useState<string[]>([]);
   const [showBulkEditDialog, setShowBulkEditDialog] = useState(false);
   const [versionHistoryReflectionId, setVersionHistoryReflectionId] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [currentReflection, setCurrentReflection] = useState<any>({
     mood: "calm",
     emotionalDump: "",
@@ -119,48 +123,7 @@ const Reflections = () => {
 
   useEffect(() => {
     loadData();
-    loadGeneralLearningGoals();
   }, [currentMode]);
-
-  const loadGeneralLearningGoals = async () => {
-    try {
-      const { data: profiles } = await db
-        .from("profiles")
-        .select("general_learning_goals")
-        .limit(1);
-
-      if (profiles && profiles.length > 0 && profiles[0]?.general_learning_goals) {
-        setGeneralLearningGoals(profiles[0].general_learning_goals);
-      }
-    } catch (error) {
-      console.error("Error loading general learning goals:", error);
-    }
-  };
-
-  const saveGeneralLearningGoals = async (goalsData: any) => {
-    try {
-      const { data: profiles } = await db
-        .from("profiles")
-        .select("id")
-        .limit(1);
-
-      const profileId = profiles && profiles.length > 0 ? profiles[0].id : null;
-
-      const { error } = await db
-        .from("profiles")
-        .upsert({ 
-          id: profileId || undefined,
-          general_learning_goals: goalsData 
-        });
-
-      if (error) throw error;
-      setGeneralLearningGoals(goalsData);
-    } catch (error) {
-      console.error("Error saving general learning goals:", error);
-      toast.error("Failed to save learning goals");
-      throw error;
-    }
-  };
 
   // Handle reflectionId from query params (when navigating from project detail view)
   useEffect(() => {
@@ -221,7 +184,7 @@ const Reflections = () => {
   ]);
 
   const handleSave = async () => {
-    // Project is now optional - allow daily reflections
+    // Allow saving even if incomplete - no validation required
     try {
       const insertData: any = {
         project_id: selectedProjectId || null,
@@ -232,6 +195,7 @@ const Reflections = () => {
         category: currentReflection.category,
         mode: currentMode,
         audio_url: currentReflection.audioUrl || null,
+        entry_date: format(selectedDate, "yyyy-MM-dd"),
       };
 
       if (currentMode === "personal") {
@@ -266,6 +230,7 @@ const Reflections = () => {
         audioUrl: "",
       });
       setSelectedProjectId(null);
+      setSelectedDate(new Date());
     } catch (error: any) {
       toast.error(error.message || "Failed to save reflection");
     }
@@ -355,14 +320,13 @@ const Reflections = () => {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-xl font-bold">Current Reflection</h2>
-              <p className="text-xs text-muted-foreground mt-1">Complete all sections to save</p>
+              <p className="text-xs text-muted-foreground mt-1">Save anytime - completion is optional</p>
             </div>
             <div className="flex gap-2">
               {!isViewerMode && (
               <Button 
                 onClick={handleSave} 
                 className="gap-2 rounded-full shadow-md hover:shadow-lg transition-all hover:scale-105"
-                disabled={currentReflection.progress < 100}
               >
                   <Save className="h-4 w-4" />
                   Save Reflection
@@ -376,49 +340,74 @@ const Reflections = () => {
               <p className="text-sm text-muted-foreground">
                 {Math.round(currentReflection.progress)}% Complete
               </p>
-              {currentReflection.progress === 100 && (
-                <span className="text-xs text-primary font-semibold animate-pulse">✓ Ready to save</span>
-              )}
             </div>
           </div>
         </div>
 
         {/* General Learning Goals Section */}
-        <GeneralLearningGoalsSection
-          data={generalLearningGoals}
-          onSave={saveGeneralLearningGoals}
-          isViewerMode={isViewerMode}
-        />
+        <GeneralLearningGoalsHistory isViewerMode={isViewerMode} />
 
-        {/* Project Selection - Now Optional */}
-        <Card className="shadow-md border-l-4 border-l-primary">
-          <CardContent className="pt-6 space-y-2">
-            <Label htmlFor="project" className="text-sm font-semibold">Select Project (Optional)</Label>
-            <p className="text-xs text-muted-foreground mb-2">Choose a project, or leave empty for a daily reflection</p>
-            <Select value={selectedProjectId || "none"} onValueChange={(value) => setSelectedProjectId(value === "none" ? null : value)}>
-              <SelectTrigger className="h-11">
-                <SelectValue placeholder="📅 Daily Reflection (No Project)" />
-              </SelectTrigger>
-              <SelectContent className="bg-popover">
-                <SelectItem value="none">📅 Daily Reflection (No Project)</SelectItem>
-                {projects.length === 0 ? (
-                  <div className="p-3 text-sm text-muted-foreground text-center">
-                    No projects available. Create a project first!
-                  </div>
-                ) : (
-                  projects.map((project) => (
-                    <SelectItem key={project.id} value={project.id}>
-                      <div className="flex items-center gap-2">
-                        <span>{project.name}</span>
-                        <span className="text-xs text-muted-foreground">({project.completion}% complete)</span>
-                      </div>
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
-          </CardContent>
-        </Card>
+        {/* Date and Project Selection */}
+        <div className="grid md:grid-cols-2 gap-4">
+          <Card className="shadow-md border-l-4 border-l-primary">
+            <CardContent className="pt-6 space-y-2">
+              <Label className="text-sm font-semibold">Reflection Date</Label>
+              <p className="text-xs text-muted-foreground mb-2">Select the date for this reflection</p>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !selectedDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComponent
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={(date) => date && setSelectedDate(date)}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-md border-l-4 border-l-secondary">
+            <CardContent className="pt-6 space-y-2">
+              <Label htmlFor="project" className="text-sm font-semibold">Select Project (Optional)</Label>
+              <p className="text-xs text-muted-foreground mb-2">Choose a project, or leave empty for a daily reflection</p>
+              <Select value={selectedProjectId || "none"} onValueChange={(value) => setSelectedProjectId(value === "none" ? null : value)}>
+                <SelectTrigger className="h-11">
+                  <SelectValue placeholder="📅 Daily Reflection (No Project)" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover">
+                  <SelectItem value="none">📅 Daily Reflection (No Project)</SelectItem>
+                  {projects.length === 0 ? (
+                    <div className="p-3 text-sm text-muted-foreground text-center">
+                      No projects available. Create a project first!
+                    </div>
+                  ) : (
+                    projects.map((project) => (
+                      <SelectItem key={project.id} value={project.id}>
+                        <div className="flex items-center gap-2">
+                          <span>{project.name}</span>
+                          <span className="text-xs text-muted-foreground">({project.completion}% complete)</span>
+                        </div>
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Reflection Sections */}
         <div className="space-y-6">
