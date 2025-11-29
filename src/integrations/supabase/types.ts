@@ -47,6 +47,42 @@ export type Database = {
         }
         Relationships: []
       }
+      general_learning_goals_entries: {
+        Row: {
+          achievement_level: number | null
+          created_at: string | null
+          entry_date: string
+          goals: Json | null
+          heading: string
+          id: string
+          subheading: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          achievement_level?: number | null
+          created_at?: string | null
+          entry_date?: string
+          goals?: Json | null
+          heading: string
+          id?: string
+          subheading?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          achievement_level?: number | null
+          created_at?: string | null
+          entry_date?: string
+          goals?: Json | null
+          heading?: string
+          id?: string
+          subheading?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       mentor_log_views: {
         Row: {
           id: string
@@ -312,6 +348,7 @@ export type Database = {
           contingency_plan: string | null
           created_at: string | null
           emotional_dump: string | null
+          entry_date: string | null
           fill_the_gaps: Json | null
           id: string
           mode: string | null
@@ -336,6 +373,7 @@ export type Database = {
           contingency_plan?: string | null
           created_at?: string | null
           emotional_dump?: string | null
+          entry_date?: string | null
           fill_the_gaps?: Json | null
           id?: string
           mode?: string | null
@@ -360,6 +398,7 @@ export type Database = {
           contingency_plan?: string | null
           created_at?: string | null
           emotional_dump?: string | null
+          entry_date?: string | null
           fill_the_gaps?: Json | null
           id?: string
           mode?: string | null
