@@ -6,11 +6,12 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Plus, X, Save, CalendarIcon, Trash2 } from "lucide-react";
+import { Plus, X, Save, CalendarIcon, Trash2, Edit } from "lucide-react";
 import { toast } from "sonner";
 import { db } from "@/lib/supabaseHelpers";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { GeneralLearningGoalsEditDialog } from "./GeneralLearningGoalsEditDialog";
 
 interface LearningGoalsEntry {
   id: string;
@@ -37,6 +38,8 @@ export const GeneralLearningGoalsHistory = ({
   const [achievementLevel, setAchievementLevel] = useState(0);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [loading, setLoading] = useState(false);
+  const [editingEntry, setEditingEntry] = useState<LearningGoalsEntry | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   useEffect(() => {
     loadEntries();
@@ -131,6 +134,37 @@ export const GeneralLearningGoalsHistory = ({
     } catch (error: any) {
       console.error("Error deleting entry:", error);
       toast.error("Failed to delete entry");
+    }
+  };
+
+  const handleEdit = (entry: LearningGoalsEntry) => {
+    setEditingEntry(entry);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleEditSave = async (updatedEntry: LearningGoalsEntry) => {
+    setLoading(true);
+    try {
+      const { error } = await db
+        .from("general_learning_goals_entries")
+        .update({
+          entry_date: updatedEntry.entry_date,
+          heading: updatedEntry.heading,
+          subheading: updatedEntry.subheading,
+          goals: updatedEntry.goals,
+          achievement_level: updatedEntry.achievement_level,
+        })
+        .eq("id", updatedEntry.id);
+
+      if (error) throw error;
+
+      toast.success("Learning goals entry updated!");
+      loadEntries();
+    } catch (error: any) {
+      console.error("Error updating learning goals entry:", error);
+      toast.error("Failed to update learning goals entry");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -294,14 +328,24 @@ export const GeneralLearningGoalsHistory = ({
                     )}
                   </div>
                   {!isViewerMode && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(entry.id)}
-                      className="text-destructive hover:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEdit(entry)}
+                        className="text-primary hover:text-primary"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(entry.id)}
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   )}
                 </div>
 
@@ -332,6 +376,13 @@ export const GeneralLearningGoalsHistory = ({
             ))
           )}
         </div>
+
+        <GeneralLearningGoalsEditDialog
+          open={isEditDialogOpen}
+          onOpenChange={setIsEditDialogOpen}
+          entry={editingEntry}
+          onSave={handleEditSave}
+        />
       </CardContent>
     </Card>
   );
